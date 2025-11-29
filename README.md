@@ -12,6 +12,13 @@ Module permettant de suivre les demandes de subventions :
 - [Module Tiers] Ajout d'un onglet au sein de la fiche tiers des projets
 <!---- [Module Comptablité] Lien entre les paiements et comptabilité Dolibarr-->
 
+## Captures d'écrans
+
+<img width="341" height="145" alt="Module subvention" src="https://github.com/user-attachments/assets/d9a7cb72-39bd-4482-b859-14e167831b1f" />
+<img width="341" height="145" alt="Liste subventions" src="https://github.com/user-attachments/assets/c8918b39-b352-4462-8e9f-726eed267d9d" />
+<img width="341" height="145" alt="Stats par année" src="https://github.com/user-attachments/assets/24187851-3448-401e-ba87-0861ce4bbb86" />
+<img width="341" height="145" alt="Stats par financeur" src="https://github.com/user-attachments/assets/624f4761-3eb7-4abf-a87d-006c5fa5a2bb" />
+
 
 ## Nous soutenir
 Nous avons consacré du temps bénévole pour créer un module utile à tous. Si vous souhaitez soutenir notre association et nous aider à développer de nouveaux modules, n’hésitez pas à nous encourager :
