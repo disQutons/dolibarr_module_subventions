@@ -1,0 +1,142 @@
+ModuleSubventionsName=Sovvenzioni
+#
+# financement_list.php
+#
+Fundings=Finanziamenti
+#
+# subvention_card.php
+#
+Accepted=Accettato
+Cloture=Chiudere
+Evaluate=Valutare
+Financed=Finanziato
+Evaluated=Relazione presentata
+ListOfFundingAssociatedWithTheGrant=Elenco dei finanziamenti della sovvenzione
+ListOfPaymentsAssociatedWithTheGrant=Elenco dei pagamenti della sovvenzione
+OthersSubsidys=Altre sovvenzioni
+Pending=In attesa
+ReferenceFunding=Riferimento finanziamento
+ReferencePayment=Riferimento pagamento
+Requested=Richiesto
+SetFromEvaluate=Azione non completata
+SetToEvaluate=Relazione da presentare
+ConfirmActionRefuse=Sei sicuro di voler rifiutare questa sovvenzione? (tutti i finanziamenti associati verranno impostati a 0)
+#
+# subvention_list.php
+#
+Subsidys=Sovvenzioni
+#
+# admin\setup.php
+#
+AmountRequested=Importo richiesto
+AmountAccepted=Importo accettato
+AmountFinanced=Importo finanziato
+AmountPending=Importo in attesa
+AmountRefused=Importo rifiutato
+Path=Percorso
+SubsidysSetupPage=Configurazione sovvenzioni
+SubsidysDict=L'elenco dei finanziatori si trova nella gestione dei dizionari.
+# TODO SubsidysDict=L'elenco dei finanziatori e i conti associati si trovano nella gestione dei dizionari.
+# TODO AccountancyModule=Modulo Contabilità
+ProjectModule=Modulo Progetti
+StatisticsModule=Modulo Statistiche
+SUBVENTIONS_PROJECT=Aggiungere le sovvenzioni alla panoramica dei progetti
+SUBVENTIONS_PROJECT_MONTANT_HT=Importo visualizzato come "Importo IVA esclusa"
+SUBVENTIONS_PROJECT_MONTANT_TTC=Importo visualizzato come "Importo IVA inclusa"
+SUBVENTIONS_STATISTIC_DATE=Data utilizzata per calcolare le statistiche
+SubventionsSetup=Configurazione sovvenzioni
+CreationDate=Data di creazione della sovvenzione
+EspectingDate=Data di consegna prevista
+BeginProjectDate=Inizio progetto
+EndProjectDate=Fine progetto
+EvaluationDate=Valutazione della sovvenzione
+Recalcul=Ricalcolare gli importi IVA esclusa e IVA inclusa
+SUBVENTIONS_STATISTIC_COLOR_GREEN=Percentuale minima per visualizzare in verde (altrimenti arancione)
+SUBVENTIONS_STATISTIC_COLOR_ORANGE=Percentuale minima per visualizzare in arancione (altrimenti rosso)
+#
+# core\modules\modSubventions.class.php
+#
+CodeTooltipHelp=
+RightsCreateUpdateFunding=Creare o aggiornare i finanziamenti
+RightsCreateUpdatePayment=Creare o aggiornare i pagamenti
+RightsCreateUpdateSubsidy=Creare o aggiornare le sovvenzioni
+RightsDeleteFunding=Eliminare i finanziamenti
+RightsDeletePayment=Eliminare i pagamenti
+RightsDeleteSubsidy=Eliminare le sovvenzioni
+RightsExportSubsidyFundingAndPayment=
+RightsImportSubsidyFundingAndPayment=
+RightsReadFunding=Leggere i finanziamenti
+RightsReadPayment=Leggere i pagamenti
+RightsReadSubsidy=Leggere le sovvenzioni
+RightsExportSubsidyFundingAndPayment=Esportare sovvenzioni, finanziamenti e pagamenti
+RightsImportSubsidyFundingAndPayment=Importare sovvenzioni, finanziamenti e pagamenti
+#
+# lib\subventions.lib.php
+#
+AttributsSuppAddFunding=Attributi aggiuntivi finanziamenti
+AttributsSuppPayment=Attributi aggiuntivi pagamenti
+AttributsSuppSubsidy=Attributi aggiuntivi sovvenzioni
+#
+# index.php
+#
+DraftSubsidy=Sovvenzioni non presentate
+PendingSubsidy=Finanziamenti in attesa
+NoSubsidy=Nessuna sovvenzione
+LatestModifiedMySubsidy=Ultime sovvenzioni modificate
+LatestCreatedMySubsidy=Ultime sovvenzioni create
+#
+# subventions_statitics.php
+#
+SubsidysStatistics=Statistiche su sovvenzioni, finanziamenti e pagamenti
+NbOfSubsidys=N. di sovvenzioni
+NbOfSubsidysByMonth=N. di sovvenzioni per mese
+NumberOfSubsidys=Numero di sovvenzioni
+NumberOfSubsidysByMonth=Numero di sovvenzioni per mese
+AmountOfSubsidys=Importo delle sovvenzioni
+AmountOfSubsidysByMonth=Importo delle sovvenzioni per mese
+NbOfFundings=N. di finanziamenti
+NbOfFundingsByMonth=N. di finanziamenti per mese
+NumberOfFundings=Numero di finanziamenti
+NumberOfFundingsByMonth=Numero di finanziamenti per mese
+AmountOfFundings=Importo dei finanziamenti
+AmountOfFundingsByMonth=Importo dei finanziamenti per mese
+AmountRemaining=Importo rimanente
+STATUS_DRAFT=Bozza
+STATUS_VALIDATED=Presentato
+STATUS_ACCEPTED=Accettato
+STATUS_FINANCED=Finanziato
+STATUS_EVALUATED=Relazione presentata
+STATUS_CLOTURED=Chiuso
+STATUS_REFUSED=Rifiutato
+STATUS_CANCELED=Annullato
+FundingSourceType=Finanziatore
+ByFundingSource=Per finanziatori
+ByComparison=Confronto importi
+NbRequest=N. di richieste
+AmountDem=Importo richiesto
+AmountAcc=Importo accettato
+AmountFin=Importo finanziato
+LastRequest=Ultima richiesta
+AllYears=Tutti
+FundingSourceGroup=Gruppo di finanziatori
+#
+# Common Translations
+#
+AddFunding=Aggiungere finanziamento
+ClassNotFound=Classe non trovata
+DeleteFunding=Eliminare finanziamento
+DeleteGrant=Eliminare sovvenzione
+Funding=Finanziamento
+FundingSource=Finanziatore
+Payment=Pagamento
+Payments=Pagamenti
+Grant=Sovvenzione
+Refuse=Rifiutare
+ShowFunding=Mostrare finanziamenti
+ShowPayment=Mostrare pagamenti
+ShowSubsidy=Mostrare sovvenzioni
+Subsidy=Sovvenzione
+SubsidysArea=Monitoraggio di sovvenzioni, finanziamenti e pagamenti
+SubsidysSetup=Configurazione sovvenzioni
+XXX=
+bytes=byte

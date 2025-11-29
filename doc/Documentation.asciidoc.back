@@ -1,0 +1,161 @@
+= SUBVENTIONS =
+:subtitle: SUBVENTIONS DOCUMENTATION
+:source-highlighter: rouge
+:companyname: disQutons
+:corpname: disQutons
+:orgname: disQutons
+:creator: François Brichart
+:title: Documentation of module Subventions
+:subject: This document is the document of module Subventions.
+:keywords: Subventions
+// Date du document :
+:docdate: 2025-11-08
+:toc: manual
+:toc-placement: preamble
+
+
+== TOPIC OF DOCUMENT
+
+This is the documentation of module Subventions
+
+
+*Log of versions of document*
+
+[options="header",format="csv"]
+|=== 
+Author, Date, Version
+--- François Brichart  francois@disqutons.fr ---, 2025-11-08, Version 1.0
+|===
+
+
+[NOTE]
+==============
+This document was generated using Dolibarr ERP CRM process
+==============
+
+
+:toc: manual
+:toc-placement: preamble
+
+
+
+== INTRODUCTION
+
+//include::README.md[]
+__README__
+
+== DATA SPECIFICATIONS
+=== Table of fields with properties for object *Subvention* : 
+[options='header',grid=rows,frame=topbot,width=100%,caption=Organisation]
+|===
+|code|type|label|enabled|position|notnull|visible|noteditable|index|default|foreignkey|arrayofkeyval|alwayseditable|validate|searchall|comment|isameasure|css|cssview|csslist|help|showoncombobox|picto
+|*"rowid"*||||1|1|||||||||||||||||
+|*"ref"*||||20|1|||||||||||||||||
+|*label*|varchar(255)|||30|1|||||||||||||||||
+|*"montant_dem"*||||40|0|||||||||||||||||
+|*"montant_acc"*||||42|0|||||||||||||||||
+|*"montant_fin"*||||44|0|||||||||||||||||
+|*"montant_att"*||||46|0|||||||||||||||||
+|*"montant_ref"*||||48|0|||||||||||||||||
+|*"total_ht"*||||48|0|||||||||||||||||
+|*"total_ttc"*||||48|0|||||||||||||||||
+|*"fk_soc"*||||50|1|||||||||||||||||
+|*"fk_project"*||||52|-1|||||||||||||||||
+|*"description"*||||60|0|||||||||||||||||
+|*"evaluation"*||||80|0|||||||||||||||||
+|*"date_d_projet"*||||70|0|||||||||||||||||
+|*"date_f_projet"*||||70|0|||||||||||||||||
+|*"date_attendue"*||||50|-1|||||||||||||||||
+|*"date_bilan"*||||70|-1|||||||||||||||||
+|*"note_public"*||||61|0|||||||||||||||||
+|*"note_private"*||||62|0|||||||||||||||||
+|*"date_creation"*||||500|1|||||||||||||||||
+|*"tms"*||||501|0|||||||||||||||||
+|*"fk_user_creat"*||||510|1|||||||||||||||||
+|*"fk_user_modif"*||||511|-1|||||||||||||||||
+|*"last_main_doc"*||||600|0|||||||||||||||||
+|*"import_key"*||||1000|-1|||||||||||||||||
+|*"model_pdf"*||||1010|-1|||||||||||||||||
+|*"status"*||||2000|1|||||||||||||||||
+|===
+__ end table for object Subvention
+
+=== Table of fields with properties for object *Paiement* : 
+[options='header',grid=rows,frame=topbot,width=100%,caption=Organisation]
+|===
+|code|type|label|enabled|position|notnull|visible|noteditable|index|default|foreignkey|arrayofkeyval|alwayseditable|validate|searchall|comment|isameasure|css|cssview|csslist|help|showoncombobox|picto
+|*"rowid"*||||1|1|||||||||||||||||
+|*"ref"*||||20|1|||||||||||||||||
+|*"montant"*||||40|1|||||||||||||||||
+|*"datep"*||||40|1|||||||||||||||||
+|*"fk_soc"*||||50|-1|||||||||||||||||
+|*"note_public"*||||61|0|||||||||||||||||
+|*"note_private"*||||62|0|||||||||||||||||
+|*"date_creation"*||||500|1|||||||||||||||||
+|*"tms"*||||501|0|||||||||||||||||
+|*"fk_user_creat"*||||510|1|||||||||||||||||
+|*"fk_user_modif"*||||511|-1|||||||||||||||||
+|*"last_main_doc"*||||600|0|||||||||||||||||
+|*"import_key"*||||1000|-1|||||||||||||||||
+|*"fk_sub"*||||25|0|||||||||||||||||
+|*"fk_fin"*||||30|0|||||||||||||||||
+|*"status"*||||2000|1|||||||||||||||||
+|===
+__ end table for object Paiement
+
+=== Table of fields with properties for object *Financement* : 
+[options='header',grid=rows,frame=topbot,width=100%,caption=Organisation]
+|===
+|code|type|label|enabled|position|notnull|visible|noteditable|index|default|foreignkey|arrayofkeyval|alwayseditable|validate|searchall|comment|isameasure|css|cssview|csslist|help|showoncombobox|picto
+|*"rowid"*||||1|1|||||||||||||||||
+|*"ref"*||||20|1|||||||||||||||||
+|*"fk_soc"*||||30|1|||||||||||||||||
+|*"note_public"*||||61|0|||||||||||||||||
+|*"note_private"*||||62|0|||||||||||||||||
+|*"date_creation"*||||500|1|||||||||||||||||
+|*"tms"*||||501|0|||||||||||||||||
+|*"fk_user_creat"*||||510|1|||||||||||||||||
+|*"fk_user_modif"*||||511|-1|||||||||||||||||
+|*"last_main_doc"*||||600|0|||||||||||||||||
+|*"import_key"*||||1000|-1|||||||||||||||||
+|*"model_pdf"*||||1010|-1|||||||||||||||||
+|*"status"*||||2000|1|||||||||||||||||
+|*"montant_dem"*||||40|0|||||||||||||||||
+|*"montant_acc"*||||42|0|||||||||||||||||
+|*"montant_fin"*||||44|0|||||||||||||||||
+|*"montant_att"*||||46|0|||||||||||||||||
+|*"montant_ref"*||||48|0|||||||||||||||||
+|*"fk_sub"*||||25|1|||||||||||||||||
+|*"fk_financeur"*||||35|1|||||||||||||||||
+|===
+__ end table for object Financement
+
+
+__DATA_SPECIFICATION__
+
+
+== MATRIX OF PERMISSIONS
+
+[options='header',grid=rows,width=60%,caption=Organisation]
+|===
+|Objects|Permission
+|*subvention*| $langs->trans('Read Subvention object of Subventions') ,  $langs->trans('Create/Update Subvention object of Subventions') ,  $langs->trans('Import Subvention object of Subventions') ,  $langs->trans('Delete Subvention object of Subventions') ,  $langs->trans('Export Subvention object of Subventions') , 
+|*financement*| $langs->trans('Read Financement object of Subventions') ,  $langs->trans('Create/Update Financement object of Subventions') ,  $langs->trans('Delete Financement object of Subventions') , 
+|*paiement*| $langs->trans('Read Paiement object of Subventions') ,  $langs->trans('Create/Update Paiement object of Subventions') ,  $langs->trans('Delete Paiement object of Subventions') , 
+
+|===
+
+
+
+== OTHER
+
+__API_DOC__
+
+
+== CHANGELOG
+
+
+# CHANGELOG MODULE SUBVENTIONS FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
+ 1.0
+Initial version
+

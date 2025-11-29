@@ -1,0 +1,142 @@
+ModuleSubventionsName=Zuschüsse
+#
+# financement_list.php
+#
+Fundings=Finanzierungen
+#
+# subvention_card.php
+#
+Accepted=Angenommen
+Cloture=Abschließen
+Evaluate=Bewerten
+Financed=Finanziert
+Evaluated=Bericht eingereicht
+ListOfFundingAssociatedWithTheGrant=Liste der Finanzierungen des Zuschusses
+ListOfPaymentsAssociatedWithTheGrant=Liste der Zahlungen des Zuschusses
+OthersSubsidys=Andere Zuschüsse
+Pending=Ausstehend
+ReferenceFunding=Finanzierungsreferenz
+ReferencePayment=Zahlungsreferenz
+Requested=Beantragt
+SetFromEvaluate=Aktion nicht abgeschlossen
+SetToEvaluate=Bericht einzureichen
+ConfirmActionRefuse=Möchten Sie diesen Zuschuss wirklich ablehnen? (alle zugehörigen Finanzierungen werden auf 0 gesetzt)
+#
+# subvention_list.php
+#
+Subsidys=Zuschüsse
+#
+# admin\setup.php
+#
+AmountRequested=Beantragter Betrag
+AmountAccepted=Angenommener Betrag
+AmountFinanced=Finanzierter Betrag
+AmountPending=Ausstehender Betrag
+AmountRefused=Abgelehntter Betrag
+Path=Pfad
+SubsidysSetupPage=Zuschuss-Konfiguration
+SubsidysDict=Die Liste der Förderer befindet sich in der Wörterbuchverwaltung.
+# TODO SubsidysDict=Die Liste der Förderer und die dazugehörigen Konten befinden sich in der Wörterbuchverwaltung.
+# TODO AccountancyModule=Buchhaltungsmodul
+ProjectModule=Projektmodul
+StatisticsModule=Statistikmodul
+SUBVENTIONS_PROJECT=Zuschüsse zur Projektübersicht hinzufügen
+SUBVENTIONS_PROJECT_MONTANT_HT=Betrag als "Nettobetrag" anzeigen
+SUBVENTIONS_PROJECT_MONTANT_TTC=Betrag als "Bruttobetrag" anzeigen
+SUBVENTIONS_STATISTIC_DATE=Datum zur Berechnung der Statistiken
+SubventionsSetup=Zuschuss-Konfiguration
+CreationDate=Erstellungsdatum des Zuschusses
+EspectingDate=Erwartetes Abgabedatum
+BeginProjectDate=Projektbeginn
+EndProjectDate=Projektende
+EvaluationDate=Bewertungsdatum des Zuschusses
+Recalcul=Netto- und Bruttobeträge neu berechnen
+SUBVENTIONS_STATISTIC_COLOR_GREEN=Mindestprozentsatz für die Anzeige in Grün (sonst Orange)
+SUBVENTIONS_STATISTIC_COLOR_ORANGE=Mindestprozentsatz für die Anzeige in Orange (sonst Rot)
+#
+# core\modules\modSubventions.class.php
+#
+CodeTooltipHelp=
+RightsCreateUpdateFunding=Finanzierungen erstellen oder aktualisieren
+RightsCreateUpdatePayment=Zahlungen erstellen oder aktualisieren
+RightsCreateUpdateSubsidy=Zuschüsse erstellen oder aktualisieren
+RightsDeleteFunding=Finanzierungen löschen
+RightsDeletePayment=Zahlungen löschen
+RightsDeleteSubsidy=Zuschüsse löschen
+RightsExportSubsidyFundingAndPayment=
+RightsImportSubsidyFundingAndPayment=
+RightsReadFunding=Finanzierungen lesen
+RightsReadPayment=Zahlungen lesen
+RightsReadSubsidy=Zuschüsse lesen
+RightsExportSubsidyFundingAndPayment=Zuschüsse, Finanzierungen und Zahlungen exportieren
+RightsImportSubsidyFundingAndPayment=Zuschüsse, Finanzierungen und Zahlungen importieren
+#
+# lib\subventions.lib.php
+#
+AttributsSuppAddFunding=Zusätzliche Finanzierungsattribute
+AttributsSuppPayment=Zusätzliche Zahlungsattribute
+AttributsSuppSubsidy=Zusätzliche Zuschussattribute
+#
+# index.php
+#
+DraftSubsidy=Nicht eingereichte Zuschüsse
+PendingSubsidy=Ausstehende Finanzierungen
+NoSubsidy=Kein Zuschuss
+LatestModifiedMySubsidy=Zuletzt geänderte Zuschüsse
+LatestCreatedMySubsidy=Zuletzt erstellte Zuschüsse
+#
+# subventions_statitics.php
+#
+SubsidysStatistics=Statistiken zu Zuschüssen, Finanzierungen und Zahlungen
+NbOfSubsidys=Anzahl der Zuschüsse
+NbOfSubsidysByMonth=Anzahl der Zuschüsse pro Monat
+NumberOfSubsidys=Anzahl der Zuschüsse
+NumberOfSubsidysByMonth=Anzahl der Zuschüsse pro Monat
+AmountOfSubsidys=Betrag der Zuschüsse
+AmountOfSubsidysByMonth=Betrag der Zuschüsse pro Monat
+NbOfFundings=Anzahl der Finanzierungen
+NbOfFundingsByMonth=Anzahl der Finanzierungen pro Monat
+NumberOfFundings=Anzahl der Finanzierungen
+NumberOfFundingsByMonth=Anzahl der Finanzierungen pro Monat
+AmountOfFundings=Betrag der Finanzierungen
+AmountOfFundingsByMonth=Betrag der Finanzierungen pro Monat
+AmountRemaining=Verbleibender Betrag
+STATUS_DRAFT=Entwurf
+STATUS_VALIDATED=Eingereicht
+STATUS_ACCEPTED=Angenommen
+STATUS_FINANCED=Finanziert
+STATUS_EVALUATED=Bericht eingereicht
+STATUS_CLOTURED=Abgeschlossen
+STATUS_REFUSED=Abgelehnt
+STATUS_CANCELED=Storniert
+FundingSourceType=Förderer
+ByFundingSource=Nach Förderern
+ByComparison=Betragsvergleich
+NbRequest=Anzahl der Anträge
+AmountDem=Beantragter Betrag
+AmountAcc=Angenommener Betrag
+AmountFin=Finanzierter Betrag
+LastRequest=Letzter Antrag
+AllYears=Alle
+FundingSourceGroup=Förderergruppe
+#
+# Common Translations
+#
+AddFunding=Finanzierung hinzufügen
+ClassNotFound=Klasse nicht gefunden
+DeleteFunding=Finanzierung löschen
+DeleteGrant=Zuschuss löschen
+Funding=Finanzierung
+FundingSource=Förderer
+Payment=Zahlung
+Payments=Zahlungen
+Grant=Zuschuss
+Refuse=Ablehnen
+ShowFunding=Finanzierungen anzeigen
+ShowPayment=Zahlungen anzeigen
+ShowSubsidy=Zuschüsse anzeigen
+Subsidy=Zuschuss
+SubsidysArea=Verfolgung von Zuschüssen, Finanzierungen und Zahlungen
+SubsidysSetup=Zuschuss-Konfiguration
+XXX=
+bytes=Bytes

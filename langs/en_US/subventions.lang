@@ -1,0 +1,142 @@
+ModuleSubventionsName=Grants
+#
+# financement_list.php
+#
+Fundings=Fundings
+#
+# subvention_card.php
+#
+Accepted=Accepted
+Cloture=Close
+Evaluate=Evaluate
+Financed=Funded
+Evaluated=Report submitted
+ListOfFundingAssociatedWithTheGrant=List of fundings for the grant
+ListOfPaymentsAssociatedWithTheGrant=List of payments for the grant
+OthersSubsidys=Other grants
+Pending=Pending
+ReferenceFunding=Funding reference
+ReferencePayment=Payment reference
+Requested=Requested
+SetFromEvaluate=Incomplete action
+SetToEvaluate=Report to be submitted
+ConfirmActionRefuse=Are you sure you want to refuse this grant? (all associated fundings will be set to 0)
+#
+# subvention_list.php
+#
+Subsidys=Grants
+#
+# admin\setup.php
+#
+AmountRequested=Requested amount
+AmountAccepted=Accepted amount
+AmountFinanced=Funded amount
+AmountPending=Pending amount
+AmountRefused=Refused amount
+Path=Path
+SubsidysSetupPage=Grants configuration
+SubsidysDict=The list of funders is available in the dictionary management.
+# TODO SubsidysDict=The list of funders and the associated accounts are available in the dictionary management.
+# TODO AccountancyModule=Accounting Module
+ProjectModule=Projects Module
+StatisticsModule=Statistics Module
+SUBVENTIONS_PROJECT=Add grants to the project overview
+SUBVENTIONS_PROJECT_MONTANT_HT=Amount displayed as "Amount before tax"
+SUBVENTIONS_PROJECT_MONTANT_TTC=Amount displayed as "Amount including tax"
+SUBVENTIONS_STATISTIC_DATE=Date used to calculate statistics
+SubventionsSetup=Grants configuration
+CreationDate=Grant creation date
+EspectingDate=Expected submission date
+BeginProjectDate=Project start date
+EndProjectDate=Project end date
+EvaluationDate=Grant evaluation date
+Recalcul=Recalculate VAT-exclusive and VAT-inclusive amounts
+SUBVENTIONS_STATISTIC_COLOR_GREEN=Minimum percentage to display in green (otherwise orange)
+SUBVENTIONS_STATISTIC_COLOR_ORANGE=Minimum percentage to display in orange (otherwise red)
+#
+# core\modules\modSubventions.class.php
+#
+CodeTooltipHelp=
+RightsCreateUpdateFunding=Create or update fundings
+RightsCreateUpdatePayment=Create or update payments
+RightsCreateUpdateSubsidy=Create or update grants
+RightsDeleteFunding=Delete fundings
+RightsDeletePayment=Delete payments
+RightsDeleteSubsidy=Delete grants
+RightsExportSubsidyFundingAndPayment=
+RightsImportSubsidyFundingAndPayment=
+RightsReadFunding=Read fundings
+RightsReadPayment=Read payments
+RightsReadSubsidy=Read grants
+RightsExportSubsidyFundingAndPayment=Export grants, fundings, and payments
+RightsImportSubsidyFundingAndPayment=Import grants, fundings, and payments
+#
+# lib\subventions.lib.php
+#
+AttributsSuppAddFunding=Additional funding attributes
+AttributsSuppPayment=Additional payment attributes
+AttributsSuppSubsidy=Additional grant attributes
+#
+# index.php
+#
+DraftSubsidy=Unsubmitted grants
+PendingSubsidy=Pending fundings
+NoSubsidy=No grant
+LatestModifiedMySubsidy=Latest modified grants
+LatestCreatedMySubsidy=Latest created grants
+#
+# subventions_statitics.php
+#
+SubsidysStatistics=Statistics on grants, fundings, and payments
+NbOfSubsidys=No. of grants
+NbOfSubsidysByMonth=No. of grants per month
+NumberOfSubsidys=Number of grants
+NumberOfSubsidysByMonth=Number of grants per month
+AmountOfSubsidys=Amount of grants
+AmountOfSubsidysByMonth=Amount of grants per month
+NbOfFundings=No. of fundings
+NbOfFundingsByMonth=No. of fundings per month
+NumberOfFundings=Number of fundings
+NumberOfFundingsByMonth=Number of fundings per month
+AmountOfFundings=Amount of fundings
+AmountOfFundingsByMonth=Amount of fundings per month
+AmountRemaining=Remaining amount
+STATUS_DRAFT=Draft
+STATUS_VALIDATED=Submitted
+STATUS_ACCEPTED=Accepted
+STATUS_FINANCED=Funded
+STATUS_EVALUATED=Report submitted
+STATUS_CLOTURED=Closed
+STATUS_REFUSED=Refused
+STATUS_CANCELED=Canceled
+FundingSourceType=Funder
+ByFundingSource=By funders
+ByComparison=Amount comparison
+NbRequest=No. of requests
+AmountDem=Requested amount
+AmountAcc=Accepted amount
+AmountFin=Funded amount
+LastRequest=Last request
+AllYears=All
+FundingSourceGroup=Funder group
+#
+# Common Translations
+#
+AddFunding=Add funding
+ClassNotFound=Class not found
+DeleteFunding=Delete funding
+DeleteGrant=Delete grant
+Funding=Funding
+FundingSource=Funder
+Payment=Payment
+Payments=Payments
+Grant=Grant
+Refuse=Refuse
+ShowFunding=Show fundings
+ShowPayment=Show payments
+ShowSubsidy=Show grants
+Subsidy=Grant
+SubsidysArea=Grants, fundings, and payments tracking
+SubsidysSetup=Grants configuration
+XXX=
+bytes=bytes

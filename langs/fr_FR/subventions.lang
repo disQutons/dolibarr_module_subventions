@@ -1,0 +1,154 @@
+# Translation file
+ModuleSubventionsName=Subventions
+ModuleSubventionsDesc=Suivi des subventions, financements et paiements
+SubventionsDescription=Suivi des subventions, financements et paiements
+#
+# financement_list.php
+#
+Fundings=Financements
+
+#
+# subvention_card.php
+#
+Accepted=Accepté
+Cloture=Clôturer
+Evaluate=Évaluer
+Financed=Financé
+Evaluated=Bilan déposé
+ListOfFundingAssociatedWithTheGrant=Liste des financements de la subvention
+ListOfPaymentsAssociatedWithTheGrant=Liste des paiements de la subvention
+OthersSubsidys=Autres subventions
+Pending=En attente
+ReferenceFunding=Référence financement
+ReferencePayment=Référence paiement
+Requested=Demandé
+SetFromEvaluate=Action non terminée
+SetToEvaluate=Bilan à déposer
+ConfirmActionRefuse=Êtes-vous sûr de vouloir refuser cette subvention ? (tous les financements associés seront indiqués à 0)
+
+#
+# subvention_list.php
+#
+Subsidys=Subventions
+
+#
+# admin\setup.php
+#
+AmountRequested=Montant demandé
+AmountAccepted=Montant accepté
+AmountFinanced=Montant financé
+AmountPending=Montant en attente
+AmountRefused=Montant refusé
+Path=Chemin
+SubsidysSetupPage=Paramétrage des subventions
+SubsidysDict=La liste des financeurs se trouvent dans la gestion des dictionnaires.
+# TODO SubsidysDict=La liste des financeurs et les comptes comptes qui s'y rattachent, se trouvent dans la gestion des dictionnaires.
+# TODO AccountancyModule=Module Comptabilité
+ProjectModule=Module Projets
+StatisticsModule=Module Statistiques
+SUBVENTIONS_PROJECT=Ajouter les subventions à la vue d'ensemble des projets
+SUBVENTIONS_PROJECT_MONTANT_HT=Montant affiché en tant que "Montant HT"
+SUBVENTIONS_PROJECT_MONTANT_TTC=Montant affiché en tant que "Montant TTC"
+SUBVENTIONS_STATISTIC_DATE=Date utilisée pour calculer les statistiques
+SubventionsSetup=Paramétrages subventions
+CreationDate=Création de la subvention
+EspectingDate=Date de rendu attendue
+BeginProjectDate=Début du projet
+EndProjectDate=Fin du projet
+EvaluationDate=Bilan de la subvention
+Recalcul=Recalculer les montants HT et TTC
+SUBVENTIONS_STATISTIC_COLOR_GREEN=Pourcentage minimum pour s'afficher en vert (sinon orange)
+SUBVENTIONS_STATISTIC_COLOR_ORANGE=Pourcentage minimum pour s'afficher en orange (sinon rouge)
+
+#
+# core\modules\modSubventions.class.php
+#
+CodeTooltipHelp=
+RightsCreateUpdateFunding=Créer ou mettre à jour les financements
+RightsCreateUpdatePayment=Créer ou mettre à jour les paiements
+RightsCreateUpdateSubsidy=Créer ou mettre à jour les subventions
+RightsDeleteFunding=Supprimer les financements
+RightsDeletePayment=Supprimer les paiements
+RightsDeleteSubsidy=Supprimer les subventions
+RightsExportSubsidyFundingAndPayment=
+RightsImportSubsidyFundingAndPayment=
+RightsReadFunding=Lire les financements
+RightsReadPayment=Lire les paiements
+RightsReadSubsidy=Lire les subventions
+RightsExportSubsidyFundingAndPayment=Exporter les subventions, financements et paiements
+RightsImportSubsidyFundingAndPayment=Importer les subventions, financements et paiements
+
+#
+# lib\subventions.lib.php
+#
+AttributsSuppAddFunding=Attributs supplémentaires financements
+AttributsSuppPayment=Attributs supplémentaires paiements
+AttributsSuppSubsidy=Attributs supplémentaires subventions
+
+#
+# index.php
+#
+DraftSubsidy=Subventions non déposées
+PendingSubsidy=En attente des financements
+NoSubsidy=Pas de subvention
+LatestModifiedMySubsidy=Dernières subventions modifiées
+LatestCreatedMySubsidy=Dernières subventions créées
+
+#
+# subventions_statitics.php
+#
+SubsidysStatistics=Statistiques sur les subventions, financements et paiements
+NbOfSubsidys=Nb de subs
+NbOfSubsidysByMonth=Nb de subs par mois
+NumberOfSubsidys=Nombre de subventions
+NumberOfSubsidysByMonth=Nombre de subventions par mois
+AmountOfSubsidys=Montant des subventions
+AmountOfSubsidysByMonth=Montant des subventions par mois
+NbOfFundings=Nb de fin.
+NbOfFundingsByMonth=Nb de fin. par mois
+NumberOfFundings=Nombre de financements
+NumberOfFundingsByMonth=Nombre de financements par mois
+AmountOfFundings=Montant des financements
+AmountOfFundingsByMonth=Montant des financements par mois
+AmountRemaining=Montant restant
+STATUS_DRAFT=Non déposé
+STATUS_VALIDATED=Déposé
+STATUS_ACCEPTED=Accepté
+STATUS_FINANCED=Financé
+STATUS_EVALUATED=Bilan déposé
+STATUS_CLOTURED=Clôturé
+STATUS_REFUSED=Refusé
+STATUS_CANCELED=Annulé
+FundingSourceType=Financeur
+ByFundingSource=Par financeurs
+ByComparison=Comparaison de montant
+NbRequest=Nb demande
+AmountDem=Mnt demandé
+AmountAcc=Mnt accepté
+AmountFin=Mnt financé
+LastRequest=Dernière demande
+AllYears=Toutes
+FundingSourceGroup=Groupe de financeurs
+
+
+#
+# Common Translations
+#
+AddFunding=Ajouter financement
+ClassNotFound=Class non trouvée
+DeleteFunding=Supprimer financement
+DeleteGrant=Supprimer subvention
+Funding=Financement
+FundingSource=Financeur
+Payment=Paiement
+Payments=Paiements
+Grant=Subvention
+Refuse=Refuser
+ShowFunding=Afficher les financements
+ShowPayment=Afficher les paiements
+ShowSubsidy=Afficher les subventions
+Subsidy=Subvention
+SubsidysArea=Suivi des subventions, financements et paiements
+SubsidysSetup=Paramétrage subventions
+XXX=
+bytes=octets
