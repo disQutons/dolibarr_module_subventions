@@ -1,5 +1,7 @@
 # Suivi des subventions pour [DOLIBARR ERP & CRM](https://www.dolibarr.org)
 
+<img width="250" height="250" alt="Logo Dolibarr module subvention" src="https://github.com/user-attachments/assets/833292e2-8cc1-4730-86e0-45175a5fffb8" />
+
 ## Caractéristiques
 
 Module permettant de suivre les demandes de subventions :
