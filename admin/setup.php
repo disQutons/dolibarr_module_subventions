@@ -63,7 +63,7 @@ if (!$res) {
 
 // Libraries
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
-require_once '../lib/subventions.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/custom/subventions/lib/subventions.lib.php';
 
 /**
  * @var Conf $conf
@@ -300,7 +300,6 @@ if ($action == 'updateMask') {
 		dolibarr_del_const($db, $constforval, $conf->entity);
 	}
 } elseif ($action == 'recalcul') {
-	require_once DOL_DOCUMENT_ROOT.'/custom/subventions/lib/subventions.lib.php';
 	$res = majMontantsTTCHT();
 }
 
@@ -627,3 +626,4 @@ print dol_get_fiche_end();
 
 llxFooter();
 $db->close();
+
