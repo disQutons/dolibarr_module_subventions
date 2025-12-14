@@ -273,11 +273,11 @@ class modSubventions extends DolibarrModules
 		 // Sort order
 		 'tabsqlsort' => array("position ASC, rowid ASC"),
 		 // List of fields (result of select to show dictionary)
-		 'tabfield' => array("ref,label,accountancy_code,active,position"),
+		 'tabfield' => array("ref,label,accountancy_code,position"),
 		 // List of fields (list of fields to edit a record)
-		 'tabfieldvalue' => array("label,accountancy_code,active,position"),
+		 'tabfieldvalue' => array("label,accountancy_code,position"),
 		 // List of fields (list of fields for insert)
-		 'tabfieldinsert' => array("ref,label,accountancy_code,active,position"),
+		 'tabfieldinsert' => array("ref,label,accountancy_code,position"),
 		 // Name of columns with primary key (try to always name it 'rowid')
 		 'tabrowid' => array("rowid"),
 		 // Condition to show each dictionary
@@ -1075,3 +1075,4 @@ class modSubventions extends DolibarrModules
 		return $this->_remove($sql, $options);
 	}
 }
+
