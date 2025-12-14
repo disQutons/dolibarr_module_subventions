@@ -13,26 +13,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-CREATE TABLE llx_subventions_paiement(
-	-- BEGIN MODULEBUILDER FIELDS
-	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
-	montant double NOT NULL, 
-	datep date NOT NULL, 
-	fk_soc integer, 
-	note_public text, 
-	note_private text, 
-	date_creation datetime NOT NULL, 
-	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
-	fk_user_creat integer NOT NULL, 
-	fk_user_modif integer, 
-	last_main_doc varchar(255), 
-	import_key varchar(14), 
-	model_pdf varchar(255),
-	fk_sub integer,
-	fk_fin integer
-	-- END MODULEBUILDER FIELDS
-) ENGINE=innodb;
 -- Création de la table c_subventions_financeur
 CREATE TABLE llx_c_subventions_financeur (
     rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -58,3 +38,4 @@ VALUES
     (8, 'SF_ASP', 'L\'agence de services et de paiement (emplois aidés)', '7406', 1, NULL, 8, 0),
     (9, 'SF_PUB', 'Autres établissements publics', '7408', 1, NULL, 9, 0),
     (10, 'SF_PRI', 'Aides privées (fondation)', '7409', 1, NULL, 10, 0);
+
