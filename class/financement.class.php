@@ -138,7 +138,7 @@ class Financement extends CommonObject
 		"montant_att" => array("type" => "price", "label" => "Montant en attente", "enabled" => "1", 'position' => 46, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant en attente des financements", "validate" => "1",),
 		"montant_ref" => array("type" => "price", "label" => "Montant refusé", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "1", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant refusé", "validate" => "1",),
 		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('subventions')", 'position' => 25, 'notnull' => 1, "visible" => "1",),
-		"fk_financeur" => array("type" => "integer", "label" => "Type de financeur", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "La liste des financeurs peut être modifié dans les dictionnaires.", "arrayofkeyval" => array("1" => "Autre", "2" => "État", "3" => "Région", "4" => "Département", "5" => "Commune", "6" => "Organismes sociaux (CAF, etc.)", "7" => "Fonds européens (FSE, FEDER, etc.)", "8" => "L'agence de services et de paiement (emplois aidés)", "9" => "Autres établissements publics", "10" => "Aides privées (fondation)"),),
+		"fk_financeur" => array("type" => "integer", "label" => "Type de financeur", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "La liste des financeurs peut être modifié dans les dictionnaires.",),
 	);
 	public $rowid;
 	public $ref;
@@ -1229,4 +1229,5 @@ class FinancementLine extends CommonObjectLine
 		$this->isextrafieldmanaged = 0;
 	}
 }
+
 
