@@ -869,7 +869,7 @@ class modSubventions extends DolibarrModules
 			's.description'=>"Main goals", 's.evaluation'=>"evaluation", 's.date_d_projet'=>"2025-01-01", 's.date_f_projet'=>"2025-12-31",
 			's.date_attendue'=>"2024-09-15", 's.date_bilan'=>"2026-06-30", 's.date_creation'=>"2026-06-30",
 		);
-		$this->import_examplevalues_array[$r] = array_merge($import_sample, $import_extrafield_sample);
+		$this->import_examplevalues_array[$r] = array_merge($import_examplevalues_array, $import_extrafield_sample);
 
 		$this->import_updatekeys_array[$r] = array('s.ref'=>'Ref');
 
@@ -1075,4 +1075,5 @@ class modSubventions extends DolibarrModules
 		return $this->_remove($sql, $options);
 	}
 }
+
 
