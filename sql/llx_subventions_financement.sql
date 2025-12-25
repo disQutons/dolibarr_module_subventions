@@ -35,6 +35,7 @@ CREATE TABLE llx_subventions_financement(
 	montant_att double DEFAULT NULL, 
 	montant_ref double DEFAULT NULL, 
 	fk_sub integer NOT NULL, 
-	fk_financeur integer NOT NULL
+	fk_financeur integer NOT NULL,
+	entity integer DEFAULT 1 NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
