@@ -139,6 +139,7 @@ class Financement extends CommonObject
 		"montant_ref" => array("type" => "price", "label" => "Montant refusé", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "1", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant refusé", "validate" => "1",),
 		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('subventions')", 'position' => 25, 'notnull' => 1, "visible" => "1",),
 		"fk_financeur" => array("type" => "integer", "label" => "Type de financeur", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "La liste des financeurs peut être modifié dans les dictionnaires.",),
+		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
 	public $ref;
@@ -160,6 +161,7 @@ class Financement extends CommonObject
 	public $montant_ref;
 	public $fk_sub;
 	public $fk_financeur;
+	public $entity;
 	// END MODULEBUILDER PROPERTIES
 
 
@@ -1229,5 +1231,6 @@ class FinancementLine extends CommonObjectLine
 		$this->isextrafieldmanaged = 0;
 	}
 }
+
 
 
