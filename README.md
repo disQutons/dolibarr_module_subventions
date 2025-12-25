@@ -14,6 +14,10 @@ Module permettant de suivre les demandes de subventions :
 - [Module Tiers] Ajout d'un onglet au sein de la fiche tiers des projets
 <!---- [Module Comptablité] Lien entre les paiements et comptabilité Dolibarr-->
 
+## Installation
+Vous pouvez copier ces fichiers, directement dans le dossier custom/subventions de votre Dolibarr. Vous aurez ainsi la version la plus à jour.
+Vous pouvez également télécharger la dernière release disponible sur Dolistore : https://www.dolistore.com/product.php?id=2594&title=suivi-des-subventions&l=fr
+
 ## Captures d'écrans
 
 <img width="341" height="145" alt="Module subvention" src="https://github.com/user-attachments/assets/d9a7cb72-39bd-4482-b859-14e167831b1f" />
