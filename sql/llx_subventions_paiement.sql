@@ -31,6 +31,8 @@ CREATE TABLE llx_subventions_paiement(
 	import_key varchar(14), 
 	fk_sub integer, 
 	fk_fin integer, 
-	status integer DEFAULT 1 NOT NULL
+	status integer DEFAULT 1 NOT NULL,
+	entity integer DEFAULT 1 NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
+
