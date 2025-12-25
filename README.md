@@ -16,7 +16,7 @@ Module permettant de suivre les demandes de subventions :
 
 ## Installation
 Vous pouvez copier ces fichiers, directement dans le dossier custom/subventions de votre Dolibarr. Vous aurez ainsi la version la plus à jour.
-Vous pouvez également télécharger la dernière release disponible sur Dolistore : https://www.dolistore.com/product.php?id=2594&title=suivi-des-subventions&l=fr
+Vous pouvez également télécharger la dernière release disponible sur [Dolistore](https://www.dolistore.com/product.php?id=2594&)
 
 ## Captures d'écrans
 
