@@ -135,6 +135,7 @@ class Paiement extends CommonObject
 		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "enabled" => "1", 'position' => 25, 'notnull' => 0, "visible" => "1",),
 		"fk_fin" => array("type" => "integer:financement:/custom/subventions/class/financement.class.php", "label" => "Réf financement", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1",),
 		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon", "1" => "Valid&eacute;", "9" => "Annul&eacute;"), "validate" => "1",),
+		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
 	public $ref;
@@ -152,6 +153,7 @@ class Paiement extends CommonObject
 	public $fk_sub;
 	public $fk_fin;
 	public $status;
+	public $entity;
 	// END MODULEBUILDER PROPERTIES
 
 
@@ -1034,4 +1036,5 @@ class PaiementLine extends CommonObjectLine
 		$this->isextrafieldmanaged = 0;
 	}
 }
+
 
