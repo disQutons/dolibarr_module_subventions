@@ -655,7 +655,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					</td>
 					<td class="nobordernopadding titre_right wordbreakimp right valignmiddle col-right">
 						<div class="inline-block valignmiddle">
-							<a class="buttonxxx marginleftonly" href="/dolibarr/custom/subventions/financement_card.php?action=create&amp;origin=subvention&amp;fk_sub='.$id.'" title="Créer un financeur">
+							<a class="buttonxxx marginleftonly" href="'.DOL_URL_ROOT.'/subventions/financement_card.php?action=create&amp;origin=subvention&amp;fk_sub='.$id.'" title="Créer un financeur">
 								<span class="fa fa-plus-circle valignmiddle paddingleft"></span>
 							</a>
 						<div></div></div>
@@ -742,7 +742,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					</td>
 					<td class="nobordernopadding titre_right wordbreakimp right valignmiddle col-right">
 						<div class="inline-block valignmiddle">
-							<a class="buttonxxx marginleftonly" href="/dolibarr/custom/subventions/paiement_card.php?action=create&amp;origin=subvention&amp;fk_sub='.$id.'" title="Créer un financeur">
+							<a class="buttonxxx marginleftonly" href="'.DOL_URL_ROOT.'/subventions/paiement_card.php?action=create&amp;origin=subvention&amp;fk_sub='.$id.'" title="Créer un financeur">
 								<span class="fa fa-plus-circle valignmiddle paddingleft"></span>
 							</a>
 						<div></div></div>
