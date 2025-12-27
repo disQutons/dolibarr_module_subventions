@@ -3,7 +3,6 @@
 <img width="250" height="250" alt="Logo Dolibarr module subvention" src="https://github.com/user-attachments/assets/833292e2-8cc1-4730-86e0-45175a5fffb8" />
 
 ## Caractéristiques
-
 Module permettant de suivre les demandes de subventions :
 - Suivi des subventions, demandes de financements, financeurs et paiements
 - Possibilité d'ajouter des documents : demande, notification, convention, bilan, etc.
@@ -19,7 +18,6 @@ Vous pouvez copier ces fichiers, directement dans le dossier custom/subventions 
 Vous pouvez également télécharger la dernière release disponible sur [Dolistore](https://www.dolistore.com/product.php?id=2594&)
 
 ## Captures d'écrans
-
 <img width="341" height="145" alt="Module subvention" src="https://github.com/user-attachments/assets/d9a7cb72-39bd-4482-b859-14e167831b1f" />
 <img width="341" height="145" alt="Liste subventions" src="https://github.com/user-attachments/assets/c8918b39-b352-4462-8e9f-726eed267d9d" />
 <img width="341" height="145" alt="Stats par année" src="https://github.com/user-attachments/assets/24187851-3448-401e-ba87-0861ce4bbb86" />
@@ -32,7 +30,6 @@ Nous avons consacré du temps bénévole pour créer un module utile à tous. Si
 
 
 ## Traductions/Translations
-
 Les traductions peuvent être effectuées manuellement en éditant des fichiers dans les répertoires de modules sous `lang`.
 Translations can be completed manually by editing files in the module directories under `langs`.
 
@@ -44,5 +41,4 @@ En cas de bug ou si vous avez des propositions d'amélioration, n'hésitez pas �
 
 
 ## Licences
-
 Le module est sous la licence [GPLv3 (GNU/GPL v3)](https://github.com/disQutons/dolibarr_module_subventions?tab=GPL-3.0-1-ov-file).
