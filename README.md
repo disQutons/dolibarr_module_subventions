@@ -28,7 +28,7 @@ Vous pouvez également télécharger la dernière release disponible sur [Dolist
 
 ## Nous soutenir
 Nous avons consacré du temps bénévole pour créer un module utile à tous. Si vous souhaitez soutenir notre association et nous aider à développer de nouveaux modules, n’hésitez pas à nous encourager :
-[Faire un don à l'association disQutons](https://www.helloasso.com/associations/disqutons/formulaires/2)
+[Faire un don à l'association disQutons](https://disqutons.fr/url/don)
 
 
 ## Traductions/Translations
