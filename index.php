@@ -62,9 +62,9 @@ if (!$res) {
 }
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/subvention.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/financement.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/paiement.class.php';
+dol_include_once('/custom/subventions/class/subvention.class.php');
+dol_include_once('/custom/subventions/class/financement.class.php');
+dol_include_once('/custom/subventions/class/paiement.class.php');
 
 /**
  * @var Conf $conf

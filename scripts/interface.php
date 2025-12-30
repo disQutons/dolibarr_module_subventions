@@ -62,8 +62,8 @@ if (!$res) {
 }
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/subvention.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/financement.class.php';
+dol_include_once('/custom/subventions/class/subvention.class.php');
+dol_include_once('/custom/subventions/class/financement.class.php');
 
 header('Content-Type: application/json'); // Force le type de réponse en JSON
 

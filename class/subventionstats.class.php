@@ -33,9 +33,9 @@ ini_set('display_errors', 1);
 
 
 include_once DOL_DOCUMENT_ROOT.'/core/class/stats.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/subvention.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/financement.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/paiement.class.php';
+dol_include_once('/custom/subventions/class/subvention.class.php');
+dol_include_once('/custom/subventions/class/financement.class.php');
+dol_include_once('/custom/subventions/class/paiement.class.php');
 
 
 /**
