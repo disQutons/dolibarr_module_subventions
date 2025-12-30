@@ -35,4 +35,3 @@ CREATE TABLE llx_subventions_paiement(
 	entity integer DEFAULT 1 NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
-

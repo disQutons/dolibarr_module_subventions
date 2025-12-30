@@ -31,9 +31,7 @@ ini_set('display_errors', 1);
 
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/lib/subventions.lib.php';
-//require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
-//require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+dol_include_once('/custom/subventions/lib/subventions.lib.php');
 
 /**
  * Class for Financement
@@ -1231,6 +1229,3 @@ class FinancementLine extends CommonObjectLine
 		$this->isextrafieldmanaged = 0;
 	}
 }
-
-
-

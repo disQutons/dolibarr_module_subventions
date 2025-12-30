@@ -24,7 +24,7 @@
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonhookactions.class.php';
-require_once DOL_DOCUMENT_ROOT.'/custom/subventions/class/subvention.class.php';
+dol_include_once('/custom/subventions/class/subvention.class.php');
 
 /**
  * Class ActionsSubventions
