@@ -132,7 +132,7 @@ class Subvention extends CommonObject
 		"total_ht" => array("type" => "price", "label" => "Total HT", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "validate" => "1",),
 		"total_ttc" => array("type" => "price", "label" => "Total TTC", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "validate" => "1",),
 		"fk_soc" => array("type" => "integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "ThirdParty", "picto" => "company", "enabled" => "isModEnabled('societe')", 'position' => 50, 'notnull' => 1, "visible" => "1", "index" => "1", "css" => "maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "help" => "OrganizationEventLinkToThirdParty", "validate" => "1",),
-		"fk_project" => array("type" => "integer:Project:projet/class/project.class.php:1", "label" => "Project", "picto" => "project", "enabled" => "isModEnabled('project')", 'position' => 52, 'notnull' => -1, "visible" => "-1", "index" => "1", "css" => "maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "validate" => "1",),
+		"fk_project" => array("type" => "integer:Project:projet/class/project.class.php:1:((fk_statut:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "Project", "picto" => "project", "enabled" => "isModEnabled('project')", 'position' => 52, 'notnull' => -1, "visible" => "-1", "index" => "1", "css" => "maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "validate" => "1",),
 		"description" => array("type" => "text", "label" => "Description", "enabled" => "1", 'position' => 60, 'notnull' => 0, "visible" => "3", "validate" => "1",),
 		"evaluation" => array("type" => "text", "label" => "Critères d'évaluation", "enabled" => "1", 'position' => 80, 'notnull' => 0, "visible" => "3", "validate" => "1",),
 		"date_d_projet" => array("type" => "date", "label" => "Date début projet", "enabled" => "1", 'position' => 70, 'notnull' => 0, "visible" => "1", "validate" => "1",),
@@ -149,6 +149,7 @@ class Subvention extends CommonObject
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
 		"model_pdf" => array("type" => "varchar(255)", "label" => "Model pdf", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
 		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "5", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon/Non déposée", "1" => "Financ&eacute;", "4" => "Clôtur&eacute;", "5" => "Bilan d&eacute;pos&eacute;", "6" => "Refusé", "9" => "Annul&eacute;"), "validate" => "1",),
+		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
 	public $ref;
@@ -178,6 +179,7 @@ class Subvention extends CommonObject
 	public $import_key;
 	public $model_pdf;
 	public $status;
+	public $entity;
 	// END MODULEBUILDER PROPERTIES
 
 
