@@ -333,6 +333,16 @@ if ($object->ismultientitymanaged == 1) {
 } else {
 	$sql .= " WHERE 1 = 1";
 }
+
+// Ajout de la condition par défaut (t.status < 5) uniquement si le statut n'est pas recherché
+$statusSearched = false;
+if (!empty($search['status']) && $search['status'] != '-1') {
+    $statusSearched = true;
+}
+if (!$statusSearched) {
+    $sql .= " AND t.status < 5";
+}
+
 foreach ($search as $key => $val) {
 	if (array_key_exists($key, $object->fields)) {
 		if ($key == 'status' && $search[$key] == -1) {
