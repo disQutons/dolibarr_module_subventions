@@ -33,6 +33,79 @@ include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
  */
 class modSubventions extends DolibarrModules
 {
+	// Explicit declaration of properties
+	/** @var array<int, array<int, array<string, string>>> */
+	public $import_permission = array();
+
+	/** @var array<int, string> */
+	public $import_code = array();
+
+	/** @var array<int, string> */
+	public $import_label = array();
+
+	/** @var array<int, string> */
+	public $import_icon = array();
+
+	/** @var array<int, array<string, string>> */
+	public $import_tables_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $import_tables_creator_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $import_fields_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $import_regex_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $import_examplevalues_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $import_convertvalue_array = array();
+
+	/** @var array<int, array<int, string>> */
+	public $import_updatekeys_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $import_required_fields_array = array();
+
+	/** @var array<int, array<string, array<string, string>>> */
+	public $import_entities_array = array();
+
+	/** @var array<int, string> */
+	public $export_code = array();
+
+	/** @var array<int, string> */
+	public $export_label = array();
+
+	/** @var array<int, string> */
+	public $export_icon = array();
+
+	/** @var array<int, array<int, array<string, string>>> */
+	public $export_permission = array();
+
+	/** @var array<int, array<string, string>> */
+	public $export_fields_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $export_TypeFields_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $export_entities_array = array();
+
+	/** @var array<int, array<string, string>> */
+	public $export_dependencies_array = array();
+
+	/** @var array<int, string> */
+	public $export_sql_start = array();
+
+	/** @var array<int, string> */
+	public $export_sql_end = array();
+
+	/** @var array<int, array<int, string>> */
+	public $import_run_sql_after_array = array();
+
 	/**
 	 * Constructor. Define names, constants, directories, boxes, permissions
 	 *

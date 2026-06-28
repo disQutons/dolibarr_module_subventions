@@ -59,7 +59,7 @@ function subventionsAdminPrepareHead()
 
 	$head[$h][0] = dol_buildpath("/subventions/admin/subvention_extrafields.php", 1);
 	$head[$h][1] = $langs->trans("AttributsSuppSubsidy");
-	$nbExtrafields = is_countable($extrafields->attributes['subvention']['label']) ? count($extrafields->attributes['subvention']['label']) : 0;
+	$nbExtrafields = (!empty($extrafields->attributes['subvention']['label']) && is_countable($extrafields->attributes['subvention']['label'])) ? count($extrafields->attributes['subvention']['label']) : 0;
 	if ($nbExtrafields > 0) {
 		$head[$h][1] .= ' <span class="badge">' . $nbExtrafields . '</span>';
 	}
@@ -72,7 +72,7 @@ function subventionsAdminPrepareHead()
 
 	$head[$h][0] = dol_buildpath("/subventions/admin/financement_extrafields.php", 1);
 	$head[$h][1] = $langs->trans("AttributsSuppAddFunding");
-	$nbExtrafields = is_countable($extrafields->attributes['financement']['label']) ? count($extrafields->attributes['financement']['label']) : 0;
+	$nbExtrafields = (!empty($extrafields->attributes['financement']['label']) && is_countable($extrafields->attributes['financement']['label'])) ? count($extrafields->attributes['financement']['label']) : 0;
 	if ($nbExtrafields > 0) {
 		$head[$h][1] .= ' <span class="badge">' . $nbExtrafields . '</span>';
 	}
@@ -85,7 +85,7 @@ function subventionsAdminPrepareHead()
 
 	$head[$h][0] = dol_buildpath("/subventions/admin/paiement_extrafields.php", 1);
 	$head[$h][1] = $langs->trans("AttributsSuppPayment");
-	$nbExtrafields = is_countable($extrafields->attributes['paiement']['label']) ? count($extrafields->attributes['paiement']['label']) : 0;
+	$nbExtrafields = (!empty($extrafields->attributes['paiement']['label']) && is_countable($extrafields->attributes['paiement']['label'])) ? count($extrafields->attributes['paiement']['label']) : 0;
 	if ($nbExtrafields > 0) {
 		$head[$h][1] .= ' <span class="badge">' . $nbExtrafields . '</span>';
 	}
