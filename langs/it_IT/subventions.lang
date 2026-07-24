@@ -1,5 +1,6 @@
 ModuleSubventionsName=Sovvenzioni
 ListSubventionsAssociatedProject=Elenco dei sussidi relativi al progetto
+AddSubvention=Aggiungi una sovvenzione
 #
 # financement_list.php
 #

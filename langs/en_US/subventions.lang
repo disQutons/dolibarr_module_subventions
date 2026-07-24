@@ -1,5 +1,6 @@
 ModuleSubventionsName=Grants
 ListSubventionsAssociatedProject=List of Grants related to the project
+AddSubvention=Add a grant
 #
 # financement_list.php
 #

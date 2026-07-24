@@ -1,5 +1,6 @@
 ModuleSubventionsName=Zuschüsse
 ListSubventionsAssociatedProject=Liste der mit dem Projekt verbundenen Subventionen
+AddSubvention=Zuschuss hinzufügen
 #
 # financement_list.php
 #

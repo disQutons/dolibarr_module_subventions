@@ -3,6 +3,7 @@ ModuleSubventionsName=Subventions
 ModuleSubventionsDesc=Suivi des subventions, financements et paiements
 SubventionsDescription=Suivi des subventions, financements et paiements
 ListSubventionsAssociatedProject=Liste des subventions liées au projet
+AddSubvention=Ajouter une subvention
 #
 # financement_list.php
 #
