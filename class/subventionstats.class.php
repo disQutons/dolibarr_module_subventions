@@ -274,6 +274,7 @@ class SubventionStats extends Stats
 					'montant_fin' => $obj->montant_fin,
 					'date_creation' => $obj->date_creation,
 					'nom' => $obj->nom,
+					'fk_financeur' => $obj->fk_financeur,
 				);
 				$i++;
 			}
