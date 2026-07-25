@@ -167,8 +167,8 @@ function majMontantsFinancementSubvention($object) {
             $obj = $db->fetch_object($resql);
             $m_fin = (float) $obj->total;
 
-            // Calcule le montant attendu (montant_acc - somme des paiements)
-            $m_att = $m_acc - $m_fin;
+            // Calcule le montant attendu (montant_acc - somme des paiements) ne peut pas être négatif
+            $m_att = ($m_acc - $m_fin < 0) ? 0 : $m_acc - $m_fin;
             
             // Si aucun montant n'a été saisi on ne calcul rien
             if (is_null($m_acc)){
