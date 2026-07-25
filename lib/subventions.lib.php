@@ -175,7 +175,8 @@ function majMontantsFinancementSubvention($object) {
                 $m_ref = 0;    
             }
             else{
-                $m_ref = $m_dem - $m_acc;
+                // Calcule le montant refusé (montant_dem - montant_acc) ne peut pas être négatif
+                $m_ref = ($m_dem - $m_acc < 0) ? 0 : $m_dem - $m_acc;
             }
 
             // Màj financement
