@@ -248,7 +248,7 @@ class SubventionStats extends Stats
 				$sql .= " AND ".dolSqlDateFilter('x.'.$this->date_stat, 0, 0, (int) $year, 1);
 			}
 			$sql .= " GROUP BY x.fk_financeur";
-			$sql .= $this->db->order('nom', 'ASC');
+			$sql .= $this->db->order('fk_financeur', 'ASC');
 		}
 		else {
 			$sql = "SELECT x.fk_soc, COUNT(x.ref) AS nb, x.montant_dem, x.montant_acc, x.montant_fin, x.date_creation, s.nom";
