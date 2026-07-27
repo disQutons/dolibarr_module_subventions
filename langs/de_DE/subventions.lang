@@ -1,5 +1,6 @@
 ModuleSubventionsName=Zuschüsse
 ListSubventionsAssociatedProject=Liste der mit dem Projekt verbundenen Subventionen
+AddSubvention=Zuschuss hinzufügen
 #
 # financement_list.php
 #
@@ -14,6 +15,8 @@ Financed=Finanziert
 Evaluated=Bericht eingereicht
 ListOfFundingAssociatedWithTheGrant=Liste der Finanzierungen des Zuschusses
 ListOfPaymentsAssociatedWithTheGrant=Liste der Zahlungen des Zuschusses
+AddAFunding=Finanzierung hinzufügen
+AddAPayment=Zahlung hinzufügen
 OthersSubsidys=Andere Zuschüsse
 Pending=Ausstehend
 ReferenceFunding=Finanzierungsreferenz

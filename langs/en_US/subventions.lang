@@ -1,5 +1,6 @@
 ModuleSubventionsName=Grants
 ListSubventionsAssociatedProject=List of Grants related to the project
+AddSubvention=Add a grant
 #
 # financement_list.php
 #
@@ -14,6 +15,8 @@ Financed=Funded
 Evaluated=Report submitted
 ListOfFundingAssociatedWithTheGrant=List of fundings for the grant
 ListOfPaymentsAssociatedWithTheGrant=List of payments for the grant
+AddAFunding=Add a funding
+AddAPayment=Add a payment
 OthersSubsidys=Other grants
 Pending=Pending
 ReferenceFunding=Funding reference

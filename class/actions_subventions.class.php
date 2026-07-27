@@ -86,8 +86,8 @@ class ActionsSubventions extends CommonHookActions
 		if ($object->element == 'project' && getDolGlobalInt('SUBVENTIONS_PROJECT')) {
 			$this->results = array(
 				'subvention' => array(
-				'name' => "Subventions",
-				'title' => "ListSubventionsAssociatedProject",
+				'name' => $langs->trans("Subsidys"),
+				'title' => $langs->trans("ListSubventionsAssociatedProject"),
 				'class' => 'Subvention',
 				'table' => 'subventions_subvention',
 				'datefieldname' => 'date_creation',
@@ -96,7 +96,7 @@ class ActionsSubventions extends CommonHookActions
 				'url' => DOL_URL_ROOT.'/custom/subventions/subvention_list.php?fk_project='.$object->id, // URL pour lister les subventions
 				'urlnew' => DOL_URL_ROOT.'/custom/subventions/subvention_card.php?action=create&origin=project&originid='.$object->id.'&backtopage='.urlencode($_SERVER['PHP_SELF'].'?id='.$object->id),
 				'lang' => 'subventions',
-				'buttonnew' => 'AddSubvention',
+				'buttonnew' => $langs->trans('AddSubvention'),
 				'testnew' => $user->hasRight('subventions', 'subvention', 'write'),
 				'test' => isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 'read'),
 				),
