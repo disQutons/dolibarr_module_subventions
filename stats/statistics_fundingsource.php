@@ -289,6 +289,12 @@ print '</tr>';
 
 print '</div></table>';
 
+// Réinitialisation des totaux
+$total_nb = 0;
+$total_montant_dem = 0;
+$total_montant_acc = 0;
+$total_montant_fin = 0;
+
 // Liste complète des financeurs
 print '<div class="div-table-responsive-no-min">';
 print '<table class="noborder centpercent">';
