@@ -256,7 +256,7 @@ foreach ($data as $val) {
 	else {$colorFinAcc = 'red';}
 
     print '<tr class="oddeven" height="24">';
-    print '<td align="left"><a href="'.dol_buildpath('custom/subventions/financement_list.php?search_fk_soc='.$val['fk_soc'].'">'.$val['nom'],1).'</a></td>';
+    print '<td align="left"><a href="'.dol_buildpath('custom/subventions/financement_list.php?search_fk_financeur='.$val['fk_financeur'].'">'.$val['nom'],1).'</a></td>';
     print '<td class="center">'.$val['nb'].'</td>';
     print '<td class="right"><span class="amount">'.price(price2num($val['montant_dem'], 'MT'), 1).'</span></td>';
     print '<td class="right"><span class="amount">'.price(price2num($val['montant_acc'], 'MT'), 1).'</span></td>';
@@ -288,6 +288,12 @@ print '<td class="right opacitylow" style="color: black;"><strong>'.$total_perce
 print '</tr>';
 
 print '</div></table>';
+
+// Réinitialisation des totaux
+$total_nb = 0;
+$total_montant_dem = 0;
+$total_montant_acc = 0;
+$total_montant_fin = 0;
 
 // Liste complète des financeurs
 print '<div class="div-table-responsive-no-min">';
