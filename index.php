@@ -4,7 +4,8 @@
  * Copyright (C) 2005-2012  Regis Houssin           <regis.houssin@inodbox.com>
  * Copyright (C) 2015       Jean-François Ferry     <jfefe@aternatik.fr>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
- * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +38,7 @@ $tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
 $tmp2 = realpath(__FILE__);
 $i = strlen($tmp) - 1;
 $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] === $tmp2[$j]) {
 	$i--;
 	$j--;
 }
@@ -93,15 +94,12 @@ if (!empty($user->socid) && $user->socid > 0) {
 //$hookmanager->initHooks(array($object->element.'index'));
 
 // Security check (enable the most restrictive one)
-//if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) $socid = $user->socid;
 //if (!isModEnabled('subventions')) {
 //	accessforbidden('Module not enabled');
 //}
 if (! $user->hasRight('subventions', 'subvention', 'read')) {
 	accessforbidden();
 }
-//restrictedArea($user, 'subventions', 0, 'subventions_myobject', 'myobject', '', 'rowid');
 //if (empty($user->admin)) {
 //	accessforbidden('Must be admin');
 //}
@@ -128,17 +126,72 @@ llxHeader("", $langs->trans("SubsidysArea"), '', '', 0, 0, '', '', '', 'mod-subv
 
 print load_fiche_titre($langs->trans("SubsidysArea"), '', $picto);
 
-print '<div class="fichecenter"><div class="fichethirdleft">';
+// Key figures (one aggregate query per base table, so amounts are never
+// multiplied by joins; strictly limited to the current entity)
+$kpiSub = array('nb' => 0, 'dem' => 0, 'acc' => 0, 'ref' => 0);
+$kpiFin = array('nb' => 0, 'acc' => 0, 'fin' => 0);
+$kpiPay = array('nb' => 0, 'sum' => 0);
+
+$sql = "SELECT COUNT(rowid) AS nb, COALESCE(SUM(montant_dem), 0) AS dem, COALESCE(SUM(montant_acc), 0) AS acc, COALESCE(SUM(montant_ref), 0) AS ref";
+$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention";
+$sql .= " WHERE entity IN (".getEntity('subvention').")";
+$resql = $db->query($sql);
+if ($resql && ($obj = $db->fetch_object($resql))) {
+	$kpiSub = array('nb' => (int) $obj->nb, 'dem' => (float) $obj->dem, 'acc' => (float) $obj->acc, 'ref' => (float) $obj->ref);
+}
+
+if ($user->hasRight('subventions', 'financement', 'read')) {
+	$sql = "SELECT COUNT(rowid) AS nb, COALESCE(SUM(montant_acc), 0) AS acc, COALESCE(SUM(montant_fin), 0) AS fin";
+	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_financement";
+	$sql .= " WHERE entity IN (".getEntity('financement').")";
+	$resql = $db->query($sql);
+	if ($resql && ($obj = $db->fetch_object($resql))) {
+		$kpiFin = array('nb' => (int) $obj->nb, 'acc' => (float) $obj->acc, 'fin' => (float) $obj->fin);
+	}
+}
+
+if ($user->hasRight('subventions', 'paiement', 'read')) {
+	$sql = "SELECT COUNT(rowid) AS nb, COALESCE(SUM(montant), 0) AS sum";
+	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_paiement";
+	$sql .= " WHERE entity IN (".getEntity('paiement').")";
+	$resql = $db->query($sql);
+	if ($resql && ($obj = $db->fetch_object($resql))) {
+		$kpiPay = array('nb' => (int) $obj->nb, 'sum' => (float) $obj->sum);
+	}
+}
+
+$openAmount = $kpiSub['acc'] - $kpiPay['sum'];
+
+print '<div class="fichecenter">';
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre"><th colspan="2">'.$langs->trans("DashboardKPIs").'</th><th class="right">'.$langs->trans("Amount").'</th></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans("NbOfSubsidys").'</td><td class="center">'.$kpiSub['nb'].'</td><td></td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans("AmountDem").'</td><td></td><td class="right"><span class="amount">'.price($kpiSub['dem']).'</span></td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans("AmountAcc").'</td><td></td><td class="right"><span class="amount">'.price($kpiSub['acc']).'</span></td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans("AmountRefused").'</td><td></td><td class="right"><span class="amount">'.price($kpiSub['ref']).'</span></td></tr>';
+if ($user->hasRight('subventions', 'financement', 'read')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("NbOfFundings").'</td><td class="center">'.$kpiFin['nb'].'</td><td></td></tr>';
+	print '<tr class="oddeven"><td>'.$langs->trans("AmountFin").'</td><td></td><td class="right"><span class="amount">'.price($kpiFin['fin']).'</span></td></tr>';
+}
+if ($user->hasRight('subventions', 'paiement', 'read')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("NbOfPaiements").'</td><td class="center">'.$kpiPay['nb'].'</td><td></td></tr>';
+	print '<tr class="oddeven"><td>'.$langs->trans("AmountOfPaiements").'</td><td></td><td class="right"><span class="amount">'.price($kpiPay['sum']).'</span></td></tr>';
+}
+print '<tr class="liste_total"><td>'.$langs->trans("OpenAmount").'</td><td></td><td class="right"><span class="amount">'.price($openAmount).'</span></td></tr>';
+print '</table><br>';
+
+print '<div class="fichethirdleft">';
 
 
 // Draft subsidy
 if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 'read')) {
-		
+
 	$sql = "SELECT s.rowid, s.ref, s.label, s.status";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
 	$sql .= " WHERE s.status = 0";
+	$sql .= " AND s.entity IN (".getEntity('subvention').")";
 	$resql = $db->query($sql);
-	
+
 	if ($resql)
 	{
 		$total = 0;
@@ -156,7 +209,7 @@ if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 
 			{
 				$obj = $db->fetch_object($resql);
 				print '<tr class="oddeven"><td class="nowrap">';
-				
+
 				$substatic->id=$obj->rowid;
 				$substatic->ref=$obj->ref;
 				$substatic->label=$obj->label;
@@ -191,13 +244,14 @@ if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 
 
 // Pending subsidy
 if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 'read')) {
-		
+
 	$sql = "SELECT s.rowid, s.ref, s.label, s.status, s.montant_att";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
 	$sql .= " WHERE s.status > 1";
 	$sql .= " AND s.montant_att > 0";
+	$sql .= " AND s.entity IN (".getEntity('subvention').")";
 	$resql = $db->query($sql);
-	
+
 	if ($resql)
 	{
 		$total = 0;
@@ -215,7 +269,7 @@ if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 
 			{
 				$obj = $db->fetch_object($resql);
 				print '<tr class="oddeven"><td class="nowrap">';
-				
+
 				$substatic->id=$obj->rowid;
 				$substatic->ref=$obj->ref;
 				$substatic->label=$obj->label;
@@ -258,11 +312,12 @@ print '</div><div class="fichetwothirdright">';
 if (isModEnabled('subventions') && $user->hasRight('subventions','subvention', 'read')) {
 	$sql = "SELECT s.rowid, s.ref, s.label, s.status, s.date_creation, s.tms";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
+	$sql .= " WHERE s.entity IN (".getEntity('subvention').")";
 	$sql .= " ORDER BY s.tms DESC";
 	$sql .= $db->plimit($max, 0);
 
 	$resql = $db->query($sql);
-		
+
 	if ($resql)
 	{
 		$num = $db->num_rows($resql);
@@ -310,11 +365,12 @@ if (isModEnabled('subventions') && $user->hasRight('subventions','subvention', '
 if (isModEnabled('subventions') && $user->hasRight('subventions','subvention', 'read')) {
 	$sql = "SELECT s.rowid, s.ref, s.label, s.status, s.date_creation, s.tms";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
+	$sql .= " WHERE s.entity IN (".getEntity('subvention').")";
 	$sql .= " ORDER BY s.date_creation DESC";
 	$sql .= $db->plimit($max, 0);
 
 	$resql = $db->query($sql);
-		
+
 	if ($resql)
 	{
 		$num = $db->num_rows($resql);

@@ -1,7 +1,8 @@
 <?php
-/* Copyright (C) 2017       Laurent Destailleur      <eldy@users.sourceforge.net>
- * Copyright (C) 2023-2024  Frédéric France          <frederic.france@free.fr>
- * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+/* Copyright (C) 2017       Laurent Destailleur     <eldy@users.sourceforge.net>
+ * Copyright (C) 2023-2024  Frédéric France         <frederic.france@free.fr>
+ * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +117,6 @@ class Subvention extends CommonObject
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @inheritdoc
 	 * Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
@@ -124,22 +124,22 @@ class Subvention extends CommonObject
 	public $fields = array(
 		"rowid" => array("type" => "integer", "label" => "TechnicalID", "enabled" => "1", 'position' => 1, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "index" => "1", "css" => "left", "comment" => "Id"),
 		"ref" => array("type" => "varchar(128)", "label" => "Ref", "enabled" => "1", 'position' => 20, 'notnull' => 1, "visible" => "4", "noteditable" => "1", "default" => "(PROV)", "index" => "1", "validate" => "1", "comment" => "Reference of object"),
-		"label" => array("type" => "varchar(255)", "label" => "Nom du projet", "enabled" => "1", 'position' => 30, 'notnull' => 1, "visible" => "1", "searchall" => "1", "css" => "minwidth300", "cssview" => "wordbreak", "validate" => "1",),
-		"montant_dem" => array("type" => "price", "label" => "Montant demandé", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "Montant demandé", "validate" => "1",),
-		"montant_acc" => array("type" => "price", "label" => "Montant accepté", "enabled" => "1", 'position' => 42, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "Montant accepté", "validate" => "1",),
-		"montant_fin" => array("type" => "price", "label" => "Montant financé", "enabled" => "1", 'position' => 44, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "Montant avec des financements reçus", "validate" => "1",),
-		"montant_att" => array("type" => "price", "label" => "Montant en attente", "enabled" => "1", 'position' => 46, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "Montant en attente des financements", "validate" => "1",),
-		"montant_ref" => array("type" => "price", "label" => "Montant refusé", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "Montant refusé", "validate" => "1",),
+		"label" => array("type" => "varchar(255)", "label" => "ProjectName", "picto" => "fa-hand-holding-heart", "enabled" => "1", 'position' => 30, 'notnull' => 1, "visible" => "1", "searchall" => "1", "css" => "minwidth500", "cssview" => "wordbreak", "validate" => "1",),
+		"montant_dem" => array("type" => "price", "label" => "AmountRequested", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "AmountRequested", "validate" => "1", "css" => "maxwidth250", "picto" => "fa-money-bill-alt"),
+		"montant_acc" => array("type" => "price", "label" => "AmountAccepted", "enabled" => "1", 'position' => 42, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "AmountAccepted", "validate" => "1", "css" => "maxwidth250", "picto" => "fa-money-bill-alt"),
+		"montant_fin" => array("type" => "price", "label" => "AmountFinanced", "enabled" => "1", 'position' => 44, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "AmountFinanced", "validate" => "1", "css" => "maxwidth250", "picto" => "fa-money-bill-alt"),
+		"montant_att" => array("type" => "price", "label" => "AmountPending", "enabled" => "1", 'position' => 46, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "AmountPending", "validate" => "1", "css" => "maxwidth250", "picto" => "fa-money-bill-alt"),
+		"montant_ref" => array("type" => "price", "label" => "AmountRefused", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "help" => "AmountRefused", "validate" => "1", "css" => "maxwidth250", "picto" => "fa-money-bill-alt"),
 		"total_ht" => array("type" => "price", "label" => "Total HT", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "validate" => "1",),
 		"total_ttc" => array("type" => "price", "label" => "Total TTC", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "0", "default" => "null", "isameasure" => "1", "validate" => "1",),
-		"fk_soc" => array("type" => "integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "ThirdParty", "picto" => "company", "enabled" => "isModEnabled('societe')", 'position' => 50, 'notnull' => 1, "visible" => "1", "index" => "1", "css" => "maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "help" => "OrganizationEventLinkToThirdParty", "validate" => "1",),
-		"fk_project" => array("type" => "integer:Project:projet/class/project.class.php:1:((fk_statut:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "Project", "picto" => "project", "enabled" => "isModEnabled('project')", 'position' => 52, 'notnull' => -1, "visible" => "-1", "index" => "1", "css" => "maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "validate" => "1",),
+		"fk_soc" => array("type" => "integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "ThirdParty", "picto" => "company", "enabled" => "isModEnabled('societe')", 'position' => 50, 'notnull' => 1, "visible" => "1", "index" => "1", "css" => "minwidth500 maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "help" => "OrganizationEventLinkToThirdParty", "validate" => "1",),
+		"fk_project" => array("type" => "integer:Project:projet/class/project.class.php:1:((fk_statut:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "Project", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('project')", 'position' => 52, 'notnull' => -1, "visible" => "-1", "index" => "1", "css" => "minwidth500 maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "validate" => "1",),
 		"description" => array("type" => "text", "label" => "Description", "enabled" => "1", 'position' => 60, 'notnull' => 0, "visible" => "3", "validate" => "1",),
-		"evaluation" => array("type" => "text", "label" => "Critères d'évaluation", "enabled" => "1", 'position' => 80, 'notnull' => 0, "visible" => "3", "validate" => "1",),
-		"date_d_projet" => array("type" => "date", "label" => "Date début projet", "enabled" => "1", 'position' => 70, 'notnull' => 0, "visible" => "1", "validate" => "1",),
-		"date_f_projet" => array("type" => "date", "label" => "Date fin projet", "enabled" => "1", 'position' => 70, 'notnull' => 0, "visible" => "1", "validate" => "1",),
-		"date_attendue" => array("type" => "date", "label" => "Date attendue projet", "enabled" => "1", 'position' => 50, 'notnull' => -1, "visible" => "1", "validate" => "1",),
-		"date_bilan" => array("type" => "date", "label" => "Date rendu bilan", "enabled" => "1", 'position' => 70, 'notnull' => -1, "visible" => "1", "validate" => "1",),
+		"evaluation" => array("type" => "text", "label" => "EvaluationCriteria", "enabled" => "1", 'position' => 80, 'notnull' => 0, "visible" => "3", "validate" => "1",),
+		"date_d_projet" => array("type" => "date", "label" => "BeginProjectDate", "picto" => "fa-calendar-alt", "enabled" => "1", 'position' => 70, 'notnull' => 0, "visible" => "1", "validate" => "1",),
+		"date_f_projet" => array("type" => "date", "label" => "EndProjectDate", "picto" => "fa-calendar-alt", "enabled" => "1", 'position' => 70, 'notnull' => 0, "visible" => "1", "validate" => "1",),
+		"date_attendue" => array("type" => "date", "label" => "EspectingDate", "picto" => "fa-calendar-alt", "enabled" => "1", 'position' => 50, 'notnull' => -1, "visible" => "1", "validate" => "1",),
+		"date_bilan" => array("type" => "date", "label" => "EvaluationDate", "picto" => "fa-calendar-alt", "enabled" => "1", 'position' => 70, 'notnull' => -1, "visible" => "1", "validate" => "1",),
 		"note_public" => array("type" => "html", "label" => "NotePublic", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "0", "cssview" => "wordbreak", "validate" => "1",),
 		"note_private" => array("type" => "html", "label" => "NotePrivate", "enabled" => "1", 'position' => 62, 'notnull' => 0, "visible" => "0", "cssview" => "wordbreak", "validate" => "1",),
 		"date_creation" => array("type" => "datetime", "label" => "DateCreation", "enabled" => "1", 'position' => 500, 'notnull' => 1, "visible" => "-2",),
@@ -149,7 +149,7 @@ class Subvention extends CommonObject
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
 		"model_pdf" => array("type" => "varchar(255)", "label" => "Model pdf", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
-		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "5", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon/Non déposée", "1" => "Financ&eacute;", "4" => "Clôtur&eacute;", "5" => "Bilan d&eacute;pos&eacute;", "6" => "Refusé", "9" => "Annul&eacute;"), "validate" => "1",),
+		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "5", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "STATUS_DRAFT", "1" => "STATUS_VALIDATED", "2" => "STATUS_ACCEPTED", "3" => "STATUS_FINANCED", "4" => "STATUS_EVALUATED", "5" => "STATUS_CLOTURED", "6" => "STATUS_REFUSED", "9" => "STATUS_CANCELED"), "validate" => "1",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
@@ -181,7 +181,6 @@ class Subvention extends CommonObject
 	public $model_pdf;
 	public $status;
 	public $entity;
-	// END MODULEBUILDER PROPERTIES
 
 
 	// If this object has a subtable with lines
@@ -230,7 +229,7 @@ class Subvention extends CommonObject
 		global $langs;
 
 		$this->db = $db;
-		$this->ismultientitymanaged = 0;
+		$this->ismultientitymanaged = 1;
 		$this->isextrafieldmanaged = 1;
 
 		if (!getDolGlobalInt('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid']) && !empty($this->fields['ref'])) {
@@ -311,9 +310,7 @@ class Subvention extends CommonObject
 		//	$line->fetch_optionals();
 
 		// Reset some properties
-		unset($object->id);
-		unset($object->fk_user_creat);
-		unset($object->import_key);
+		unset($object->id, $object->fk_user_creat, $object->import_key);
 
 		// Clear fields
 		if (property_exists($object, 'ref')) {
@@ -362,7 +359,7 @@ class Subvention extends CommonObject
 
 		if (!$error) {
 			// copy external contacts if same company
-			if (!empty($object->socid) && property_exists($this, 'fk_soc') && $this->fk_soc == $object->socid) {
+			if (!empty($object->socid) && property_exists($this, 'fk_soc') && $this->fk_soc === $object->socid) {
 				if ($this->copy_linked_contact($object, 'external') < 0) {
 					$error++;
 				}
@@ -440,10 +437,10 @@ class Subvention extends CommonObject
 		$sql = "SELECT ";
 		$sql .= $this->getFieldList('t');
 		$sql .= " FROM ".$this->db->prefix().$this->table_element." as t";
-		if (isset($this->isextrafieldmanaged) && $this->isextrafieldmanaged == 1) {
+		if (isset($this->isextrafieldmanaged) && $this->isextrafieldmanaged === 1) {
 			$sql .= " LEFT JOIN ".$this->db->prefix().$this->table_element."_extrafields as te ON te.fk_object = t.rowid";
 		}
-		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
+		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged === 1) {
 			$sql .= " WHERE t.entity IN (".getEntity($this->element).")";
 		} else {
 			$sql .= " WHERE 1 = 1";
@@ -521,7 +518,6 @@ class Subvention extends CommonObject
 	public function delete(User $user, $notrigger = 0)
 	{
 		return $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
 	}
 
 	/**
@@ -559,7 +555,7 @@ class Subvention extends CommonObject
 		$error = 0;
 
 		// Protection
-		if ($this->status == self::STATUS_VALIDATED) {
+		if ($this->status === self::STATUS_VALIDATED) {
 			dol_syslog(get_class($this)."::validate action abandoned: already validated", LOG_WARNING);
 			return 0;
 		}
@@ -577,7 +573,7 @@ class Subvention extends CommonObject
 		$this->db->begin();
 
 		// Define new ref
-		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
+		if (!$error && (preg_match('/^[(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
 			$num = $this->getNextNumRef();
 		} else {
 			$num = $this->ref;
@@ -622,7 +618,7 @@ class Subvention extends CommonObject
 			$this->oldref = $this->ref;
 
 			// Rename directory if dir was a temporary ref
-			if (preg_match('/^[\(]?PROV/i', $this->ref)) {
+			if (preg_match('/^[(]?PROV/i', $this->ref)) {
 				// Now we rename also files into index
 				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'subvention/".$this->db->escape($this->newref)."'";
 				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'subvention/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
@@ -667,7 +663,7 @@ class Subvention extends CommonObject
 		if (!$error) {
 			$this->ref = $num;
 			$this->status = self::STATUS_VALIDATED;
-			
+
 			// Màj statut de la subvention
 			majstatut($this);
 		}
@@ -732,7 +728,7 @@ class Subvention extends CommonObject
 
     public function accepted($user, $notrigger = 0)
 	{
-		if ($this->status != self::STATUS_VALIDATED) {
+		if ($this->status !== self::STATUS_VALIDATED) {
 			return 0;
 		}
 
@@ -770,7 +766,7 @@ class Subvention extends CommonObject
 	public function reopen($user, $notrigger = 0)
 	{
 		// Protection
-		if ($this->status == self::STATUS_VALIDATED) {
+		if ($this->status === self::STATUS_VALIDATED) {
 			return 0;
 		}
 
@@ -853,8 +849,8 @@ class Subvention extends CommonObject
 
 		if ($option !== 'nolink') {
 			// Add param to save lastsearch_values or not
-			$add_save_lastsearch_values = ($save_lastsearch_value == 1 ? 1 : 0);
-			if ($save_lastsearch_value == -1 && isset($_SERVER["PHP_SELF"]) && preg_match('/list\.php/', $_SERVER["PHP_SELF"])) {
+			$add_save_lastsearch_values = ($save_lastsearch_value === 1 ? 1 : 0);
+			if ($save_lastsearch_value === -1 && isset($_SERVER["PHP_SELF"]) && preg_match('/list\.php$/', $_SERVER["PHP_SELF"])) {
 				$add_save_lastsearch_values = 1;
 			}
 			if ($url && $add_save_lastsearch_values) {
@@ -877,13 +873,13 @@ class Subvention extends CommonObject
 			$linkclose = ($morecss ? ' class="'.$morecss.'"' : '');
 		}
 
-		if ($option == 'nolink' || empty($url)) {
+		if ($option === 'nolink' || empty($url)) {
 			$linkstart = '<span';
 		} else {
 			$linkstart = '<a href="'.$url.'"';
 		}
 		$linkstart .= $linkclose.'>';
-		if ($option == 'nolink' || empty($url)) {
+		if ($option === 'nolink' || empty($url)) {
 			$linkend = '</span>';
 		} else {
 			$linkend = '</a>';
@@ -893,7 +889,7 @@ class Subvention extends CommonObject
 
 		if (empty($this->showphoto_on_popup)) {
 			if ($withpicto) {
-				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), (($withpicto != 2) ? 'class="paddingright"' : ''), 0, 0, $notooltip ? 0 : 1);
+				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), (($withpicto !== 2) ? 'class="paddingright"' : ''), 0, 0, $notooltip ? 0 : 1);
 			}
 		} else {
 			if ($withpicto) {
@@ -915,12 +911,12 @@ class Subvention extends CommonObject
 
 					$result .= '</div>';
 				} else {
-					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'"'), 0, 0, $notooltip ? 0 : 1);
+					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto !== 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto !== 2) ? 'paddingright ' : '').'"'), 0, 0, $notooltip ? 0 : 1);
 				}
 			}
 		}
 
-		if ($withpicto != 2) {
+		if ($withpicto !== 2) {
 			$result .= $this->ref;
 		}
 
@@ -1045,7 +1041,7 @@ class Subvention extends CommonObject
 
 		$statusType = 'status'.$status;
 		//if ($status == self::STATUS_VALIDATED) $statusType = 'status1';
-		if ($status == self::STATUS_CANCELED) {
+		if ($status === self::STATUS_CANCELED) {
 			$statusType = 'status6';
 		}
 		switch ($status){
@@ -1207,7 +1203,7 @@ class Subvention extends CommonObject
 				'@phan-var-force ModeleNumRefSubvention $obj';
 				$numref = $obj->getNextValue($this);
 
-				if ($numref != '' && $numref != '-1') {
+				if ($numref !== '' && $numref !== '-1') {
 					return $numref;
 				} else {
 					$this->error = $obj->error;
@@ -1240,9 +1236,13 @@ class Subvention extends CommonObject
 		global $langs;
 
 		$result = 0;
-		$includedocgeneration = 1;
 
 		$langs->load("subventions@subventions");
+
+		if (!getDolGlobalInt('SUBVENTIONS_ENABLE_DOC_SUBVENTION', 1)) {
+			$this->error = $langs->trans('DocsDisabled');
+			return 0;
+		}
 
 		if (!dol_strlen($modele)) {
 			$modele = 'standard_subvention';
@@ -1253,15 +1253,12 @@ class Subvention extends CommonObject
 				$modele = getDolGlobalString('SUBVENTION_ADDON_PDF');
 			}
 		}
-		
+
 		$modelpath = "core/modules/subventions/doc/";
 
-		// TODO régler le problème de génération de document : https://www.dolibarr.fr/forum/t/problemes-a-la-creation-dun-module-personnalise/47354/7
-		/*
-		if ($includedocgeneration && !empty($modele)) {
+		if (!empty($modele)) {
 			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
 		}
-		*/
 		return $result;
 	}
 

@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann				<d.bachmann@digiconn.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +36,7 @@ function financementPrepareHead($object)
 
 	$showtabofpagecontact = 1;
 	$showtabofpagenote = 1;
-	$showtabofpagedocument = 1;
+	$showtabofpagedocument = getDolGlobalInt('SUBVENTIONS_ENABLE_DOC_FINANCEMENT', 1);
 	$showtabofpageagenda = 1;
 
 	$h = 0;
@@ -96,12 +97,6 @@ function financementPrepareHead($object)
 
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
-	//$this->tabs = array(
-	//	'entity:+tabname:Title:@subventions:/subventions/mypage.php?id=__ID__'
-	//); // to add new tab
-	//$this->tabs = array(
-	//	'entity:-tabname:Title:@subventions:/subventions/mypage.php?id=__ID__'
-	//); // to remove a tab
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'financement@subventions');
 
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'financement@subventions', 'remove');

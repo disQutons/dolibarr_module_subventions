@@ -2,6 +2,7 @@
 /* Copyright (C) 2017       Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
  * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,26 +25,6 @@
  */
 
 
-// General defined Options
-//if (! defined('CSRFCHECK_WITH_TOKEN'))     define('CSRFCHECK_WITH_TOKEN', '1');					// Force use of CSRF protection with tokens even for GET
-//if (! defined('MAIN_AUTHENTICATION_MODE')) define('MAIN_AUTHENTICATION_MODE', 'aloginmodule');	// Force authentication handler
-//if (! defined('MAIN_LANG_DEFAULT'))        define('MAIN_LANG_DEFAULT', 'auto');					// Force LANG (language) to a particular value
-//if (! defined('MAIN_SECURITY_FORCECSP'))   define('MAIN_SECURITY_FORCECSP', 'none');				// Disable all Content Security Policies
-//if (! defined('NOBROWSERNOTIF'))     		 define('NOBROWSERNOTIF', '1');					// Disable browser notification
-//if (! defined('NOIPCHECK'))                define('NOIPCHECK', '1');						// Do not check IP defined into conf $dolibarr_main_restrict_ip
-//if (! defined('NOLOGIN'))                  define('NOLOGIN', '1');						// Do not use login - if this page is public (can be called outside logged session). This includes the NOIPCHECK too.
-//if (! defined('NOREQUIREAJAX'))            define('NOREQUIREAJAX', '1');       	  		// Do not load ajax.lib.php library
-//if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');					// Do not create database handler $db
-//if (! defined('NOREQUIREHTML'))            define('NOREQUIREHTML', '1');					// Do not load html.form.class.php
-//if (! defined('NOREQUIREMENU'))            define('NOREQUIREMENU', '1');					// Do not load and show top and left menu
-//if (! defined('NOREQUIRESOC'))             define('NOREQUIRESOC', '1');					// Do not load object $mysoc
-//if (! defined('NOREQUIRETRAN'))            define('NOREQUIRETRAN', '1');					// Do not load object $langs
-//if (! defined('NOREQUIREUSER'))            define('NOREQUIREUSER', '1');					// Do not load object $user
-//if (! defined('NOSCANGETFORINJECTION'))    define('NOSCANGETFORINJECTION', '1');			// Do not check injection attack on GET parameters
-//if (! defined('NOSCANPOSTFORINJECTION'))   define('NOSCANPOSTFORINJECTION', '1');			// Do not check injection attack on POST parameters
-//if (! defined('NOSESSION'))                define('NOSESSION', '1');						// On CLI mode, no need to use web sessions
-//if (! defined('NOSTYLECHECK'))             define('NOSTYLECHECK', '1');					// Do not check style html tag into posted data
-//if (! defined('NOTOKENRENEWAL'))           define('NOTOKENRENEWAL', '1');					// Do not roll the Anti CSRF token (used if MAIN_SECURITY_CSRF_WITH_TOKEN is on)
 
 /*
 // FBR récupération des erreurs php
@@ -62,7 +43,7 @@ $tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
 $tmp2 = realpath(__FILE__);
 $i = strlen($tmp) - 1;
 $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] === $tmp2[$j]) {
 	$i--;
 	$j--;
 }
@@ -159,35 +140,25 @@ if (empty($action) && empty($id) && empty($ref)) {
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be 'include', not 'include_once'.
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'subvention', 'read');
-	$permissiontoadd = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->hasRight('subventions', 'subvention', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-	$permissionnote = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_setnotes.inc.php
-	$permissiondellink = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_dellink.inc.php
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = 1;
-	$permissionnote = 1;
-	$permissiondellink = 1;
-}
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'subvention', 'read');
+$permissiontoadd = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->hasRight('subventions', 'subvention', 'delete') || ($permissiontoadd && isset($object->status) && $object->status === $object::STATUS_DRAFT);
+$permissionnote = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_setnotes.inc.php
+$permissiondellink = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_dellink.inc.php
 
 $upload_dir = $conf->subventions->multidir_output[isset($object->entity) ? $object->entity : 1].'/subvention';
 
 // Security check (enable the most restrictive one)
-//if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) $socid = $user->socid;
-//$isdraft = (isset($object->status) && ($object->status == $object::STATUS_DRAFT) ? 1 : 0);
-//restrictedArea($user, $object->module, $object, $object->table_element, $object->element, 'fk_soc', 'rowid', $isdraft);
 if (!isModEnabled($object->module)) {
 	accessforbidden("Module ".$object->module." not enabled");
 }
 if (!$permissiontoread) {
 	accessforbidden();
+}
+// Entity security: never display or modify records from another entity
+if (!empty($object->id) && isset($object->entity) && !in_array((int) $object->entity, array_map('intval', explode(',', getEntity($object->element))))) {
+	accessforbidden('NotAllowedToAccessEntity');
 }
 
 $error = 0;
@@ -208,7 +179,7 @@ if (empty($reshook)) {
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
-			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
+			if (empty($id) && (($action !== 'add' && $action !== 'create') || $cancel)) {
 				$backtopage = $backurlforlist;
 			} else {
 				$backtopage = dol_buildpath('/subventions/subvention_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
@@ -233,10 +204,10 @@ if (empty($reshook)) {
 	// Action to build doc
 	include DOL_DOCUMENT_ROOT.'/core/actions_builddoc.inc.php';
 
-	if ($action == 'set_thirdparty' && $permissiontoadd) {
+	if ($action === 'set_thirdparty' && $permissiontoadd) {
 		$object->setValueFrom('fk_soc', GETPOSTINT('fk_soc'), '', null, 'date', '', $user, $triggermodname);
 	}
-	if ($action == 'classin' && $permissiontoadd) {
+	if ($action === 'classin' && $permissiontoadd) {
 		$object->setProject(GETPOSTINT('projectid'));
 	}
 
@@ -260,22 +231,21 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("Subsidy")." - ".$langs->trans('Card');
 //$title = $object->ref." - ".$langs->trans('Card');
-if ($action == 'create') {
-	$title = $langs->trans("NewObject", $langs->transnoentitiesnoconv("Subsidy"));
+if ($action === 'create') {
+	$title = $langs->trans("NewSubvention", $langs->transnoentitiesnoconv("NewSubvention"));
 }
 $help_url = '';
 
 llxHeader('', $title, $help_url, '', 0, 0, '', '', '', 'mod-subventions page-card');
 
-// TODO Debug recalcul
-if ($action == 'recalcul'){
+if ($action === 'recalcul'){
 	$recalcul = majMontantsFinancementSubvention($object);
 	dol_syslog("Recalcul: ".$recalcul, LOG_ERR);
 }
 
 
 // Part to create
-if ($action == 'create') {
+if ($action === 'create') {
 	if (empty($permissiontoadd)) {
 		accessforbidden('NotEnoughPermissions', 0, 1);
 	}
@@ -320,7 +290,7 @@ if ($action == 'create') {
 }
 
 // Part to edit record
-if (($id || $ref) && $action == 'edit') {
+if (($id || $ref) && $action === 'edit') {
 	print load_fiche_titre($langs->trans("Subsidy"), '', $object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
@@ -354,49 +324,49 @@ if (($id || $ref) && $action == 'edit') {
 }
 
 // Part to show record
-if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
+if ($object->id > 0 && (empty($action) || ($action !== 'edit' && $action !== 'create'))) {
 	$head = subventionPrepareHead($object);
 
 	print dol_get_fiche_head($head, 'card', $langs->trans("Grant"), -1, $object->picto, 0, '', '', 0, '', 1);
 	$formconfirm = '';
 
 	// Confirmation to delete (using preloaded confirm popup)
-	if ($action == 'delete' || ($conf->use_javascript_ajax && empty($conf->dol_use_jmobile))) {
+	if ($action === 'delete' || ($conf->use_javascript_ajax && empty($conf->dol_use_jmobile))) {
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteGrant'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 'action-delete');
 	}
 	// Confirmation to delete line
-	if ($action == 'deleteline') {
+	if ($action === 'deleteline') {
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('DeleteLine'), $langs->trans('ConfirmDeleteLine'), 'confirm_deleteline', '', 0, 1);
 	}
 
 	// Clone confirmation
-	if ($action == 'clone') {
+	if ($action === 'clone') {
 		// Create an array for form
 		$formquestion = array();
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ToClone'), $langs->trans('ConfirmCloneAsk', $object->ref), 'confirm_clone', $formquestion, 'yes', 1);
 	}
 
 	// Set finance
-	if ($action == 'setfinanced') {
+	if ($action === 'setfinanced') {
 		// Create an array for form
 		$object->setfinanced($user);
 	}
 
 	// Evaluate
-	if ($action == 'evaluate') {
+	if ($action === 'evaluate') {
 		// Create an array for form
 		$object->evaluate($user);
 	}
-	
+
 	// Cloture
-	if ($action == 'cloture') {
+	if ($action === 'cloture') {
 		// Create an array for form
 		$object->cloture($user);
 	}
 
 
 	// Confirmation of action xxxx (You can use it for xxx = 'close', xxx = 'reopen', ...)
-	if ($action == 'confirm_setrefuse') {
+	if ($action === 'confirm_setrefuse') {
 		$text = $langs->trans('ConfirmActionRefuse', $object->ref);
 		$formquestion = array();
 
@@ -425,11 +395,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	$linkback = '<a href="'.dol_buildpath('/subventions/subvention_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
-	
+
 		// Ref customer
 		//$morehtmlref .= $form->editfieldkey("RefCustomer", 'ref_client', $object->ref_client, $object, $usercancreate, 'string', '', 0, 1);
 		//$morehtmlref .= $form->editfieldval("RefCustomer", 'ref_client', $object->ref_client, $object, $usercancreate, 'string'.(getDolGlobalInt('THIRDPARTY_REF_INPUT_SIZE') ? ':'.getDolGlobalInt('THIRDPARTY_REF_INPUT_SIZE') : ''), '', null, null, '', 1);
-		
+
 		$morehtmlref .= '<span>'.$object->label.'</span>';
 
 		// Thirdparty
@@ -446,10 +416,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$morehtmlref .= '<br>';
 			if ($permissiontoadd) {
 				$morehtmlref .= img_picto($langs->trans("Project"), 'project', 'class="pictofixedwidth"');
-				if ($action != 'classify') {
+				if ($action !== 'classify') {
 					$morehtmlref .= '<a class="editfielda" href="'.$_SERVER['PHP_SELF'].'?action=classify&token='.newToken().'&id='.$object->id.'">'.img_edit($langs->transnoentitiesnoconv('SetProject')).'</a> ';
 				}
-				$morehtmlref .= $form->form_project($_SERVER['PHP_SELF'].'?id='.$object->id, $object->socid, $object->fk_project, ($action == 'classify' ? 'projectid' : 'none'), 0, 0, 0, 1, '', 'maxwidth300');
+				$morehtmlref .= $form->form_project($_SERVER['PHP_SELF'].'?id='.$object->id, $object->socid, $object->fk_project, ($action === 'classify' ? 'projectid' : 'none'), 0, 0, 0, 1, '', 'maxwidth300');
 			} else {
 				if (!empty($object->fk_project)) {
 					$proj = new Project($db);
@@ -461,7 +431,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				}
 			}
 		}
-	
+
 	$morehtmlref .= '</div>';
 
 
@@ -499,20 +469,20 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		// Show object lines
 		$result = $object->getLinesArray();
 
-		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline') ? '' : '#line_'.GETPOSTINT('lineid')).'" method="POST">
+		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action !== 'editline') ? '' : '#line_'.GETPOSTINT('lineid')).'" method="POST">
 		<input type="hidden" name="token" value="' . newToken().'">
-		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline').'">
+		<input type="hidden" name="action" value="' . (($action !== 'editline') ? 'addline' : 'updateline').'">
 		<input type="hidden" name="mode" value="">
 		<input type="hidden" name="page_y" value="">
 		<input type="hidden" name="id" value="' . $object->id.'">
 		';
 
-		if (!empty($conf->use_javascript_ajax) && $object->status == 0) {
+		if (!empty($conf->use_javascript_ajax) && $object->status === 0) {
 			include DOL_DOCUMENT_ROOT.'/core/tpl/ajaxrow.tpl.php';
 		}
 
 		print '<div class="div-table-responsive-no-min">';
-		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+		if (!empty($object->lines) || ($object->status === $object::STATUS_DRAFT && $permissiontoadd && $action !== 'selectlines' && $action !== 'editline')) {
 			print '<table id="tablelines" class="noborder noshadow" width="100%">';
 		}
 
@@ -521,8 +491,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		}
 
 		// Form to add new line
-		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
-			if ($action != 'editline') {
+		if ($object->status === 0 && $permissiontoadd && $action !== 'selectlines') {
+			if ($action !== 'editline') {
 				// Add products/services form
 
 				$parameters = array();
@@ -536,7 +506,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 		}
 
-		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+		if (!empty($object->lines) || ($object->status === $object::STATUS_DRAFT && $permissiontoadd && $action !== 'selectlines' && $action !== 'editline')) {
 			print '</table>';
 		}
 		print '</div>';
@@ -547,7 +517,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Buttons for actions
 
-	if ($action != 'presend' && $action != 'editline') {
+	if ($action !== 'presend' && $action !== 'editline') {
 		print '<div class="tabsAction">'."\n";
 		$parameters = array();
 		$reshook = $hookmanager->executeHooks('addMoreActionsButtons', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
@@ -557,11 +527,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		if (empty($reshook)) {
 
-			// TODO Debug button
-			//print dolGetButtonAction('', $langs->trans('Recalcul'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recalcul&token='.newToken(), '', $permissiontoadd);
 
 			// Validate
-			if ($object->status == $object::STATUS_DRAFT) {
+			if ($object->status === $object::STATUS_DRAFT) {
 				if (empty($object->table_element_line) || (is_array($object->lines) && count($object->lines) > 0)) {
 					print dolGetButtonAction('', $langs->trans('Validate'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=confirm_validate&confirm=yes&token='.newToken(), '', $permissiontoadd);
 				} else {
@@ -571,33 +539,33 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 
 			// Refuse | Back to draft
-			if ($object->status == $object::STATUS_VALIDATED) {
+			if ($object->status === $object::STATUS_VALIDATED) {
 				print dolGetButtonAction('', $langs->trans('Refuse'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_setrefuse&token='.newToken(), '', $permissiontoadd);
 				print dolGetButtonAction('', $langs->trans('SetToDraft'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// Evaluate
-			if ($object->status == $object::STATUS_FINANCED) {
+			if ($object->status === $object::STATUS_FINANCED) {
 				print dolGetButtonAction('', $langs->trans('Evaluate'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=evaluate&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// Clôturer | Backfrom evaluate
-			if ($object->status == $object::STATUS_EVALUATED) {
+			if ($object->status === $object::STATUS_EVALUATED) {
 				print dolGetButtonAction('', $langs->trans('SetFromEvaluate'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=setfinanced&token='.newToken(), '', $permissiontoadd);
 				print dolGetButtonAction('', $langs->trans('Cloture'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=cloture&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// Déclôturer
-			if ($object->status == $object::STATUS_CLOTURED) {
+			if ($object->status === $object::STATUS_CLOTURED) {
 				print dolGetButtonAction('', $langs->trans('SetFromEvaluate'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=evaluate&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// Evaluate | Modify
-			if ($object->status != $object::STATUS_CLOTURED) {
+			if ($object->status !== $object::STATUS_CLOTURED) {
 				print dolGetButtonAction('', $langs->trans('Modify'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
 			}
 
-						
+
 			/*// Clone
 			if ($permissiontoadd) {
 				print dolGetButtonAction('', $langs->trans('ToClone'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.(!empty($object->socid) ? '&socid='.$object->socid : '').'&action=clone&token='.newToken(), '', $permissiontoadd);
@@ -640,16 +608,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$action = 'presend';
 	}
 
-	if ($action != 'presend') {
-		/*print '<div class="fichecenter"><div class="fichehalfleft">';*/
+	if ($action !== 'presend') {
 		print '<a name="builddoc"></a>'; // ancre
 
-		$includedocgeneration = 1;
+		$includedocgeneration = getDolGlobalInt('SUBVENTIONS_ENABLE_DOC_SUBVENTION', 1);
 
 		// Création de l'URL nécessaire au bouton
         $url = dol_buildpath('/subventions/financement_card.php', 1);
         $url .= '?action=create&origin=subvention&fk_sub='.urlencode($id).'&token='.newToken();
-        
+
 		// Liste des financeurs
 		print'<table class="notopnoleftnoright table-fiche-title showlinkedobjectblock">
 			<tbody>
@@ -676,14 +643,14 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			<table class="noborder centpercent">
 				<tbody>
 					<tr class="liste_titre">
-						<td style="width: 24px"></td>';
-						print '<td style="width: 200">'.$langs->trans("ReferenceFunding").'</td>';
-						print '<td style="width: 300">'.$langs->trans("FundingSource").'</td>';
-						print '<td style="width: 150" class="right">'.$langs->trans("Requested").'</td>';
-						print '<td style="width: 150" class="right">'.$langs->trans("Accepted").'</td>';
-						print '<td style="width: 150" class="right">'.$langs->trans("Financed").'</td>';
-						print '<td style="width: 150" class="right">'.$langs->trans("Pending").'</td>';
-						print '<td style="width: 150" class="right">'.$langs->trans("Refused").'</td>';
+						<td style="width: 24px;"></td>';
+						print '<td style="width: 200px;">'.$langs->trans("ReferenceFunding").'</td>';
+						print '<td style="width: 300px;">'.$langs->trans("FundingSource").'</td>';
+						print '<td style="width: 150px;" class="right">'.$langs->trans("Requested").'</td>';
+						print '<td style="width: 150px;" class="right">'.$langs->trans("Accepted").'</td>';
+						print '<td style="width: 150px;" class="right">'.$langs->trans("Financed").'</td>';
+						print '<td style="width: 150px;" class="right">'.$langs->trans("Pending").'</td>';
+						print '<td style="width: 150px;" class="right">'.$langs->trans("Refused").'</td>';
 					print '</tr>';
 
 		$sql = "SELECT f.rowid, f.ref, f.fk_soc, f.montant_dem, f.montant_acc, f.montant_fin, f.montant_att, f.montant_ref, fk_sub, s.nom, s.rowid as sref";
@@ -723,7 +690,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		// Ajout de la ligne total :
 		print '<tr class="liste_total">';
 		print '<td></td>';
-		print '<td>Nombre : '.$i.'</td>';
+		print '<td>Anzahl: '.$i.'</td>';
 		print '<td class="right">Total :</td>';
 		print '<td class="right"><span class="amount">'.$object->montant_dem.'</span></td>';
 		print '<td class="right"><span class="amount">'.$object->montant_acc.'</span></td>';
@@ -765,12 +732,12 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			<table class="noborder">
 				<tbody>
 					<tr class="liste_titre">
-						<td style="width: 24px"></td>';
-						print '<td style="width: 200">'.$langs->trans("ReferencePayment").'</td>';
+						<td style="width: 24px;"></td>';
+						print '<td style="width: 200px;">'.$langs->trans("ReferencePayment").'</td>';
 						//print '<td style="width: 200" class="center">'.$langs->trans("Funding").'</td>';
-						print '<td style="width: 300">'.$langs->trans("FundingSource").'</td>';
-						print '<td style="width: 150" class="center">'.$langs->trans("Date").'</td>';
-						print '<td style="width: 150" class="right">'.$langs->trans("Amount").'</td>';						
+						print '<td style="width: 300px;">'.$langs->trans("FundingSource").'</td>';
+						print '<td style="width: 150px;" class="center">'.$langs->trans("Date").'</td>';
+						print '<td style="width: 150px;" class="right">'.$langs->trans("Amount").'</td>';
 					print '</tr>';
 
 		$sql = "SELECT p.rowid, p.ref, p.fk_soc, p.montant, p.datep, p.fk_sub, p.fk_fin, s.nom, s.rowid as sref";
@@ -797,7 +764,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 				print '<tr class="oddeven">';
 				print '<td></td>';
-				
+
 				print '<td>'.$paiement->getNomUrl(1, '', 0, '', -1, '&sub='.$object->id).'</td>';
 				//print '<td class="center">'.$financement->getNomUrl(1).'</td>';
 				print '<td>'.$societe->getNomUrl(1).'</td>';
@@ -810,7 +777,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		// Ajout de la ligne total :
 		print '<tr class="liste_total">';
 		print '<td></td>';
-		print '<td colspan="2">Nombre : '.$i.'</td>';
+		print '<td colspan="2">Anzahl: '.$i.'</td>';
 		print '<td class="right">Total : </td>';
 		print '<td class="right">'.$object->montant_fin.'</td>';
 		print '</tr>';
@@ -818,8 +785,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			</table>
 		</div>';
 
-		// TODO Documents
-		/*
+		// Documents (upload, list, download, delete, PDF generation via document tab models)
 		if ($includedocgeneration) {
 			$objref = dol_sanitizeFileName($object->ref);
 			$relativepath = $objref.'/'.$objref.'.pdf';
@@ -829,9 +795,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$delallowed = $permissiontoadd; // If you can create/edit, you can remove a file on card
 			print $formfile->showdocuments('subventions:Subvention', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
-		*/
 
-		/*print '</div><div class="fichehalfright">';*/
 
 		$MAXEVENT = 10;
 

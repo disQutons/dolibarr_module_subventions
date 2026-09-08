@@ -1,7 +1,8 @@
 <?php
-/* Copyright (C) 2017       Laurent Destailleur      <eldy@users.sourceforge.net>
- * Copyright (C) 2023-2024  Frédéric France          <frederic.france@free.fr>
- * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+/* Copyright (C) 2017       Laurent Destailleur     <eldy@users.sourceforge.net>
+ * Copyright (C) 2023-2024  Frédéric France         <frederic.france@free.fr>
+ * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,7 +112,6 @@ class Paiement extends CommonObject
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @inheritdoc
 	 * Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
@@ -119,9 +119,9 @@ class Paiement extends CommonObject
 	public $fields = array(
 		"rowid" => array("type" => "integer", "label" => "TechnicalID", "enabled" => "1", 'position' => 1, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "index" => "1", "css" => "left", "comment" => "Id"),
 		"ref" => array("type" => "varchar(128)", "label" => "Ref", "enabled" => "1", 'position' => 20, 'notnull' => 1, "visible" => "4", "noteditable" => "1", "default" => "(PROV)", "index" => "1", "searchall" => "1", "showoncombobox" => "1", "validate" => "1", "comment" => "Reference of object"),
-		"montant" => array("type" => "price", "label" => "Montant", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "isameasure" => "1", "help" => "Help text for amount", "validate" => "1",),
-		"datep" => array("type" => "date", "label" => "Date paiement", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "help" => "Help text for amount", "validate" => "1",),
-		"fk_soc" => array("type" => "integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "ThirdParty", "picto" => "company", "enabled" => "isModEnabled('societe')", 'position' => 50, 'notnull' => -1, "visible" => "1", "index" => "1", "css" => "maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "help" => "OrganizationEventLinkToThirdParty", "validate" => "1",),
+		"montant" => array("type" => "price", "label" => "Amount", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "isameasure" => "1", "help" => "Amount", "validate" => "1", "css" => "maxwidth250", "picto" => "fa-money-bill-alt"),
+		"datep" => array("type" => "date", "label" => "DatePayment", "picto" => "fa-calendar-alt", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "help" => "DatePayment", "validate" => "1",),
+		"fk_soc" => array("type" => "integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "ThirdParty", "picto" => "company", "enabled" => "isModEnabled('societe')", 'position' => 22, 'notnull' => -1, "visible" => "1", "index" => "1", "css" => "minwidth500 maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "help" => "OrganizationEventLinkToThirdParty", "validate" => "1",),
 		"note_public" => array("type" => "html", "label" => "NotePublic", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "0", "cssview" => "wordbreak", "validate" => "1",),
 		"note_private" => array("type" => "html", "label" => "NotePrivate", "enabled" => "1", 'position' => 62, 'notnull' => 0, "visible" => "0", "cssview" => "wordbreak", "validate" => "1",),
 		"date_creation" => array("type" => "datetime", "label" => "DateCreation", "enabled" => "1", 'position' => 500, 'notnull' => 1, "visible" => "-2",),
@@ -130,9 +130,10 @@ class Paiement extends CommonObject
 		"fk_user_modif" => array("type" => "integer:User:user/class/user.class.php", "label" => "UserModif", "picto" => "user", "enabled" => "1", 'position' => 511, 'notnull' => -1, "visible" => "-2", "csslist" => "tdoverflowmax150",),
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
-		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "enabled" => "1", 'position' => 25, 'notnull' => 0, "visible" => "1",),
-		"fk_fin" => array("type" => "integer:financement:/custom/subventions/class/financement.class.php", "label" => "Réf financement", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1",),
-		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon", "1" => "Valid&eacute;", "9" => "Annul&eacute;"), "validate" => "1",),
+		"model_pdf" => array("type" => "varchar(255)", "label" => "Model pdf", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
+		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "ReferenceSubvention", "picto" => "fa-hand-holding-heart", "enabled" => "1", 'position' => 25, 'notnull' => 0, "visible" => "1", "css" => "minwidth500 maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150"),
+		"fk_fin" => array("type" => "integer:financement:/custom/subventions/class/financement.class.php", "label" => "ReferenceFunding", "picto" => "fa-handshake", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1", "css" => "minwidth500 maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150"),
+		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "STATUS_DRAFT", "1" => "STATUS_VALIDATED", "9" => "STATUS_CANCELED"), "validate" => "1",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
@@ -148,11 +149,11 @@ class Paiement extends CommonObject
 	public $fk_user_modif;
 	public $last_main_doc;
 	public $import_key;
+	public $model_pdf;
 	public $fk_sub;
 	public $fk_fin;
 	public $status;
 	public $entity;
-	// END MODULEBUILDER PROPERTIES
 
 
 	// If this object has a subtable with lines
@@ -201,7 +202,7 @@ class Paiement extends CommonObject
 		global $langs;
 
 		$this->db = $db;
-		$this->ismultientitymanaged = 0;
+		$this->ismultientitymanaged = 1;
 		$this->isextrafieldmanaged = 1;
 
 		if (!getDolGlobalInt('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid']) && !empty($this->fields['ref'])) {
@@ -240,13 +241,22 @@ class Paiement extends CommonObject
 	public function create(User $user, $notrigger = 0)
 	{
 		$resultcreate = $this->createCommon($user, $notrigger);
+		if ($resultcreate <= 0) {
+			return $resultcreate;
+		}
 
 		// uncomment lines below if you want to validate object after creation
 		$this->fetch($this->id); // needed to retrieve some fields (ie date_creation for masked ref)
 		$resultvalidate = $this->validate($user, $notrigger);
+		if ($resultvalidate < 0) {
+			return $resultvalidate;
+		}
 
 		// Mise à jour des montants des financements liés
 		$resultmaj = majMontantsFinancementSubvention($this);
+		if ($resultmaj < 0) {
+			return $resultmaj;
+		}
 
 		return $resultcreate;
 	}
@@ -307,10 +317,10 @@ class Paiement extends CommonObject
 		$sql = "SELECT ";
 		$sql .= $this->getFieldList('t');
 		$sql .= " FROM ".$this->db->prefix().$this->table_element." as t";
-		if (isset($this->isextrafieldmanaged) && $this->isextrafieldmanaged == 1) {
+		if (isset($this->isextrafieldmanaged) && $this->isextrafieldmanaged === 1) {
 			$sql .= " LEFT JOIN ".$this->db->prefix().$this->table_element."_extrafields as te ON te.fk_object = t.rowid";
 		}
-		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
+		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged === 1) {
 			$sql .= " WHERE t.entity IN (".getEntity($this->element).")";
 		} else {
 			$sql .= " WHERE 1 = 1";
@@ -371,7 +381,7 @@ class Paiement extends CommonObject
 	public function update(User $user, $notrigger = 0)
 	{
 		$result = $this->updateCommon($user, $notrigger);
-		
+
 		// mise à jour des montants des financements liés
 		$resultmaj = majMontantsFinancementSubvention($this);
 
@@ -388,10 +398,16 @@ class Paiement extends CommonObject
 	public function delete(User $user, $notrigger = 0)
 	{
 		$result = $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
+		if ($result <= 0) {
+			return $result;
+		}
 
 		// mise à jour des montants des financements liés
 		$resultmaj = majMontantsFinancementSubvention($this);
+		if ($resultmaj < 0) {
+			$this->error = 'ErrorRecalculationAfterDelete';
+			return $resultmaj;
+		}
 
 		return $result;
 	}
@@ -431,7 +447,7 @@ class Paiement extends CommonObject
 		$error = 0;
 
 		// Protection
-		if ($this->status == self::STATUS_VALIDATED) {
+		if ($this->status === self::STATUS_VALIDATED) {
 			dol_syslog(get_class($this)."::validate action abandoned: already validated", LOG_WARNING);
 			return 0;
 		}
@@ -449,7 +465,7 @@ class Paiement extends CommonObject
 		$this->db->begin();
 
 		// Define new ref
-		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
+		if (!$error && (preg_match('/^[(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
 			$num = $this->getNextNumRef();
 		} else {
 			$num = $this->ref;
@@ -494,7 +510,7 @@ class Paiement extends CommonObject
 			$this->oldref = $this->ref;
 
 			// Rename directory if dir was a temporary ref
-			if (preg_match('/^[\(]?PROV/i', $this->ref)) {
+			if (preg_match('/^[(]?PROV/i', $this->ref)) {
 				// Now we rename also files into index
 				$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'paiement/".$this->db->escape($this->newref)."'";
 				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'paiement/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
@@ -619,8 +635,8 @@ class Paiement extends CommonObject
 
 		if ($option !== 'nolink') {
 			// Add param to save lastsearch_values or not
-			$add_save_lastsearch_values = ($save_lastsearch_value == 1 ? 1 : 0);
-			if ($save_lastsearch_value == -1 && isset($_SERVER["PHP_SELF"]) && preg_match('/list\.php/', $_SERVER["PHP_SELF"])) {
+			$add_save_lastsearch_values = ($save_lastsearch_value === 1 ? 1 : 0);
+			if ($save_lastsearch_value === -1 && isset($_SERVER["PHP_SELF"]) && preg_match('/list\.php$/', $_SERVER["PHP_SELF"])) {
 				$add_save_lastsearch_values = 1;
 			}
 			if ($url && $add_save_lastsearch_values) {
@@ -643,13 +659,13 @@ class Paiement extends CommonObject
 			$linkclose = ($morecss ? ' class="'.$morecss.'"' : '');
 		}
 
-		if ($option == 'nolink' || empty($url)) {
+		if ($option === 'nolink' || empty($url)) {
 			$linkstart = '<span';
 		} else {
 			$linkstart = '<a href="'.$url.'"';
 		}
 		$linkstart .= $linkclose.'>';
-		if ($option == 'nolink' || empty($url)) {
+		if ($option === 'nolink' || empty($url)) {
 			$linkend = '</span>';
 		} else {
 			$linkend = '</a>';
@@ -659,7 +675,7 @@ class Paiement extends CommonObject
 
 		if (empty($this->showphoto_on_popup)) {
 			if ($withpicto) {
-				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), (($withpicto != 2) ? 'class="paddingright"' : ''), 0, 0, $notooltip ? 0 : 1);
+				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), (($withpicto !== 2) ? 'class="paddingright"' : ''), 0, 0, $notooltip ? 0 : 1);
 			}
 		} else {
 			if ($withpicto) {
@@ -681,7 +697,7 @@ class Paiement extends CommonObject
 
 					$result .= '</div>';
 				} else {
-					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'"'), 0, 0, $notooltip ? 0 : 1);
+					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto !== 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto !== 2) ? 'paddingright ' : '').'"'), 0, 0, $notooltip ? 0 : 1);
 				}
 			}
 		}
@@ -799,7 +815,7 @@ class Paiement extends CommonObject
 
 		$statusType = 'status'.$status;
 		//if ($status == self::STATUS_VALIDATED) $statusType = 'status1';
-		if ($status == self::STATUS_CANCELED) {
+		if ($status === self::STATUS_CANCELED) {
 			$statusType = 'status6';
 		}
 
@@ -935,7 +951,7 @@ class Paiement extends CommonObject
 				'@phan-var-force ModeleNumRefPaiement $obj';
 				$numref = $obj->getNextValue($this);
 
-				if ($numref != '' && $numref != '-1') {
+				if ($numref !== '' && $numref !== '-1') {
 					return $numref;
 				} else {
 					$this->error = $obj->error;
@@ -950,6 +966,50 @@ class Paiement extends CommonObject
 			print $langs->trans("ErrorNumberingModuleNotSetup", $this->element);
 			return "";
 		}
+	}
+
+
+	/**
+	 *  Create a document onto disk according to template module.
+	 *
+	 *  @param	string		$modele			Force template to use ('' to not force)
+	 *  @param	Translate	$outputlangs	object lang a utiliser pour traduction
+	 *  @param	int<0,1>	$hidedetails    Hide details of lines
+	 *  @param	int<0,1>	$hidedesc       Hide description
+	 *  @param	int<0,1>	$hideref        Hide ref
+	 *  @param	?array<string,string>  $moreparams     Array to provide more information
+	 *  @return	int         				0 if KO, 1 if OK
+	 */
+	public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
+	{
+		global $langs;
+
+		$result = 0;
+
+		$langs->load("subventions@subventions");
+
+		if (!getDolGlobalInt('SUBVENTIONS_ENABLE_DOC_PAIEMENT', 1)) {
+			$this->error = $langs->trans('DocsDisabled');
+			return 0;
+		}
+
+		if (!dol_strlen($modele)) {
+			$modele = 'standard_paiement';
+
+			if (!empty($this->model_pdf)) {
+				$modele = $this->model_pdf;
+			} elseif (getDolGlobalString('PAIEMENT_ADDON_PDF')) {
+				$modele = getDolGlobalString('PAIEMENT_ADDON_PDF');
+			}
+		}
+
+		$modelpath = "core/modules/subventions/doc/";
+
+		if (!empty($modele)) {
+			$result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+		}
+
+		return $result;
 	}
 
 

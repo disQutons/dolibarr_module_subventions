@@ -2,6 +2,7 @@
 /* Copyright (C) 2004-2017  Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
  * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,6 +171,18 @@ $item = $formSetup->newItem('SUBVENTIONS_STATISTIC_COLOR_ORANGE');
 $item->defaultFieldValue = '50';
 $item->fieldAttr['placeholder'] = '% entre 0 et 100';
 
+// Documents (tabs, card blocks and PDF generation per object; defaults keep previous behavior)
+$formSetup->newItem('DocumentsModule')->setAsTitle();
+
+$item = $formSetup->newItem('SUBVENTIONS_ENABLE_DOC_SUBVENTION')->setAsYesNo();
+$item->defaultFieldValue = '1';
+
+$item = $formSetup->newItem('SUBVENTIONS_ENABLE_DOC_FINANCEMENT')->setAsYesNo();
+$item->defaultFieldValue = '1';
+
+$item = $formSetup->newItem('SUBVENTIONS_ENABLE_DOC_PAIEMENT')->setAsYesNo();
+$item->defaultFieldValue = '1';
+
 // ACCOUNTANCY
 // TODO Implement accountancy parameters
 // $formSetup->newItem('AccountancyModule')->setAsTitle();
@@ -186,9 +199,9 @@ $dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
 
 $moduledir = 'subventions';
 $myTmpObjects = array();
-$myTmpObjects['subvention'] = array('label' => 'Subvention', 'includerefgeneration' => 1, 'includedocgeneration' => 0, 'class' => 'Subvention');
-$myTmpObjects['financement'] = array('label' => 'Financement', 'includerefgeneration' => 1, 'includedocgeneration' => 0, 'class' => 'Financement');
-$myTmpObjects['paiement'] = array('label' => 'Paiement', 'includerefgeneration' => 1, 'includedocgeneration' => 0, 'class' => 'Paiement');
+$myTmpObjects['subvention'] = array('label' => 'Subvention', 'scopelabel' => 'ModuleSubventionsName', 'includerefgeneration' => 1, 'includedocgeneration' => 1, 'class' => 'Subvention');
+$myTmpObjects['financement'] = array('label' => 'Financement', 'scopelabel' => 'MenuFunding', 'includerefgeneration' => 1, 'includedocgeneration' => 0, 'class' => 'Financement');
+$myTmpObjects['paiement'] = array('label' => 'Paiement', 'scopelabel' => 'MenuPayment', 'includerefgeneration' => 1, 'includedocgeneration' => 1, 'class' => 'Paiement');
 
 $tmpobjectkey = GETPOST('object', 'aZ09');
 if ($tmpobjectkey && !array_key_exists($tmpobjectkey, $myTmpObjects)) {
@@ -201,13 +214,13 @@ if ($tmpobjectkey && !array_key_exists($tmpobjectkey, $myTmpObjects)) {
  */
 
 // For retrocompatibility Dolibarr < 15.0
-if (versioncompare(explode('.', DOL_VERSION), array(15)) < 0 && $action == 'update' && !empty($user->admin)) {
+if (versioncompare(explode('.', DOL_VERSION), array(15)) < 0 && $action === 'update' && !empty($user->admin)) {
 	$formSetup->saveConfFromPost();
 }
 
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 
-if ($action == 'updateMask') {
+if ($action === 'updateMask') {
 	$maskconst = GETPOST('maskconst', 'aZ09');
 	$maskvalue = GETPOST('maskvalue', 'alpha');
 
@@ -223,7 +236,7 @@ if ($action == 'updateMask') {
 	} else {
 		setEventMessages($langs->trans("Error"), null, 'errors');
 	}
-} elseif ($action == 'specimen' && $tmpobjectkey) {
+} elseif ($action === 'specimen' && $tmpobjectkey) {
 	$modele = GETPOST('module', 'alpha');
 
 	$className = $myTmpObjects[$tmpobjectkey]['class'];
@@ -262,25 +275,25 @@ if ($action == 'updateMask') {
 		setEventMessages($langs->trans("ErrorModuleNotFound"), null, 'errors');
 		dol_syslog($langs->trans("ErrorModuleNotFound"), LOG_ERR);
 	}
-} elseif ($action == 'setmod') {
+} elseif ($action === 'setmod') {
 	if (!empty($tmpobjectkey)) {
 		$constforval = 'SUBVENTIONS_'.strtoupper($tmpobjectkey)."_ADDON";
 		dolibarr_set_const($db, $constforval, $value, 'chaine', 0, '', $conf->entity);
 	}
-} elseif ($action == 'set') {
+} elseif ($action === 'set') {
 	// Activate a model
 	$ret = addDocumentModel($value, $type, $label, $scandir);
-} elseif ($action == 'del') {
+} elseif ($action === 'del') {
 	$ret = delDocumentModel($value, $type);
 	if ($ret > 0) {
 		if (!empty($tmpobjectkey)) {
 			$constforval = 'SUBVENTIONS_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
-			if (getDolGlobalString($constforval) == "$value") {
+			if (getDolGlobalString($constforval) === "$value") {
 				dolibarr_del_const($db, $constforval, $conf->entity);
 			}
 		}
 	}
-} elseif ($action == 'setdoc') {
+} elseif ($action === 'setdoc') {
 	// Set or unset default model
 	if (!empty($tmpobjectkey)) {
 		$constforval = 'SUBVENTIONS_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
@@ -296,12 +309,12 @@ if ($action == 'updateMask') {
 			$ret = addDocumentModel($value, $type, $label, $scandir);
 		}
 	}
-} elseif ($action == 'unsetdoc') {
+} elseif ($action === 'unsetdoc') {
 	if (!empty($tmpobjectkey)) {
 		$constforval = 'SUBVENTIONS_'.strtoupper($tmpobjectkey).'_ADDON_PDF';
 		dolibarr_del_const($db, $constforval, $conf->entity);
 	}
-} elseif ($action == 'recalcul') {
+} elseif ($action === 'recalcul') {
 	$res = majMontantsTTCHT();
 }
 
@@ -331,7 +344,7 @@ print dol_get_fiche_head($head, 'settings', $langs->trans($title), -1, "subventi
 // Setup page goes here
 echo '<span class="opacitymedium">'.$langs->trans("SubsidysSetupPage").'</span><br><br>';
 
-// Informations aubout the dictionnarie 
+// Informations aubout the dictionnarie
 echo '<span ">'.$langs->trans("SubsidysDict").'</span><br><br>';
 
 /*
@@ -366,7 +379,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 		 */
 		$setupnotempty++;
 
-		print load_fiche_titre($langs->trans("NumberingModules", $myTmpObjectArray['label']), '', '');
+		print load_fiche_titre($langs->trans("NumberingModules").' '.$langs->trans($myTmpObjectArray['scopelabel']), '', '');
 
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre">';
@@ -379,14 +392,22 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 
 		clearstatcache();
 
+		// $dirmodels may resolve twice to the same directory (e.g. '/' and the module path):
+		// remember scanned directories so models are never listed twice.
+		$dirsAlreadyScanned = array();
 		foreach ($dirmodels as $reldir) {
 			$dir = dol_buildpath($reldir."core/modules/".$moduledir);
+			$realdir = realpath($dir);
+			if ($realdir === false || in_array($realdir, $dirsAlreadyScanned)) {
+				continue;
+			}
+			$dirsAlreadyScanned[] = $realdir;
 
 			if (is_dir($dir)) {
 				$handle = opendir($dir);
 				if (is_resource($handle)) {
 					while (($file = readdir($handle)) !== false) {
-						if (strpos($file, 'mod_'.strtolower($myTmpObjectKey).'_') === 0 && substr($file, dol_strlen($file) - 3, 3) == 'php') {
+						if (strpos($file, 'mod_'.strtolower($myTmpObjectKey).'_') === 0 && substr($file, dol_strlen($file) - 3, 3) === 'php') {
 							$file = substr($file, 0, dol_strlen($file) - 4);
 
 							require_once $dir.'/'.$file.'.php';
@@ -395,10 +416,10 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 							'@phan-var-force ModeleNumRefMyObject $module';
 
 							// Show modules according to features level
-							if ($module->version == 'development' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 2) {
+							if ($module->version === 'development' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 2) {
 								continue;
 							}
-							if ($module->version == 'experimental' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 1) {
+							if ($module->version === 'experimental' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 1) {
 								continue;
 							}
 
@@ -415,7 +436,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 								if (preg_match('/^Error/', $tmp)) {
 									$langs->load("errors");
 									print '<div class="error">'.$langs->trans($tmp).'</div>';
-								} elseif ($tmp == 'NotConfigured') {
+								} elseif ($tmp === 'NotConfigured') {
 									print $langs->trans($tmp);
 								} else {
 									print $tmp;
@@ -424,7 +445,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 
 								print '<td class="center">';
 								$constforvar = 'SUBVENTIONS_'.strtoupper($myTmpObjectKey).'_ADDON';
-								if (getDolGlobalString($constforvar) == $file) {
+								if (getDolGlobalString($constforvar) === $file) {
 									print img_picto($langs->trans("Activated"), 'switch_on');
 								} else {
 									print '<a href="'.$_SERVER["PHP_SELF"].'?action=setmod&token='.newToken().'&object='.strtolower($myTmpObjectKey).'&value='.urlencode($file).'">';
@@ -443,10 +464,10 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 								$htmltooltip .= ''.$langs->trans("Version").': <b>'.$module->getVersion().'</b><br>';
 
 								$nextval = $module->getNextValue($mytmpinstance);
-								if ("$nextval" != $langs->trans("NotAvailable")) {  // Keep " on nextval
+								if ("$nextval" !== $langs->trans("NotAvailable")) {  // Keep " on nextval
 									$htmltooltip .= ''.$langs->trans("NextValue").': ';
 									if ($nextval) {
-										if (preg_match('/^Error/', $nextval) || $nextval == 'NotConfigured') {
+										if (preg_match('/^Error/', $nextval) || $nextval === 'NotConfigured') {
 											$nextval = $langs->trans($nextval);
 										}
 										$htmltooltip .= $nextval.'<br>';
@@ -510,10 +531,17 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 
 		clearstatcache();
 
+		// Same deduplication as for numbering models: each physical directory is scanned only once.
+		$dirsAlreadyScanned = array();
 		foreach ($dirmodels as $reldir) {
 			foreach (array('', '/doc') as $valdir) {
 				$realpath = $reldir."core/modules/".$moduledir.$valdir;
 				$dir = dol_buildpath($realpath);
+				$realdir = realpath($dir);
+				if ($realdir === false || in_array($realdir, $dirsAlreadyScanned)) {
+					continue;
+				}
+				$dirsAlreadyScanned[] = $realdir;
 
 				if (is_dir($dir)) {
 					$handle = opendir($dir);
@@ -526,7 +554,9 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 						arsort($filelist);
 
 						foreach ($filelist as $file) {
-							if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file)) {
+							// Only models belonging to the current object (e.g. pdf_standard_paiement for paiement),
+							// otherwise a model could be activated for the wrong object type and fail at generation.
+							if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file) && stripos($file, '_'.strtolower($myTmpObjectKey)) !== false) {
 								if (file_exists($dir.'/'.$file)) {
 									$name = substr($file, 4, dol_strlen($file) - 16);
 									$className = substr($file, 0, dol_strlen($file) - 12);
@@ -536,10 +566,10 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 									'@phan-var-force ModelePDFMyObject $module';
 
 									$modulequalified = 1;
-									if ($module->version == 'development' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 2) {
+									if ($module->version === 'development' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 2) {
 										$modulequalified = 0;
 									}
-									if ($module->version == 'experimental' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 1) {
+									if ($module->version === 'experimental' && getDolGlobalInt('MAIN_FEATURES_LEVEL') < 1) {
 										$modulequalified = 0;
 									}
 
@@ -570,19 +600,19 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 										// Default
 										print '<td class="center">';
 										$constforvar = 'SUBVENTIONS_'.strtoupper($myTmpObjectKey).'_ADDON_PDF';
-										if (getDolGlobalString($constforvar) == $name) {
+										if (getDolGlobalString($constforvar) === $name) {
 											//print img_picto($langs->trans("Default"), 'on');
 											// Even if choice is the default value, we allow to disable it. Replace this with previous line if you need to disable unset
-											print '<a href="'.$_SERVER["PHP_SELF"].'?action=unsetdoc&token='.newToken().'&object='.urlencode(strtolower($myTmpObjectKey)).'&value='.urlencode($name).'&scan_dir='.urlencode($module->scandir).'&label='.urlencode($module->name).'&amp;type='.urlencode($type).'" alt="'.$langs->trans("Disable").'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+											print '<a href="'.$_SERVER["PHP_SELF"].'?action=unsetdoc&token='.newToken().'&object='.urlencode(strtolower($myTmpObjectKey)).'&value='.urlencode($name).'&scan_dir='.urlencode($module->scandir).'&label='.urlencode($module->name).'&amp;type='.urlencode($type).'" title="'.$langs->trans("Disable").'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 										} else {
-											print '<a href="'.$_SERVER["PHP_SELF"].'?action=setdoc&token='.newToken().'&object='.urlencode(strtolower($myTmpObjectKey)).'&value='.urlencode($name).'&scan_dir='.urlencode($module->scandir).'&label='.urlencode($module->name).'" alt="'.$langs->trans("Default").'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+											print '<a href="'.$_SERVER["PHP_SELF"].'?action=setdoc&token='.newToken().'&object='.urlencode(strtolower($myTmpObjectKey)).'&value='.urlencode($name).'&scan_dir='.urlencode($module->scandir).'&label='.urlencode($module->name).'" title="'.$langs->trans("Default").'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 										}
 										print '</td>';
 
 										// Info
 										$htmltooltip = ''.$langs->trans("Name").': '.$module->name;
 										$htmltooltip .= '<br>'.$langs->trans("Type").': '.($module->type ? $module->type : $langs->trans("Unknown"));
-										if ($module->type == 'pdf') {
+										if ($module->type === 'pdf') {
 											$htmltooltip .= '<br>'.$langs->trans("Width").'/'.$langs->trans("Height").': '.$module->page_largeur.'/'.$module->page_hauteur;
 										}
 										$htmltooltip .= '<br>'.$langs->trans("Path").': '.preg_replace('/^\//', '', $realpath).'/'.$file;
@@ -597,7 +627,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 
 										// Preview
 										print '<td class="center">';
-										if ($module->type == 'pdf') {
+										if ($module->type === 'pdf') {
 											$newname = preg_replace('/_'.preg_quote(strtolower($myTmpObjectKey), '/').'/', '', $name);
 											print '<a href="'.$_SERVER["PHP_SELF"].'?action=specimen&module='.urlencode($newname).'&object='.urlencode($myTmpObjectKey).'">'.img_object($langs->trans("Preview"), 'pdf').'</a>';
 										} else {

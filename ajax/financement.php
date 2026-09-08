@@ -1,7 +1,8 @@
 <?php
 /* Copyright (C) 2022       Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
- * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +24,10 @@
  */
 
 if (!defined('NOTOKENRENEWAL')) {
-	define('NOTOKENRENEWAL', 1); // Disables token renewal
+	define('NOTOKENRENEWAL', 1); // Disables token renewal (AJAX endpoint, CSRF token itself is still validated)
+}
+if (!defined('CSRFCHECK_WITH_TOKEN')) {
+	define('CSRFCHECK_WITH_TOKEN', '1'); // Force server-side CSRF token validation in main.inc.php
 }
 if (!defined('NOREQUIREMENU')) {
 	define('NOREQUIREMENU', '1');
@@ -36,12 +40,6 @@ if (!defined('NOREQUIREAJAX')) {
 }
 if (!defined('NOREQUIRESOC')) {
 	define('NOREQUIRESOC', '1');
-}
-if (!defined('NOCSRFCHECK')) {
-	define('NOCSRFCHECK', '1');
-}
-if (!defined('NOREQUIREHTML')) {
-	define('NOREQUIREHTML', '1');
 }
 
 // Load Dolibarr environment
@@ -88,8 +86,32 @@ top_httphead();
 
 // Update the object field with the new value
 if ($objectId && $field && isset($value)) {
+	// Whitelist of allowed fields for AJAX update
+	$allowedFields = array(
+		'ref',
+		'fk_soc',
+		'note_public',
+		'note_private',
+		'montant_dem',
+		'montant_acc',
+		'montant_fin',
+		'montant_att',
+		'montant_ref',
+		'fk_financeur',
+	);
+
+	if (!in_array($field, $allowedFields)) {
+		print json_encode(['status' => 'error', 'message' => 'Field not allowed for update']);
+		exit;
+	}
+
 	$object->fetch($objectId);
 	if ($object->id > 0) {
+		// Check entity access
+		if ($object->entity != $conf->entity) {
+			print json_encode(['status' => 'error', 'message' => 'Access denied: wrong entity']);
+			exit;
+		}
 		$object->$field = $value;
 	}
 	$result = $object->update($user);

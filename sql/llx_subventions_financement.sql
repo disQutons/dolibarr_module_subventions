@@ -1,4 +1,5 @@
 -- Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+-- Copyright (C) 2026		Daniel Bachmann			    <d.bachmann@digiconn.de>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -39,3 +40,18 @@ CREATE TABLE llx_subventions_financement(
 	entity integer DEFAULT 1 NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
+
+-- Foreign keys
+ALTER TABLE llx_subventions_financement ADD CONSTRAINT fk_subventions_financement_fk_sub FOREIGN KEY (fk_sub) REFERENCES llx_subventions_subvention(rowid) ON DELETE RESTRICT;
+ALTER TABLE llx_subventions_financement ADD CONSTRAINT fk_subventions_financement_fk_soc FOREIGN KEY (fk_soc) REFERENCES llx_societe(rowid) ON DELETE RESTRICT;
+ALTER TABLE llx_subventions_financement ADD CONSTRAINT fk_subventions_financement_fk_financeur FOREIGN KEY (fk_financeur) REFERENCES llx_c_subventions_financeur(rowid) ON DELETE RESTRICT;
+
+-- Indexes
+CREATE INDEX idx_subventions_financement_fk_sub ON llx_subventions_financement(fk_sub);
+CREATE INDEX idx_subventions_financement_fk_soc ON llx_subventions_financement(fk_soc);
+CREATE INDEX idx_subventions_financement_fk_financeur ON llx_subventions_financement(fk_financeur);
+
+-- Upgrade of installations created before model_pdf existed.
+-- Missing column is added, existing one is kept
+-- (Dolibarr ignores "column already exists" errors when (re)running this file).
+ALTER TABLE llx_subventions_financement ADD COLUMN model_pdf varchar(255);
