@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,13 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 */
 
+if (!defined('NOTOKENRENEWAL')) {
+	define('NOTOKENRENEWAL', '1'); // Disables token renewal (AJAX endpoint, CSRF token itself is still validated)
+}
+if (!defined('CSRFCHECK_WITH_TOKEN')) {
+	define('CSRFCHECK_WITH_TOKEN', '1'); // Force server-side CSRF token validation in main.inc.php
+}
+
 // Load Dolibarr environment
 $res = 0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
@@ -39,7 +47,7 @@ $tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
 $tmp2 = realpath(__FILE__);
 $i = strlen($tmp) - 1;
 $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] === $tmp2[$j]) {
 	$i--;
 	$j--;
 }
@@ -69,20 +77,75 @@ dol_include_once('/custom/subventions/class/financement.class.php');
 
 header('Content-Type: application/json'); // Force le type de réponse en JSON
 
-// Récupérer les financements par subvention
-if ($_POST['action'] == 'getFinancementsBySubvention') {
-    $fk_sub = GETPOST('fk_sub', 'int');
+// Récupérer les subventions (Förderungen) d'un client.
+// Format: [Funding reference] – [Project name] (pas de nom client: déjà sélectionné).
+// Sans client (fk_soc <= 0): aucune liste non filtrée n'est retournée.
+$action = GETPOST('action', 'aZ09');
+if ($action === 'getSubventionsBySoc') {
+    if (!$user->hasRight('subventions', 'subvention', 'read')) {
+        echo json_encode(['success' => false, 'error' => 'Access denied']);
+        exit;
+    }
+    $fk_soc = GETPOST('fk_soc', 'int');
     $options = '<option value="0"></option>';
 
-    $sql = "SELECT rowid, ref FROM ".MAIN_DB_PREFIX."subventions_financement WHERE fk_sub = " . $fk_sub;
-    $result = $db->query($sql);
+    if ($fk_soc > 0) {
+        $sql = "SELECT s.rowid, s.ref, p.title AS project_name ";
+        $sql .= "FROM ".MAIN_DB_PREFIX."subventions_subvention AS s ";
+        $sql .= "LEFT JOIN ".MAIN_DB_PREFIX."projet AS p ON s.fk_project = p.rowid ";
+        $sql .= "WHERE s.fk_soc = ".((int) $fk_soc);
+        $sql .= " AND s.entity IN (".getEntity('subvention').")";
+        $sql .= " ORDER BY s.ref ASC";
+        $result = $db->query($sql);
 
-    if ($result) {
-        while ($obj = $db->fetch_object($result)) {
-            $options .= '<option value="' . $obj->rowid . '">' . $obj->ref . '</option>';
+        if ($result) {
+            while ($obj = $db->fetch_object($result)) {
+                $proj = !empty($obj->project_name) ? ' – '.dol_escape_htmltag($obj->project_name) : '';
+                $options .= '<option value="'.((int) $obj->rowid).'">'.dol_escape_htmltag($obj->ref).$proj.'</option>';
+            }
+        } else {
+            dol_syslog("scripts/interface.php getSubventionsBySoc SQL error: ".$db->lasterror(), LOG_ERR);
+            $options .= '<option value="0">Erreur SQL</option>';
         }
-    } else {
-        $options .= '<option value="0">Erreur SQL</option>';
+    }
+
+    echo json_encode(['success' => true, 'options' => $options]);
+    exit;
+}
+
+// Récupérer les financements par subvention (Förderung).
+// Format: [Förderungsreferenz] – [Projektname] (pas de nom client: déjà sélectionné).
+if ($action === 'getFinancementsBySubvention') {
+    if (!$user->hasRight('subventions', 'financement', 'read')) {
+        echo json_encode(['success' => false, 'error' => 'Access denied']);
+        exit;
+    }
+    $fk_sub = GETPOST('fk_sub', 'int');
+    $fk_soc = GETPOST('fk_soc', 'int');
+    $options = '<option value="0"></option>';
+
+    if ($fk_sub > 0) {
+        $sql = "SELECT sf.rowid, sf.ref, p.title AS project_name ";
+        $sql .= "FROM ".MAIN_DB_PREFIX."subventions_financement AS sf ";
+        $sql .= "LEFT JOIN ".MAIN_DB_PREFIX."subventions_subvention AS sub ON sf.fk_sub = sub.rowid ";
+        $sql .= "LEFT JOIN ".MAIN_DB_PREFIX."projet AS p ON sub.fk_project = p.rowid ";
+        $sql .= "WHERE sf.fk_sub = ".((int) $fk_sub);
+        if ($fk_soc > 0) {
+            $sql .= " AND sf.fk_soc = ".((int) $fk_soc);
+        }
+        $sql .= " AND sf.entity IN (".getEntity('financement').")";
+        $sql .= " ORDER BY sf.ref ASC";
+        $result = $db->query($sql);
+
+        if ($result) {
+            while ($obj = $db->fetch_object($result)) {
+                $proj = !empty($obj->project_name) ? ' – '.dol_escape_htmltag($obj->project_name) : '';
+                $options .= '<option value="'.((int) $obj->rowid).'">'.dol_escape_htmltag($obj->ref).$proj.'</option>';
+            }
+        } else {
+            dol_syslog("scripts/interface.php getFinancementsBySubvention SQL error: ".$db->lasterror(), LOG_ERR);
+            $options .= '<option value="0">Erreur SQL</option>';
+        }
     }
 
     echo json_encode(['success' => true, 'options' => $options]);
@@ -90,14 +153,19 @@ if ($_POST['action'] == 'getFinancementsBySubvention') {
 }
 
 // Récupérer le fk_soc par financement
-if ($_POST['action'] == 'getSocByFinancement') {
+if ($action === 'getSocByFinancement') {
+    if (!$user->hasRight('subventions', 'financement', 'read')) {
+        echo json_encode(['success' => false, 'error' => 'Access denied']);
+        exit;
+    }
     $fk_fin = GETPOST('fk_fin', 'int');
     $financement = new Financement($db);
     $financement->fetch($fk_fin);
 
-    if ($financement->fk_soc > 0) {
+    if ($financement->id <= 0 || $financement->entity !== $conf->entity) {
+        echo json_encode(['success' => false, 'error' => 'Access denied']);
+    } elseif ($financement->fk_soc > 0) {
         echo json_encode(['success' => true, 'fk_soc' => $financement->fk_soc]);
-        $options .= '<option value="' . $financement->rowid . '">' . $financement->fk_soc . '</option>';
     } else {
         echo json_encode(['success' => false, 'error' => 'fk_soc non défini']);
     }
@@ -106,4 +174,4 @@ if ($_POST['action'] == 'getSocByFinancement') {
 
 // Si aucune action n'est reconnue
 echo json_encode(['success' => false, 'error' => 'Action non reconnue']);
-?>
+

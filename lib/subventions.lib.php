@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann				<d.bachmann@digiconn.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +54,7 @@ function subventionsAdminPrepareHead()
 	$head[$h][2] = 'settings';
 	$h++;
 
-	
+
 	// Extra fields subventions
     $extrafields = new ExtraFields($db);
 	$extrafields->fetch_name_optionals_label('subvention');
@@ -66,7 +67,7 @@ function subventionsAdminPrepareHead()
 	}
 	$head[$h][2] = 'subvention_extrafields';
 	$h++;
-	
+
     // Extra fields financements
     $extrafields = new ExtraFields($db);
 	$extrafields->fetch_name_optionals_label('financement');
@@ -79,7 +80,7 @@ function subventionsAdminPrepareHead()
 	}
 	$head[$h][2] = 'financement_extrafields';
 	$h++;
-	
+
     // Extra fields paiements
     $extrafields = new ExtraFields($db);
 	$extrafields->fetch_name_optionals_label('paiement');
@@ -92,7 +93,7 @@ function subventionsAdminPrepareHead()
 	}
 	$head[$h][2] = 'paiement_extrafields';
 	$h++;
-	
+
 
 	$head[$h][0] = dol_buildpath("/subventions/admin/about.php", 1);
 	$head[$h][1] = $langs->trans("About");
@@ -101,12 +102,6 @@ function subventionsAdminPrepareHead()
 
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
-	//$this->tabs = array(
-	//	'entity:+tabname:Title:@subventions:/subventions/mypage.php?id=__ID__'
-	//); // to add new tab
-	//$this->tabs = array(
-	//	'entity:-tabname:Title:@subventions:/subventions/mypage.php?id=__ID__'
-	//); // to remove a tab
 	complete_head_from_modules($conf, $langs, null, $head, $h, 'subventions@subventions');
 
 	complete_head_from_modules($conf, $langs, null, $head, $h, 'subventions@subventions', 'remove');
@@ -132,6 +127,9 @@ function majMontantsFinancementSubvention($object) {
     } else {
         throw new Exception("Type d'objet non supporté : ".get_class($object));
     }
+
+    $fk_sub = empty($fk_sub) ? 0 : (int) $fk_sub;
+    $fk_fin = empty($fk_fin) ? 0 : (int) $fk_fin;
 
     // On fait un test pour mettre à jour uniquement ce qui doit l'être
     if (empty($fk_sub)) {
@@ -170,10 +168,10 @@ function majMontantsFinancementSubvention($object) {
 
             // Calcule le montant attendu (montant_acc - somme des paiements) ne peut pas être négatif
             $m_att = ($m_acc - $m_fin < 0) ? 0 : $m_acc - $m_fin;
-            
+
             // Si aucun montant n'a été saisi ou qu'aucune demande n'avait été faite, on ne calcul rien
             if (is_null($m_acc) || is_null($m_dem) && $m_acc > 0){
-                $m_ref = 0;    
+                $m_ref = 0;
             }
             else{
                 // Calcule le montant refusé (montant_dem - montant_acc) ne peut pas être négatif
@@ -195,14 +193,14 @@ function majMontantsFinancementSubvention($object) {
 		// MAJ SUBVENTION
         if ($majsub){
             // Récupère les montants demandés, accordés, financés et refusés de la subvention
-            $sql = "SELECT COALESCE(SUM(montant_dem),0) as m_dem, 
+            $sql = "SELECT COALESCE(SUM(montant_dem),0) as m_dem,
                         COALESCE(SUM(montant_acc),0) as m_acc,
                         COALESCE(SUM(montant_ref),0) as m_ref,
-                        COALESCE(SUM(montant_fin),0) as m_fin 
+                        COALESCE(SUM(montant_fin),0) as m_fin
                         FROM ".MAIN_DB_PREFIX."subventions_financement WHERE fk_sub = ".$fk_sub;
 
             $resql = $db->query($sql);
-            
+
             if (!$resql) {
                 throw new Exception("Erreur SQL : ".$db->lasterror());
             }
@@ -268,7 +266,7 @@ function majMontantsFinancementSubvention($object) {
 // Mise à jour des champs montantHT et montantTTC pour les projets, en lien avec setup.php
 function majMontantsTTCHT(){
     global $db, $user, $langs;
-     
+
     $valeur_total_ht = getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_HT');
     $valeur_total_ttc = getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_TTC');
 
@@ -301,6 +299,7 @@ function majstatut ($object){
     if (empty($sub)) {
         return 0;
     }
+    $sub = (int) $sub;
 
     $db->begin();
     try {
@@ -310,14 +309,17 @@ function majstatut ($object){
             throw new Exception("Erreur SQL : ".$db->lasterror());
         }
         $obj = $db->fetch_object($resql);
+        // NULL must be checked on the raw database value: (float) NULL becomes 0.0,
+        // so is_null() after the cast would never be true.
+        $m_acc_is_null = is_null($obj->montant_acc);
         $m_dem = (float) $obj->montant_dem;
         $m_acc = (float) $obj->montant_acc;
         $m_fin = (float) $obj->montant_fin;
         $m_att = (float) $obj->montant_att;
         $m_ref = (float) $obj->montant_ref;
         $stat = (float) $obj->status;
-        
-        if ($stat == 0 || $stat == 4 || $stat == 5) {
+
+        if ($stat === 0 || $stat === 4 || $stat === 5) {
             // Brouillon
             // Déjà financée
             // Bilan déposé
@@ -330,16 +332,16 @@ function majstatut ($object){
             if ($m_acc > 0 && $m_att > 0){
                 $stat = 2; // Acceptée
             }
-            elseif ($m_acc == $m_fin && $m_att == 0 && $m_acc > 0){
+            elseif ($m_acc === $m_fin && $m_att === 0 && $m_acc > 0){
                 $stat = 3; // Financée
             }
-            elseif (($m_dem == 0 && is_null($m_acc)) || ($m_dem > 0 && $m_acc == 0 && $m_ref == 0)){
+            elseif (($m_dem === 0 && $m_acc_is_null) || ($m_dem > 0 && $m_acc === 0 && $m_ref === 0)){
                 $stat = 1; // Validé
             }
-            elseif (($m_dem == 0 && $m_acc == 0) || ($m_acc == 0 && $m_ref == $m_dem && $m_dem > 0)){
+            elseif (($m_dem === 0 && $m_acc === 0) || ($m_acc === 0 && $m_ref === $m_dem && $m_dem > 0)){
                 $stat = 6; // Refusé
             }
-        
+
             // Màj statut de la subvention
             $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_subvention SET ";
             $sql .= " status = ".$stat." ";
@@ -366,7 +368,7 @@ function refuseSub ($object){
 
     // Vérifie le type de l'objet
     if (is_a($object, 'subvention')) {
-        $sub = $object->id;
+        $sub = (int) $object->id;
     } else {
         throw new Exception("Type d'objet non supporté : ".get_class($object));
     }
@@ -378,18 +380,18 @@ function refuseSub ($object){
         if (!$resql) {
             throw new Exception("Erreur SQL : ".$db->lasterror());
         }
-    
+
         while ($obj = $db->fetch_object($resql)) {
             if (empty($obj->montant_acc)) {
                 // Créer un objet Dolibarr pour la mise à jour
                 $financement = new financement($db);
                 $financement->fetch($obj->rowid);
-                
+
                 // Mettre à jour les propriétés
                 $financement->montant_ref = $obj->montant_dem;
                 $financement->montant_acc = 0;
                 $financement->montant_att = 0;
-                
+
                 // Sauvegarder en base de données
                 $result = $financement->update($user);
 
@@ -406,7 +408,7 @@ function refuseSub ($object){
         $db->rollback();
         dol_syslog("Erreur majMontantsFinancementSubvention: ".$e->getMessage(), LOG_ERR);
         return -1;
-    
+
     }
 }
 

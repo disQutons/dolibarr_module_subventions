@@ -1,6 +1,8 @@
-ModuleSubventionsName=Zuschüsse
-ListSubventionsAssociatedProject=Liste der mit dem Projekt verbundenen Subventionen
-AddSubvention=Zuschuss hinzufügen
+ModuleSubventionsName=Förderungen
+ModuleSubventionsDesc=Verfolgung von Förderungen, Finanzierungen und Auszahlungen
+SubventionsDescription=Verfolgung von Förderungen, Finanzierungen und Auszahlungen
+ListSubventionsAssociatedProject=Liste der mit dem Projekt verbundenen Förderungen
+AddSubvention=Förderung hinzufügen
 #
 # financement_list.php
 #
@@ -13,22 +15,22 @@ Cloture=Abschließen
 Evaluate=Bewerten
 Financed=Finanziert
 Evaluated=Bericht eingereicht
-ListOfFundingAssociatedWithTheGrant=Liste der Finanzierungen des Zuschusses
-ListOfPaymentsAssociatedWithTheGrant=Liste der Zahlungen des Zuschusses
+ListOfFundingAssociatedWithTheGrant=Liste der Finanzierungen der Förderung
+ListOfPaymentsAssociatedWithTheGrant=Liste der Auszahlungen der Förderung
 AddAFunding=Finanzierung hinzufügen
-AddAPayment=Zahlung hinzufügen
-OthersSubsidys=Andere Zuschüsse
+AddAPayment=Auszahlung hinzufügen
+OthersSubsidys=Andere Förderungen
 Pending=Ausstehend
 ReferenceFunding=Finanzierungsreferenz
-ReferencePayment=Zahlungsreferenz
+ReferencePayment=Auszahlungsreferenz
 Requested=Beantragt
 SetFromEvaluate=Aktion nicht abgeschlossen
 SetToEvaluate=Bericht einzureichen
-ConfirmActionRefuse=Möchten Sie diesen Zuschuss wirklich ablehnen? (alle zugehörigen Finanzierungen werden auf 0 gesetzt)
+ConfirmActionRefuse=Möchten Sie diese Förderung wirklich ablehnen? (alle zugehörigen Finanzierungen werden auf 0 gesetzt)
 #
 # subvention_list.php
 #
-Subsidys=Zuschüsse
+Subsidys=Förderungen
 #
 # admin\setup.php
 #
@@ -36,24 +38,23 @@ AmountRequested=Beantragter Betrag
 AmountAccepted=Angenommener Betrag
 AmountFinanced=Finanzierter Betrag
 AmountPending=Ausstehender Betrag
-AmountRefused=Abgelehntter Betrag
+AmountRefused=Abgelehnter Betrag
 Path=Pfad
-SubsidysSetupPage=Zuschuss-Konfiguration
-SubsidysDict=Die Liste der Förderer befindet sich in der Wörterbuchverwaltung.
-# TODO SubsidysDict=Die Liste der Förderer und die dazugehörigen Konten befinden sich in der Wörterbuchverwaltung.
+SubsidysSetupPage=Förderungs-Konfiguration
+SubsidysDict=Die Liste der Förderer und die dazugehörigen Konten befinden sich in der Wörterbuchverwaltung.
 # TODO AccountancyModule=Buchhaltungsmodul
 ProjectModule=Projektmodul
 StatisticsModule=Statistikmodul
-SUBVENTIONS_PROJECT=Zuschüsse zur Projektübersicht hinzufügen
+SUBVENTIONS_PROJECT=Förderungen zur Projektübersicht hinzufügen
 SUBVENTIONS_PROJECT_MONTANT_HT=Betrag als "Nettobetrag" anzeigen
 SUBVENTIONS_PROJECT_MONTANT_TTC=Betrag als "Bruttobetrag" anzeigen
 SUBVENTIONS_STATISTIC_DATE=Datum zur Berechnung der Statistiken
-SubventionsSetup=Zuschuss-Konfiguration
-CreationDate=Erstellungsdatum des Zuschusses
+SubventionsSetup=Förderungs-Konfiguration
+CreationDate=Erstellungsdatum der Förderung
 EspectingDate=Erwartetes Abgabedatum
 BeginProjectDate=Projektbeginn
 EndProjectDate=Projektende
-EvaluationDate=Bewertungsdatum des Zuschusses
+EvaluationDate=Bewertungsdatum der Förderung
 Recalcul=Netto- und Bruttobeträge neu berechnen
 SUBVENTIONS_STATISTIC_COLOR_GREEN=Mindestprozentsatz für die Anzeige in Grün (sonst Orange)
 SUBVENTIONS_STATISTIC_COLOR_ORANGE=Mindestprozentsatz für die Anzeige in Orange (sonst Rot)
@@ -62,49 +63,60 @@ SUBVENTIONS_STATISTIC_COLOR_ORANGE=Mindestprozentsatz für die Anzeige in Orange
 #
 CodeTooltipHelp=
 RightsCreateUpdateFunding=Finanzierungen erstellen oder aktualisieren
-RightsCreateUpdatePayment=Zahlungen erstellen oder aktualisieren
-RightsCreateUpdateSubsidy=Zuschüsse erstellen oder aktualisieren
+RightsCreateUpdatePayment=Auszahlungen erstellen oder aktualisieren
+RightsCreateUpdateSubsidy=Förderungen erstellen oder aktualisieren
 RightsDeleteFunding=Finanzierungen löschen
-RightsDeletePayment=Zahlungen löschen
-RightsDeleteSubsidy=Zuschüsse löschen
-RightsExportSubsidyFundingAndPayment=
-RightsImportSubsidyFundingAndPayment=
+RightsDeletePayment=Auszahlungen löschen
+RightsDeleteSubsidy=Förderungen löschen
 RightsReadFunding=Finanzierungen lesen
-RightsReadPayment=Zahlungen lesen
-RightsReadSubsidy=Zuschüsse lesen
-RightsExportSubsidyFundingAndPayment=Zuschüsse, Finanzierungen und Zahlungen exportieren
-RightsImportSubsidyFundingAndPayment=Zuschüsse, Finanzierungen und Zahlungen importieren
+RightsReadPayment=Auszahlungen lesen
+RightsReadSubsidy=Förderungen lesen
+RightsExportSubsidyFundingAndPayment=Förderungen, Finanzierungen und Auszahlungen exportieren
+RightsImportSubsidyFundingAndPayment=Förderungen, Finanzierungen und Auszahlungen importieren
 #
 # lib\subventions.lib.php
 #
 AttributsSuppAddFunding=Zusätzliche Finanzierungsattribute
-AttributsSuppPayment=Zusätzliche Zahlungsattribute
-AttributsSuppSubsidy=Zusätzliche Zuschussattribute
+AttributsSuppPayment=Zusätzliche Auszahlungsattribute
+AttributsSuppSubsidy=Zusätzliche Förderungsattribute
 #
 # index.php
 #
-DraftSubsidy=Nicht eingereichte Zuschüsse
+DraftSubsidy=Nicht eingereichte Förderungen
 PendingSubsidy=Ausstehende Finanzierungen
-NoSubsidy=Kein Zuschuss
-LatestModifiedMySubsidy=Zuletzt geänderte Zuschüsse
-LatestCreatedMySubsidy=Zuletzt erstellte Zuschüsse
+NoSubsidy=Keine Förderung
+LatestModifiedMySubsidy=Zuletzt geänderte Förderungen
+LatestCreatedMySubsidy=Zuletzt erstellte Förderungen
 #
 # subventions_statitics.php
 #
-SubsidysStatistics=Statistiken zu Zuschüssen, Finanzierungen und Zahlungen
-NbOfSubsidys=Anzahl der Zuschüsse
-NbOfSubsidysByMonth=Anzahl der Zuschüsse pro Monat
-NumberOfSubsidys=Anzahl der Zuschüsse
-NumberOfSubsidysByMonth=Anzahl der Zuschüsse pro Monat
-AmountOfSubsidys=Betrag der Zuschüsse
-AmountOfSubsidysByMonth=Betrag der Zuschüsse pro Monat
+SubsidysStatistics=Statistiken zu Förderungen, Finanzierungen und Auszahlungen
+NbOfSubsidys=Anzahl der Förderungen
+NbOfSubsidysByMonth=Anzahl der Förderungen pro Monat
+NumberOfSubsidys=Anzahl der Förderungen
+NumberOfSubsidysByMonth=Anzahl der Förderungen pro Monat
+AmountOfSubsidys=Betrag der Förderungen
+AmountOfSubsidysByMonth=Betrag der Förderungen pro Monat
 NbOfFundings=Anzahl der Finanzierungen
 NbOfFundingsByMonth=Anzahl der Finanzierungen pro Monat
 NumberOfFundings=Anzahl der Finanzierungen
 NumberOfFundingsByMonth=Anzahl der Finanzierungen pro Monat
 AmountOfFundings=Betrag der Finanzierungen
 AmountOfFundingsByMonth=Betrag der Finanzierungen pro Monat
+NbOfPaiements=Anzahl der Auszahlungen
+AmountOfPaiements=Betrag der Auszahlungen
+OpenAmount=Offenes Volumen
+PaiementReceipt=Auszahlungsnachweis
+DashboardKPIs=Kennzahlen im Überblick
+DocumentsModule=Dokumente
+SUBVENTIONS_ENABLE_DOC_SUBVENTION=Dokumente/PDF für Förderungen aktivieren
+SUBVENTIONS_ENABLE_DOC_FINANCEMENT=Dokumente/PDF für Finanzierungen aktivieren
+SUBVENTIONS_ENABLE_DOC_PAIEMENT=Dokumente/PDF für Auszahlungen aktivieren
+DocsDisabled=Dokumentenfunktion ist deaktiviert
+FinancementReceipt=Finanzierungsnachweis
 AmountRemaining=Verbleibender Betrag
+AmountAverage=Durchschnittlicher Betrag
+AmountTotal=Gesamtbetrag
 STATUS_DRAFT=Entwurf
 STATUS_VALIDATED=Eingereicht
 STATUS_ACCEPTED=Angenommen
@@ -120,28 +132,93 @@ NbRequest=Anzahl der Anträge
 AmountDem=Beantragter Betrag
 AmountAcc=Angenommener Betrag
 AmountFin=Finanzierter Betrag
+PercentAcc=% acc
+PercentFin=% fin
 LastRequest=Letzter Antrag
 AllYears=Alle
 FundingSourceGroup=Förderergruppe
 #
 # Common Translations
 #
+NewSubvention=Neue Förderung
+NewFunding=Neue Finanzierung
+NewPayment=Neue Auszahlung
 AddFunding=Finanzierung hinzufügen
 ClassNotFound=Klasse nicht gefunden
 DeleteFunding=Finanzierung löschen
-DeleteGrant=Zuschuss löschen
+DeleteGrant=Förderung löschen
+DeletePayment=Auszahlung löschen
+Financement=Finanzierung
+Paiement=Auszahlung
+Subvention=Förderung
 Funding=Finanzierung
 FundingSource=Förderer
-Payment=Zahlung
-Payments=Zahlungen
-Grant=Zuschuss
+Payment=Auszahlung
+Payments=Auszahlungen
+Grant=Förderung
 Refuse=Ablehnen
 ShowFunding=Finanzierungen anzeigen
-ShowPayment=Zahlungen anzeigen
-ShowSubsidy=Zuschüsse anzeigen
-Subsidy=Zuschuss
-SubsidysArea=Verfolgung von Zuschüssen, Finanzierungen und Zahlungen
-SubsidysSetup=Zuschuss-Konfiguration
-BackToSub=Zurück zur Zuschüsse
+ShowPayment=Auszahlungen anzeigen
+ShowSubsidy=Förderungen anzeigen
+Subsidy=Subvention
+SubsidysArea=Verfolgung von Förderungen, Finanzierungen und Auszahlungen
+SubsidysSetup=Subventionen-Konfiguration
+BackToSub=Zurück zu den Förderungen
 XXX=
 bytes=Bytes
+Creation=Erstellt
+#
+# Menu translations
+#
+MenuSubvention=Förderung
+MenuNewSubvention=Neue Förderung
+MenuListSubventions=Liste der Förderungen
+MenuDraftSubvention=Nicht eingereicht
+MenuValidatedSubvention=Eingereicht
+MenuAcceptedSubvention=Angenommen
+MenuEvaluatedSubvention=Bilanz zu erstellen
+MenuCloturedSubvention=Abgeschlossen
+MenuRefusedSubvention=Abgelehnt
+MenuStatistics=Statistiken
+MenuFunding=Finanzierungen
+MenuNewFunding=Neue Finanzierung
+MenuListFundings=Liste der Finanzierungen
+MenuPayment=Auszahlungen
+MenuNewPayment=Neue Auszahlung
+MenuListPayments=Liste der Auszahlungen
+
+#
+# Class field translations
+#
+ProjectName=Projektname
+AmountRequested=Beantragter Betrag
+AmountAccepted=Angenommener Betrag
+AmountFinanced=Finanzierter Betrag
+AmountPending=Ausstehender Betrag
+AmountRefused=Abgelehnter Betrag
+EvaluationCriteria=Bewertungskriterien
+BeginProjectDate=Projektbeginn
+EndProjectDate=Projektende
+EspectingDate=Erwartetes Abgabedatum
+EvaluationDate=Bewertungsdatum
+Amount=Betrag
+DatePayment=Auszahlungsdatum
+ReferenceSubvention=Förderungsreferenz
+ReferenceFunding=Finanzierungsreferenz
+FundingSourceType=Finanzierertyp
+FundingSourceListCanBeModifiedInDictionary=Die Liste der Finanzierer kann im Wörterbuch geändert werden
+
+#
+# Dictionary translations
+#
+DictionaryFinanceursLabel=Förderungen: Hauptfinanzierer und Buchhaltung
+FinanceurAutre=Sonstige
+FinanceurEtat=Staat
+FinanceurRegion=Region
+FinanceurDepartement=Bezirk
+FinanceurCommune=Gemeinde
+FinanceurOrganismesSociaux=Sozialversicherungsträger (z. B. CAF)
+FinanceurFondsEuropeens=EU-Fonds (ESF, EFRE, usw.)
+FinanceurASP=Agentur für Arbeit und Zahlung (geforderte Beschäftigung)
+FinanceurAutresEtablissementsPublics=Sonstige öffentliche Einrichtungen
+FinanceurAidesPrivees=Private Förderungen (Stiftungen)

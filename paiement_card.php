@@ -1,7 +1,8 @@
 <?php
 /* Copyright (C) 2017       Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
- * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,26 +25,6 @@
  */
 
 
-// General defined Options
-//if (! defined('CSRFCHECK_WITH_TOKEN'))     define('CSRFCHECK_WITH_TOKEN', '1');					// Force use of CSRF protection with tokens even for GET
-//if (! defined('MAIN_AUTHENTICATION_MODE')) define('MAIN_AUTHENTICATION_MODE', 'aloginmodule');	// Force authentication handler
-//if (! defined('MAIN_LANG_DEFAULT'))        define('MAIN_LANG_DEFAULT', 'auto');					// Force LANG (language) to a particular value
-//if (! defined('MAIN_SECURITY_FORCECSP'))   define('MAIN_SECURITY_FORCECSP', 'none');				// Disable all Content Security Policies
-//if (! defined('NOBROWSERNOTIF'))     		 define('NOBROWSERNOTIF', '1');					// Disable browser notification
-//if (! defined('NOIPCHECK'))                define('NOIPCHECK', '1');						// Do not check IP defined into conf $dolibarr_main_restrict_ip
-//if (! defined('NOLOGIN'))                  define('NOLOGIN', '1');						// Do not use login - if this page is public (can be called outside logged session). This includes the NOIPCHECK too.
-//if (! defined('NOREQUIREAJAX'))            define('NOREQUIREAJAX', '1');       	  		// Do not load ajax.lib.php library
-//if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');					// Do not create database handler $db
-//if (! defined('NOREQUIREHTML'))            define('NOREQUIREHTML', '1');					// Do not load html.form.class.php
-//if (! defined('NOREQUIREMENU'))            define('NOREQUIREMENU', '1');					// Do not load and show top and left menu
-//if (! defined('NOREQUIRESOC'))             define('NOREQUIRESOC', '1');					// Do not load object $mysoc
-//if (! defined('NOREQUIRETRAN'))            define('NOREQUIRETRAN', '1');					// Do not load object $langs
-//if (! defined('NOREQUIREUSER'))            define('NOREQUIREUSER', '1');					// Do not load object $user
-//if (! defined('NOSCANGETFORINJECTION'))    define('NOSCANGETFORINJECTION', '1');			// Do not check injection attack on GET parameters
-//if (! defined('NOSCANPOSTFORINJECTION'))   define('NOSCANPOSTFORINJECTION', '1');			// Do not check injection attack on POST parameters
-//if (! defined('NOSESSION'))                define('NOSESSION', '1');						// On CLI mode, no need to use web sessions
-//if (! defined('NOSTYLECHECK'))             define('NOSTYLECHECK', '1');					// Do not check style html tag into posted data
-//if (! defined('NOTOKENRENEWAL'))           define('NOTOKENRENEWAL', '1');					// Do not roll the Anti CSRF token (used if MAIN_SECURITY_CSRF_WITH_TOKEN is on)
 
 /*
 // FBR récupération des erreurs php
@@ -62,7 +43,7 @@ $tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
 $tmp2 = realpath(__FILE__);
 $i = strlen($tmp) - 1;
 $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] === $tmp2[$j]) {
 	$i--;
 	$j--;
 }
@@ -154,35 +135,25 @@ if (empty($action) && empty($id) && empty($ref)) {
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be 'include', not 'include_once'.
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
-	$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->hasRight('subventions', 'paiement', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-	$permissionnote = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_setnotes.inc.php
-	$permissiondellink = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_dellink.inc.php
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = 1;
-	$permissionnote = 1;
-	$permissiondellink = 1;
-}
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
+$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->hasRight('subventions', 'paiement', 'delete') || ($permissiontoadd && isset($object->status) && $object->status === $object::STATUS_DRAFT);
+$permissionnote = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_setnotes.inc.php
+$permissiondellink = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_dellink.inc.php
 
 $upload_dir = $conf->subventions->multidir_output[isset($object->entity) ? $object->entity : 1].'/paiement';
 
 // Security check (enable the most restrictive one)
-//if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) $socid = $user->socid;
-//$isdraft = (isset($object->status) && ($object->status == $object::STATUS_DRAFT) ? 1 : 0);
-//restrictedArea($user, $object->module, $object, $object->table_element, $object->element, 'fk_soc', 'rowid', $isdraft);
 if (!isModEnabled($object->module)) {
 	accessforbidden("Module ".$object->module." not enabled");
 }
 if (!$permissiontoread) {
 	accessforbidden();
+}
+// Entity security: never display or modify records from another entity
+if (!empty($object->id) && isset($object->entity) && !in_array((int) $object->entity, array_map('intval', explode(',', getEntity($object->element))))) {
+	accessforbidden('NotAllowedToAccessEntity');
 }
 
 $error = 0;
@@ -203,7 +174,7 @@ if (empty($reshook)) {
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
-			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
+			if (empty($id) && (($action !== 'add' && $action !== 'create') || $cancel)) {
 				$backtopage = $backurlforlist;
 			} else {
 				$backtopage = dol_buildpath('/subventions/paiement_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
@@ -228,10 +199,10 @@ if (empty($reshook)) {
 	// Action to build doc
 	include DOL_DOCUMENT_ROOT.'/core/actions_builddoc.inc.php';
 
-	if ($action == 'set_thirdparty' && $permissiontoadd) {
+	if ($action === 'set_thirdparty' && $permissiontoadd) {
 		$object->setValueFrom('fk_soc', GETPOSTINT('fk_soc'), '', null, 'date', '', $user, $triggermodname);
 	}
-	if ($action == 'classin' && $permissiontoadd) {
+	if ($action === 'classin' && $permissiontoadd) {
 		$object->setProject(GETPOSTINT('projectid'));
 	}
 }
@@ -249,8 +220,8 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("Payment")." - ".$langs->trans('Card');
 //$title = $object->ref." - ".$langs->trans('Card');
-if ($action == 'create') {
-	$title = $langs->trans("NewObject", $langs->transnoentitiesnoconv("Paiement"));
+if ($action === 'create') {
+	$title = $langs->trans("NewPayment", $langs->transnoentitiesnoconv("NewPayment"));
 }
 $help_url = '';
 
@@ -271,64 +242,124 @@ llxHeader('', $title, $help_url, '', 0, 0, '', '', '', 'mod-subventions page-car
 // });
 // </script>';
 
-// Script pour lier les paiements aux financements en fonction de la subvention choisie
+// Script pour la cascade Client → Subvention → Financement dans les paiements.
+// Formats : subventions [Référence – Projet], financements [Référence – Projet] (sans nom client).
 ?>
 <script>
 jQuery(document).ready(function() {
+    if (!jQuery('#fk_soc').length || !jQuery('#fk_sub').length || !jQuery('#fk_fin').length) {
+        return;
+    }
     // Récupérer le jeton CSRF
     var csrfToken = jQuery('input[name="token"]').val();
     if (!csrfToken) {
         csrfToken = jQuery('input[name="newtoken"]').val();
     }
+    var interfaceUrl = '<?php echo dol_buildpath('/custom/subventions/scripts/interface.php', 1); ?>';
 
-    // Gestion du changement de subvention
-    jQuery('#fk_sub').change(function() {
-        var fk_sub = jQuery(this).val();
-        if (fk_sub > 0) {
-            jQuery.ajax({
-                url: '<?php echo dol_buildpath('/custom/subventions/scripts/interface.php', 1); ?>',
-                type: 'POST',
-                data: {
-                    action: 'getFinancementsBySubvention',
-                    fk_sub: fk_sub,
-                    token: csrfToken // Ajouter le jeton CSRF
-                },
-                dataType: 'json',
-                success: function(data) {
-                    if (data.success) {
-                        jQuery('#fk_fin').html(data.options);
-                    } else {
-                        console.error('Erreur : ', data.error);
-                        jQuery('#fk_fin').html('<option value="0">Erreur</option>');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Erreur AJAX : ', error);
-                    jQuery('#fk_fin').html('<option value="0">Erreur AJAX</option>');
-                }
-            });
+    function loadSubventions(fk_soc, selectedFkSub, afterLoad) {
+        if (!(fk_soc > 0)) {
+            jQuery('#fk_sub').html('<option value="0"></option>');
+            jQuery('#fk_fin').html('<option value="0"></option>');
+            return;
         }
+        jQuery.ajax({
+            url: interfaceUrl,
+            type: 'POST',
+            data: {
+                action: 'getSubventionsBySoc',
+                fk_soc: fk_soc,
+                token: csrfToken // Jeton CSRF
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    jQuery('#fk_sub').html(data.options);
+                    if (selectedFkSub > 0 && jQuery('#fk_sub option[value="' + selectedFkSub + '"]').length) {
+                        jQuery('#fk_sub').val(selectedFkSub);
+                    }
+                    if (typeof afterLoad === 'function') {
+                        afterLoad();
+                    }
+                } else {
+                    console.error('Erreur : ', data.error);
+                    jQuery('#fk_sub').html('<option value="0">Erreur</option>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erreur AJAX : ', error);
+                jQuery('#fk_sub').html('<option value="0">Erreur AJAX</option>');
+            }
+        });
+    }
+
+    function loadFinancements(fk_sub, fk_soc, selectedFkFin) {
+        if (!(fk_sub > 0)) {
+            jQuery('#fk_fin').html('<option value="0"></option>');
+            return;
+        }
+        jQuery.ajax({
+            url: interfaceUrl,
+            type: 'POST',
+            data: {
+                action: 'getFinancementsBySubvention',
+                fk_sub: fk_sub,
+                fk_soc: fk_soc,
+                token: csrfToken // Jeton CSRF
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    jQuery('#fk_fin').html(data.options);
+                    if (selectedFkFin > 0 && jQuery('#fk_fin option[value="' + selectedFkFin + '"]').length) {
+                        jQuery('#fk_fin').val(selectedFkFin);
+                    }
+                } else {
+                    console.error('Erreur : ', data.error);
+                    jQuery('#fk_fin').html('<option value="0">Erreur</option>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erreur AJAX : ', error);
+                jQuery('#fk_fin').html('<option value="0">Erreur AJAX</option>');
+            }
+        });
+    }
+
+    var lastSoc = jQuery('#fk_soc').val();
+    // Changement de client : subventions filtrées, sélections dépendantes réinitialisées
+    jQuery('#fk_soc').change(function() {
+        var fk_soc = jQuery(this).val();
+        if (fk_soc === lastSoc) {
+            return;
+        }
+        lastSoc = fk_soc;
+        jQuery('#fk_fin').html('<option value="0"></option>');
+        loadSubventions(fk_soc, 0, null);
     });
 
-    // Gestion du changement de financement
+    // Changement de subvention : financements de cette subvention (et de ce client)
+    jQuery('#fk_sub').change(function() {
+        loadFinancements(jQuery(this).val(), jQuery('#fk_soc').val(), 0);
+    });
+
+    // Gestion du changement de financement : client associé (cohérence)
     jQuery('#fk_fin').change(function() {
         var fk_fin = jQuery(this).val();
         if (fk_fin > 0) {
             jQuery.ajax({
-                url: '<?php echo dol_buildpath('/custom/subventions/scripts/interface.php', 1); ?>',
+                url: interfaceUrl,
                 type: 'POST',
                 data: {
                     action: 'getSocByFinancement',
                     fk_fin: fk_fin,
-                    token: csrfToken // Ajouter le jeton CSRF
+                    token: csrfToken // Jeton CSRF
                 },
                 dataType: 'json',
                 success: function(data) {
                     if (data.success) {
-                        jQuery('#fk_soc').val(data.options);
-						//jQuery('#fk_soc').trigger('change');
-						jQuery('#fk_soc').val(data.fk_soc).trigger('change.select2');
-
+                        lastSoc = data.fk_soc;
+                        jQuery('#fk_soc').val(data.fk_soc).trigger('change.select2');
                     } else {
                         console.error('Erreur : ', data.error);
                     }
@@ -339,13 +370,31 @@ jQuery(document).ready(function() {
             });
         }
     });
+
+    // Initialisation (création et édition) : sans client, aucune liste globale
+    var initSoc = jQuery('#fk_soc').val();
+    var initSub = jQuery('#fk_sub').val();
+    var initFin = jQuery('#fk_fin').val();
+    if (initSoc > 0) {
+        loadSubventions(initSoc, initSub, function() {
+            var currentSub = jQuery('#fk_sub').val();
+            if (currentSub > 0) {
+                loadFinancements(currentSub, initSoc, initFin);
+            } else {
+                jQuery('#fk_fin').html('<option value="0"></option>');
+            }
+        });
+    } else {
+        jQuery('#fk_sub').html('<option value="0"></option>');
+        jQuery('#fk_fin').html('<option value="0"></option>');
+    }
 });
 </script>
 <?php
 
 
 // Part to create
-if ($action == 'create') {
+if ($action === 'create') {
 	if (empty($permissiontoadd)) {
 		accessforbidden('NotEnoughPermissions', 0, 1);
 	}
@@ -390,7 +439,7 @@ if ($action == 'create') {
 }
 
 // Part to edit record
-if (($id || $ref) && $action == 'edit') {
+if (($id || $ref) && $action === 'edit') {
 	print load_fiche_titre($langs->trans("Payment"), '', $object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
@@ -424,7 +473,7 @@ if (($id || $ref) && $action == 'edit') {
 }
 
 // Part to show record
-if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
+if ($object->id > 0 && (empty($action) || ($action !== 'edit' && $action !== 'create'))) {
 	$head = paiementPrepareHead($object);
 
 	print dol_get_fiche_head($head, 'card', $langs->trans("Payment"), -1, $object->picto, 0, '', '', 0, '', 1);
@@ -432,16 +481,16 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	$formconfirm = '';
 
 	// Confirmation to delete (using preloaded confirm popup)
-	if ($action == 'delete' || ($conf->use_javascript_ajax && empty($conf->dol_use_jmobile))) {
+	if ($action === 'delete' || ($conf->use_javascript_ajax && empty($conf->dol_use_jmobile))) {
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeletePayment'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 'action-delete');
 	}
 	// Confirmation to delete line
-	if ($action == 'deleteline') {
+	if ($action === 'deleteline') {
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id.'&lineid='.$lineid, $langs->trans('DeleteLine'), $langs->trans('ConfirmDeleteLine'), 'confirm_deleteline', '', 0, 1);
 	}
 
 	// Confirmation of action xxxx (You can use it for xxx = 'close', xxx = 'reopen', ...)
-	if ($action == 'xxx') {
+	if ($action === 'xxx') {
 		$text = $langs->trans('ConfirmActionXxx', $object->ref);
 		/*if (isModEnabled('notification'))
 		{
@@ -453,16 +502,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		$formquestion = array();
 
-		/*
-		$forcecombo=0;
-		if ($conf->browser->name == 'ie') $forcecombo = 1;	// There is a bug in IE10 that make combo inside popup crazy
-		$formquestion = array(
-			// 'text' => $langs->trans("ConfirmClone"),
-			// array('type' => 'checkbox', 'name' => 'clone_content', 'label' => $langs->trans("CloneMainAttributes"), 'value' => 1),
-			// array('type' => 'checkbox', 'name' => 'update_prices', 'label' => $langs->trans("PuttingPricesUpToDate"), 'value' => 1),
-			// array('type' => 'other',    'name' => 'idwarehouse',   'label' => $langs->trans("SelectWarehouseForStockDecrease"), 'value' => $formproduct->selectWarehouses(GETPOST('idwarehouse')?GETPOST('idwarehouse'):'ifone', 'idwarehouse', '', 1, 0, 0, '', 0, $forcecombo))
-		);
-		*/
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('XXX'), $text, 'confirm_xxx', $formquestion, 0, 1, 220);
 	}
 
@@ -487,7 +526,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	else {
 		$linkback = '<a href="'.dol_buildpath('/subventions/subvention_card.php', 1).'?id='.$sub.'">'.$langs->trans("BackToSub").'</a>';
 	}
-	
+
 	$morehtmlref = '<div class="refidno">';
 	$morehtmlref .= '</div>';
 
@@ -526,20 +565,20 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		// Show object lines
 		$result = $object->getLinesArray();
 
-		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline') ? '' : '#line_'.GETPOSTINT('lineid')).'" method="POST">
+		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action !== 'editline') ? '' : '#line_'.GETPOSTINT('lineid')).'" method="POST">
 		<input type="hidden" name="token" value="' . newToken().'">
-		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline').'">
+		<input type="hidden" name="action" value="' . (($action !== 'editline') ? 'addline' : 'updateline').'">
 		<input type="hidden" name="mode" value="">
 		<input type="hidden" name="page_y" value="">
 		<input type="hidden" name="id" value="' . $object->id.'">
 		';
 
-		if (!empty($conf->use_javascript_ajax) && $object->status == 0) {
+		if (!empty($conf->use_javascript_ajax) && $object->status === 0) {
 			include DOL_DOCUMENT_ROOT.'/core/tpl/ajaxrow.tpl.php';
 		}
 
 		print '<div class="div-table-responsive-no-min">';
-		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+		if (!empty($object->lines) || ($object->status === $object::STATUS_DRAFT && $permissiontoadd && $action !== 'selectlines' && $action !== 'editline')) {
 			print '<table id="tablelines" class="noborder noshadow" width="100%">';
 		}
 
@@ -548,8 +587,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		}
 
 		// Form to add new line
-		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
-			if ($action != 'editline') {
+		if ($object->status === 0 && $permissiontoadd && $action !== 'selectlines') {
+			if ($action !== 'editline') {
 				// Add products/services form
 
 				$parameters = array();
@@ -563,7 +602,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 		}
 
-		if (!empty($object->lines) || ($object->status == $object::STATUS_DRAFT && $permissiontoadd && $action != 'selectlines' && $action != 'editline')) {
+		if (!empty($object->lines) || ($object->status === $object::STATUS_DRAFT && $permissiontoadd && $action !== 'selectlines' && $action !== 'editline')) {
 			print '</table>';
 		}
 		print '</div>';
@@ -573,7 +612,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 
 	// Buttons for actions
-	if ($action != 'presend' && $action != 'editline') {
+	if ($action !== 'presend' && $action !== 'editline') {
 		print '<div class="tabsAction">'."\n";
 		$parameters = array();
 		$reshook = $hookmanager->executeHooks('addMoreActionsButtons', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
@@ -596,7 +635,28 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			print dolGetButtonAction('', $langs->trans("Delete"), 'delete', $deleteUrl, $buttonId, $permissiontodelete, $params);
 		}
 		print '</div>'."\n";
-	}	
+	}
+
+	if ($action !== 'presend') {
+		print '<div class="fichecenter"><div class="fichehalfleft">';
+		print '<a name="builddoc"></a>'; // ancre
+
+		$includedocgeneration = getDolGlobalInt('SUBVENTIONS_ENABLE_DOC_PAIEMENT', 1);
+
+		// Documents (upload, list, download, delete, PDF receipt via document tab models)
+		if ($includedocgeneration) {
+			$objref = dol_sanitizeFileName($object->ref);
+			$relativepath = $objref.'/'.$objref.'.pdf';
+			$filedir = $conf->subventions->dir_output.'/'.$object->element.'/'.$objref;
+			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
+			$genallowed = $permissiontoread; // If you can read, you can build the PDF to read content
+			$delallowed = $permissiontoadd; // If you can create/edit, you can remove a file on card
+			print $formfile->showdocuments('subventions:Paiement', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
+		}
+
+		print '</div><div class="fichehalfright">';
+		print '</div></div>';
+	}
 }
 
 // End of page

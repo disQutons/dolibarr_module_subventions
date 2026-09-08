@@ -1,6 +1,7 @@
 <?php
 /* Copyright (C) 2023		Laurent Destailleur			<eldy@users.sourceforge.net>
  * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann				<d.bachmann@digiconn.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +73,7 @@ class ActionsSubventions extends CommonHookActions
 	{
 		$this->db = $db;
 	}
-	
+
 	/**
 	 * Hook pour afficher des informations dans l'onglet vue d'ensemble d'un projet
 	 */
@@ -83,7 +84,7 @@ class ActionsSubventions extends CommonHookActions
 
 		global $conf, $user, $langs;
 
-		if ($object->element == 'project' && getDolGlobalInt('SUBVENTIONS_PROJECT')) {
+		if ($object->element === 'project' && getDolGlobalInt('SUBVENTIONS_PROJECT')) {
 			$this->results = array(
 				'subvention' => array(
 				'name' => $langs->trans("Subsidys"),
@@ -123,13 +124,13 @@ class ActionsSubventions extends CommonHookActions
 		if (!isset($parameters['object']->element)) {
 			return 0;
 		}
-		if ($parameters['mode'] == 'remove') {
+		if ($parameters['mode'] === 'remove') {
 			// used to make some tabs removed
 			return 0;
-		} elseif ($parameters['mode'] == 'add') {
+		} elseif ($parameters['mode'] === 'add') {
 			$langs->load('subventions@subventions');
 			// used when we want to add some tabs
-			
+
 			$counter = count($parameters['head']);
 			$element = $parameters['object']->element;
 			$id = $parameters['object']->id;

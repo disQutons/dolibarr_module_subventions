@@ -4,7 +4,8 @@
  * Copyright (C) 2005-2012  Regis Houssin           <regis.houssin@inodbox.com>
  * Copyright (C) 2015       Jean-François Ferry     <jfefe@aternatik.fr>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
- * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +27,7 @@
  *	\brief      Home page of subventions top menu
  */
 
- 
+
 /*
 // FBR récupération des erreurs php
 error_reporting(E_ALL);
@@ -44,7 +45,7 @@ $tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
 $tmp2 = realpath(__FILE__);
 $i = strlen($tmp) - 1;
 $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] === $tmp2[$j]) {
 	$i--;
 	$j--;
 }
@@ -93,7 +94,7 @@ $action = GETPOST('action', 'aZ09');
 
 // TODO Réfléchir à comment modifier $mode et $montant. Créer un second objet ?
 $mode = GETPOST("mode","alpha") ? GETPOST("mode","alpha") : 'subvention';
-if ($mode== -1) { $mode = 'subvention'; }
+if ($mode === -1) { $mode = 'subvention'; }
 
 $montant = GETPOST("montant") ? GETPOST("montant") : 'montant_acc';
 
@@ -115,15 +116,12 @@ if ($user->socid > 0) {
 //$hookmanager->initHooks(array($object->element.'index'));
 
 // Security check (enable the most restrictive one)
-//if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) $socid = $user->socid;
 //if (!isModEnabled('subventions')) {
 //	accessforbidden('Module not enabled');
 //}
 if (! $user->hasRight('subventions', 'subvention', 'read')) {
 	accessforbidden();
 }
-//restrictedArea($user, 'subventions', 0, 'subventions_myobject', 'myobject', '', 'rowid');
 //if (empty($user->admin)) {
 //	accessforbidden('Must be admin');
 //}
@@ -175,7 +173,7 @@ dol_mkdir($dir);
 
 $stats = new Subventionstats($db,'financement',$montant,$socid,$userid,$object_fundingsource);
 
-if ($object_status != '' && $object_status >= 0) {
+if ($object_status !== '' && $object_status >= 0) {
 	$stats->where .= ' AND x.status IN ('.$db->sanitize($object_status).')';
 }
 
@@ -213,6 +211,24 @@ $arrayyears = array(0 => $langs->trans("AllYears")) + $arrayyears;
 
 print $form->selectarray('year', $arrayyears, $year, 0, 0, 0, '', 0, 0, 0, '', 'width75');
 print '</td><td class="left" colspan="2"><input type="submit" name="submit" class="button small" value="'.$langs->trans("Refresh").'"></td></tr>';
+
+// Customer (entity-safe company list)
+print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
+print $form->select_company($socid, 'socid', '', 1, 0, 0, array(), 0, 'minwidth300');
+print '</td><td></td></tr>';
+
+// Funding source (dictionary values)
+$arrayfinanceurs = array('' => $langs->trans("All"));
+$sqlf = "SELECT rowid, ref, label FROM ".MAIN_DB_PREFIX."c_subventions_financeur WHERE active = 1 ORDER BY position ASC, label ASC";
+$resqlf = $db->query($sqlf);
+if ($resqlf) {
+	while ($objf = $db->fetch_object($resqlf)) {
+		$arrayfinanceurs[$objf->rowid] = $objf->label.' ('.$objf->ref.')';
+	}
+}
+print '<tr><td>'.$langs->trans("FundingSource").'</td><td>';
+print $form->selectarray('object_fundingsource', $arrayfinanceurs, $object_fundingsource, 1, 0, 0, '', 0, 0, 0, '', 'minwidth300');
+print '</td><td class="left"><input type="submit" name="submit" class="button small" value="'.$langs->trans("Refresh").'"></td></tr>';
 print '</table>';
 print '</form>';
 //print '</div>';
@@ -231,17 +247,17 @@ print '<td class="left">'.$langs->trans("FundingSourceGroup").'</td>';
 print '<td class="center">'.$langs->trans("NbRequest").'</td>';
 print '<td class="center">'.$langs->trans("AmountDem").'</td>';
 print '<td class="center">'.$langs->trans("AmountAcc").'</td>';
-print '<td class="center">% acc</td>';
+print '<td class="center">'.$langs->trans("PercentAcc").'</td>';
 print '<td class="center">'.$langs->trans("AmountFin").'</td>';
-print '<td class="center">% fin</td>';
+print '<td class="center">'.$langs->trans("PercentFin").'</td>';
 print '</tr>';
 
 $data = $stats->getStatsFundingSource($summary = true, $year);
 foreach ($data as $val) {
     // Calcul des %
-    $percentAccDem = (!empty($val['montant_dem']) && $val['montant_dem'] != 0)
+    $percentAccDem = (!empty($val['montant_dem']) && $val['montant_dem'] !== 0)
         ? round(($val['montant_acc'] / $val['montant_dem']) * 100, 2) : 0;
-    $percentFinAcc = (!empty($val['montant_acc']) && $val['montant_acc'] != 0)
+    $percentFinAcc = (!empty($val['montant_acc']) && $val['montant_acc'] !== 0)
         ? round(($val['montant_fin'] / $val['montant_acc']) * 100, 2) : 0;
 
     // Détermination de la couleur (vert/rouge)
@@ -266,7 +282,7 @@ foreach ($data as $val) {
     print '<td class="right"><span class="amount">'.price(price2num($val['montant_fin'], 'MT'), 1).'</span></td>';
     print '<td class="right opacitylow" style="color: '.$colorFinAcc.';">'.$percentFinAcc.'%</td>';
     print '</tr>';
-	
+
 	// Mise à jour des totaux
     $total_nb += $val['nb'];
     $total_montant_dem += $val['montant_dem'];
@@ -305,18 +321,18 @@ print '<td class="left">'.$langs->trans("FundingSource").'</td>';
 print '<td class="center">'.$langs->trans("NbRequest").'</td>';
 print '<td class="center">'.$langs->trans("AmountDem").'</td>';
 print '<td class="center">'.$langs->trans("AmountAcc").'</td>';
-print '<td class="center">% acc</td>';
+print '<td class="center">'.$langs->trans("PercentAcc").'</td>';
 print '<td class="center">'.$langs->trans("AmountFin").'</td>';
-print '<td class="center">% fin</td>';
+print '<td class="center">'.$langs->trans("PercentFin").'</td>';
 //print '<td class="center">'.$langs->trans("LastRequest").'</td>';
 print '</tr>';
 
 $data = $stats->getStatsFundingSource($summary = false, $year);
 foreach ($data as $val) {
     // Calcul des %
-    $percentAccDem = (!empty($val['montant_dem']) && $val['montant_dem'] != 0)
+    $percentAccDem = (!empty($val['montant_dem']) && $val['montant_dem'] !== 0)
         ? round(($val['montant_acc'] / $val['montant_dem']) * 100, 2) : 0;
-    $percentFinAcc = (!empty($val['montant_acc']) && $val['montant_acc'] != 0)
+    $percentFinAcc = (!empty($val['montant_acc']) && $val['montant_acc'] !== 0)
         ? round(($val['montant_fin'] / $val['montant_acc']) * 100, 2) : 0;
 
     // Détermination de la couleur (vert/rouge)

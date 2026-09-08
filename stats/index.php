@@ -4,7 +4,8 @@
  * Copyright (C) 2005-2012  Regis Houssin           <regis.houssin@inodbox.com>
  * Copyright (C) 2015       Jean-François Ferry     <jfefe@aternatik.fr>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
- * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
+ * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,15 +109,12 @@ if ($user->socid > 0) {
 //$hookmanager->initHooks(array($object->element.'index'));
 
 // Security check (enable the most restrictive one)
-//if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) $socid = $user->socid;
 //if (!isModEnabled('subventions')) {
 //	accessforbidden('Module not enabled');
 //}
 if (! $user->hasRight('subventions', 'subvention', 'read')) {
 	accessforbidden();
 }
-//restrictedArea($user, 'subventions', 0, 'subventions_myobject', 'myobject', '', 'rowid');
 //if (empty($user->admin)) {
 //	accessforbidden('Must be admin');
 //}
@@ -200,17 +198,17 @@ if (!$mesg) {
 	$px1->SetMaxValue($px1->GetCeilMaxValue());
 	$px1->SetWidth($WIDTH);
 	$px1->SetHeight($HEIGHT);
-	if ($mode == 'subvention') {
+	if ($mode === 'subvention') {
 		$px1->SetYLabel($langs->trans("NumberOfSubsidys"));
-	} elseif ($mode == 'financement') {
+	} elseif ($mode === 'financement') {
 		$px1->SetYLabel($langs->trans("NumberOfFundings"));
 	}
 	$px1->SetShading(3);
 	$px1->SetHorizTickIncrement(1);
 	$px1->mode = 'depth';
-	if ($mode == 'subvention') {
+	if ($mode === 'subvention') {
 		$px1->SetTitle($langs->trans("NumberOfSubsidysByMonth"));
-	} elseif ($mode == 'financement') {
+	} elseif ($mode === 'financement') {
 		$px1->SetTitle($langs->trans("NumberOfFundingsByMonth"));
 	}
 	$px1->draw($filenamenb, $fileurlnb);
@@ -238,17 +236,17 @@ if (!$mesg) {
 	$px2->SetMinValue(min(0, $px2->GetFloorMinValue()));
 	$px2->SetWidth($WIDTH);
 	$px2->SetHeight($HEIGHT);
-	if ($mode == 'subvention') {
+	if ($mode === 'subvention') {
 		$px2->SetYLabel($langs->trans("AmountOfSubsidys"));
-	} elseif ($mode == 'financement') {
+	} elseif ($mode === 'financement') {
 		$px2->SetYLabel($langs->trans("AmountOfFundings"));
 	}
 	$px2->SetShading(3);
 	$px2->SetHorizTickIncrement(1);
 	$px2->mode = 'depth';
-	if ($mode == 'subvention') {
+	if ($mode === 'subvention') {
 		$px2->SetTitle($langs->trans("AmountOfSubsidysByMonth"));
-	} elseif ($mode == 'financement') {
+	} elseif ($mode === 'financement') {
 		$px2->SetTitle($langs->trans("AmountOfFundingsByMonth"));
 	}
 	$px2->draw($filenameamount, $fileurlamount);
@@ -397,7 +395,7 @@ foreach ($data as $val) {
 		print '</tr>';
 	}
 
-	// Calcul %	
+	// Calcul %
 	$greennb = (empty($val['nb_diff']) || $val['nb_diff'] >= 0);
 	$greentotal = (empty($val['total_diff']) || $val['total_diff'] >= 0);
 	$greenavg = (empty($val['avg_diff']) || $val['avg_diff'] >= 0);

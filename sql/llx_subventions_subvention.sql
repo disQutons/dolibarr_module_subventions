@@ -1,4 +1,5 @@
 -- Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+-- Copyright (C) 2026		Daniel Bachmann			    <d.bachmann@digiconn.de>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -47,3 +48,16 @@ CREATE TABLE llx_subventions_subvention(
 	entity integer DEFAULT 1 NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
+
+-- Foreign keys
+ALTER TABLE llx_subventions_subvention ADD CONSTRAINT fk_subventions_subvention_fk_soc FOREIGN KEY (fk_soc) REFERENCES llx_societe(rowid) ON DELETE RESTRICT;
+ALTER TABLE llx_subventions_subvention ADD CONSTRAINT fk_subventions_subvention_fk_project FOREIGN KEY (fk_project) REFERENCES llx_projet(rowid) ON DELETE SET NULL;
+
+-- Indexes
+CREATE INDEX idx_subventions_subvention_fk_soc ON llx_subventions_subvention(fk_soc);
+CREATE INDEX idx_subventions_subvention_fk_project ON llx_subventions_subvention(fk_project);
+
+-- Upgrade of installations created before model_pdf existed.
+-- Missing column is added, existing one is kept
+-- (Dolibarr ignores "column already exists" errors when (re)running this file).
+ALTER TABLE llx_subventions_subvention ADD COLUMN model_pdf varchar(255);

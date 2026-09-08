@@ -1,4 +1,5 @@
 -- Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+-- Copyright (C) 2026		Daniel Bachmann			    <d.bachmann@digiconn.de>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -15,10 +16,9 @@
 
 
 -- BEGIN MODULEBUILDER INDEXES
-ALTER TABLE llx_c_subventions_financeur ADD INDEX idx_subventions_financeur_rowid (rowid);
-ALTER TABLE llx_c_subventions_financeur ADD UNIQUE INDEX uk_subventions_financeur_ref (ref);
+--
 -- END MODULEBUILDER INDEXES
 
---ALTER TABLE llx_subventions_paiement ADD UNIQUE INDEX uk_subventions_paiement_fieldxy(fieldx, fieldy);
+--ALTER TABLE llx_c_subventions_financeur ADD UNIQUE INDEX uk_c_subventions_financeur_fieldxy(fieldx, fieldy);
 
---ALTER TABLE llx_subventions_paiement ADD CONSTRAINT llx_subventions_paiement_fk_field FOREIGN KEY (fk_field) REFERENCES llx_subventions_myotherobject(rowid);
+--ALTER TABLE llx_c_subventions_financeur ADD CONSTRAINT llx_c_subventions_financeur_fk_field FOREIGN KEY (fk_field) REFERENCES llx_subventions_myotherobject(rowid);

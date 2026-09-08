@@ -45,8 +45,7 @@ AmountPending=Montant en attente
 AmountRefused=Montant refusé
 Path=Chemin
 SubsidysSetupPage=Paramétrage des subventions
-SubsidysDict=La liste des financeurs se trouvent dans la gestion des dictionnaires.
-# TODO SubsidysDict=La liste des financeurs et les comptes comptes qui s'y rattachent, se trouvent dans la gestion des dictionnaires.
+SubsidysDict=La liste des financeurs et les comptes comptes qui s'y rattachent, se trouvent dans la gestion des dictionnaires.
 # TODO AccountancyModule=Module Comptabilité
 ProjectModule=Module Projets
 StatisticsModule=Module Statistiques
@@ -74,8 +73,6 @@ RightsCreateUpdateSubsidy=Créer ou mettre à jour les subventions
 RightsDeleteFunding=Supprimer les financements
 RightsDeletePayment=Supprimer les paiements
 RightsDeleteSubsidy=Supprimer les subventions
-RightsExportSubsidyFundingAndPayment=
-RightsImportSubsidyFundingAndPayment=
 RightsReadFunding=Lire les financements
 RightsReadPayment=Lire les paiements
 RightsReadSubsidy=Lire les subventions
@@ -114,7 +111,26 @@ NumberOfFundings=Nombre de financements
 NumberOfFundingsByMonth=Nombre de financements par mois
 AmountOfFundings=Montant des financements
 AmountOfFundingsByMonth=Montant des financements par mois
+NbOfPaiements=Nombre de paiements
+AmountOfPaiements=Montant des paiements
+OpenAmount=Montant ouvert
+PaiementReceipt=Justificatif de paiement
+DashboardKPIs=Chiffres clés
+DocumentsModule=Documents
+SUBVENTIONS_ENABLE_DOC_SUBVENTION=Activer documents/PDF pour les subventions
+SUBVENTIONS_ENABLE_DOC_FINANCEMENT=Activer documents/PDF pour les financements
+SUBVENTIONS_ENABLE_DOC_PAIEMENT=Activer documents/PDF pour les paiements
+DocsDisabled=Fonction documents désactivée
+FinancementReceipt=Justificatif de financement
 AmountRemaining=Montant restant
+STATUS_DRAFT=Non déposé
+STATUS_VALIDATED=Déposé
+STATUS_ACCEPTED=Accepté
+STATUS_FINANCED=Financé
+STATUS_EVALUATED=Bilan déposé
+STATUS_CLOTURED=Clôturé
+STATUS_REFUSED=Refusé
+STATUS_CANCELED=Annulé
 STATUS_DRAFT=Non déposé
 STATUS_VALIDATED=Déposé
 STATUS_ACCEPTED=Accepté
@@ -138,6 +154,9 @@ FundingSourceGroup=Groupe de financeurs
 #
 # Common Translations
 #
+NewSubvention=Nouvelle subvention
+NewFunding=Nouveau financement
+NewPayment=Nouveau paiement
 AddFunding=Ajouter financement
 ClassNotFound=Class non trouvée
 DeleteFunding=Supprimer financement
@@ -157,3 +176,60 @@ SubsidysSetup=Paramétrage subventions
 BackToSub=Retour à la subvention
 XXX=
 bytes=octets
+Creation=Créé
+
+#
+# Menu translations
+#
+MenuSubvention=Subvention
+MenuNewSubvention=Nouvelle subvention
+MenuListSubventions=Liste des subventions
+MenuDraftSubvention=Non déposées
+MenuValidatedSubvention=Attente de réponse
+MenuAcceptedSubvention=Attente de financement
+MenuEvaluatedSubvention=Bilan à déposer
+MenuCloturedSubvention=Clôturé
+MenuRefusedSubvention=Refusé
+MenuStatistics=Statistiques
+MenuFunding=Financements
+MenuNewFunding=Nouveau financement
+MenuListFundings=Liste des financements
+MenuPayment=Paiements
+MenuNewPayment=Nouveau paiement
+MenuListPayments=Liste des paiements
+
+#
+# Class field translations
+#
+ProjectName=Nom du projet
+AmountRequested=Montant demandé
+AmountAccepted=Montant accepté
+AmountFinanced=Montant financé
+AmountPending=Montant en attente
+AmountRefused=Montant refusé
+EvaluationCriteria=Critères d'évaluation
+BeginProjectDate=Date début projet
+EndProjectDate=Date fin projet
+EspectingDate=Date attendue projet
+EvaluationDate=Date rendu bilan
+Amount=Montant
+DatePayment=Date paiement
+ReferenceSubvention=Réf subvention
+ReferenceFunding=Réf financement
+FundingSourceType=Type de financeur
+FundingSourceListCanBeModifiedInDictionary=La liste des financeurs peut être modifiée dans les dictionnaires
+
+#
+# Dictionary translations
+#
+DictionaryFinanceursLabel=Subventions : Financeurs principaux et comptabilité
+FinanceurAutre=Autre
+FinanceurEtat=État
+FinanceurRegion=Région
+FinanceurDepartement=Département
+FinanceurCommune=Commune
+FinanceurOrganismesSociaux=Organismes sociaux (CAF, etc.)
+FinanceurFondsEuropeens=Fonds européens (FSE, FEDER, etc.)
+FinanceurASP=L'agence de services et de paiement (emplois aidés)
+FinanceurAutresEtablissementsPublics=Autres établissements publics
+FinanceurAidesPrivees=Aides privées (fondation)
