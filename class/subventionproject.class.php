@@ -254,6 +254,9 @@ class SubventionProject extends CommonObject
 				$this->entity = $obj->entity;
 				$this->ref = $obj->subvention_ref;
 				$this->status = $obj->subvention_status;
+				if (!empty($this->annee)) {
+					$this->ref_customer = (string) $this->annee;
+				}
 
 				if (!empty($obj->fk_soc)) {
 					$this->fk_soc = (int) $obj->fk_soc;

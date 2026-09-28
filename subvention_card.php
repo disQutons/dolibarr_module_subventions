@@ -968,12 +968,17 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 
 			$totalVentilated = 0;
+			$distinctProjects = array();
 			foreach ($ventilations as $v) {
 				$totalVentilated += $v->amount;
+				if (!empty($v->fk_project)) {
+					$distinctProjects[$v->fk_project] = true;
+				}
 			}
 			$montantRef = !empty($object->montant_acc) ? (float) $object->montant_acc : 0;
 			$percentTotal = ($montantRef > 0) ? round($totalVentilated / $montantRef * 100, 1) : 0;
 			$remaining = $montantRef - $totalVentilated;
+			$canAutoRepart = (!empty($object->date_d_projet) && !empty($object->date_f_projet) && $remaining > 0.01 && count($distinctProjects) <= 1);
 
 			// Confirmation dialog for deletion
 			if ($action == 'deleteventilation') {
@@ -1034,7 +1039,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 						<td class="nobordernopadding titre_right wordbreakimp right valignmiddle col-right">';
 						if ($permissiontoadd) {
 							print '<div class="inline-block valignmiddle">';
-							if (!empty($object->date_d_projet) && !empty($object->date_f_projet)) {
+							if ($canAutoRepart) {
 								print '<a class="button small marginleftonly" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=autorepartition&token='.newToken().'" title="'.$langs->trans('AutoYearAllocation').'">
 									<span class="fa fa-calculator valignmiddle paddingright"></span>'.$langs->trans('AutoYearAllocationShort').'
 								</a> ';
@@ -1054,8 +1059,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					<tbody>
 						<tr class="liste_titre">
 							<td style="width: 24px"></td>';
-							print '<td style="width: 100px">'.$langs->trans("Year").'</td>';
 							print '<td>'.$langs->trans("Project").'</td>';
+							print '<td style="width: 100px">'.$langs->trans("Year").'</td>';
 							print '<td class="center" style="width: 100px">'.$langs->trans("DurationMonths").'</td>';
 							print '<td class="right" style="width: 150px">'.$langs->trans("AllocatedAmount").'</td>';
 							print '<td class="right" style="width: 100px">'.$langs->trans("AllocatedPercentage").'</td>';
@@ -1081,8 +1086,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					print '<input type="hidden" name="ventilid" value="'.$v->id.'">';
 					print '<tr class="oddeven">';
 					print '<td></td>';
-					// Year input
-					print '<td><input type="number" name="ventil_annee" value="'.(!empty($v->annee) ? $v->annee : '').'" min="2000" max="2100" size="5" class="flat width75"></td>';
 					// Project name (not editable)
 					$proj = new Project($db);
 					$proj->fetch($v->fk_project);
@@ -1091,6 +1094,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 						print ' <span class="opacitymedium">- '.dol_escape_htmltag($proj->title).'</span>';
 					}
 					print '</td>';
+					// Year input
+					print '<td><input type="number" name="ventil_annee" value="'.(!empty($v->annee) ? $v->annee : '').'" min="2000" max="2100" size="5" class="flat width75"></td>';
 					// Months input
 					print '<td class="center"><input type="number" name="ventil_nb_mois" value="'.(!empty($v->nb_mois) ? $v->nb_mois : '').'" min="1" max="120" size="3" class="flat width50 center"></td>';
 					print '<td class="right"><input type="text" name="ventil_amount" value="'.price($v->amount).'" size="10" class="flat right"></td>';
@@ -1106,8 +1111,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					// Display row
 					print '<tr class="oddeven">';
 					print '<td></td>';
-					// Year
-					print '<td>'.(!empty($v->annee) ? '<strong>'.$v->annee.'</strong>' : '<span class="opacitymedium">-</span>').'</td>';
+					// Project
 					$proj = new Project($db);
 					$proj->fetch($v->fk_project);
 					print '<td>'.$proj->getNomUrl(1);
@@ -1115,6 +1119,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 						print ' <span class="opacitymedium">- '.dol_escape_htmltag($proj->title).'</span>';
 					}
 					print '</td>';
+					// Year
+					print '<td>'.(!empty($v->annee) ? '<strong>'.$v->annee.'</strong>' : '<span class="opacitymedium">-</span>').'</td>';
 					// Months
 					print '<td class="center">'.(!empty($v->nb_mois) ? $v->nb_mois.' '.$langs->trans('Months') : '<span class="opacitymedium">-</span>').'</td>';
 					print '<td class="right"><span class="amount">'.price($v->amount, 0, $langs, 1, -1, -1, $conf->currency).'</span></td>';
@@ -1137,16 +1143,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				print '<input type="hidden" name="action" value="addventilation">';
 				print '<tr class="oddeven">';
 				print '<td></td>';
-				// Year selector
-				print '<td>';
-				print '<select class="flat width75" name="ventil_annee" id="ventil_annee">';
-				print '<option value="0">&nbsp;</option>';
-				for ($y = $currentYear - 2; $y <= $currentYear + 5; $y++) {
-					$selected = ($y == $currentYear) ? ' selected' : '';
-					print '<option value="'.$y.'"'.$selected.'>'.$y.'</option>';
-				}
-				print '</select>';
-				print '</td>';
 				// Project selector
 				print '<td>';
 				$projectOptions = $formproject->select_projects_list(-1, 0, 'ventil_projectid', 64, 0, 1, 1, 0, 0, 1);
@@ -1164,6 +1160,16 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 					include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
 					print ajax_combobox('ventil_projectid');
 				}
+				print '</td>';
+				// Year selector
+				print '<td>';
+				print '<select class="flat width75" name="ventil_annee" id="ventil_annee">';
+				print '<option value="0">&nbsp;</option>';
+				for ($y = $currentYear - 2; $y <= $currentYear + 5; $y++) {
+					$selected = ($y == $currentYear) ? ' selected' : '';
+					print '<option value="'.$y.'"'.$selected.'>'.$y.'</option>';
+				}
+				print '</select>';
 				print '</td>';
 				// Months
 				print '<td class="center"><input type="number" name="ventil_nb_mois" value="" min="1" max="120" size="3" class="flat width50 center" placeholder="12"></td>';
