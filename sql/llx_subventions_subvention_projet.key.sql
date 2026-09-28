@@ -14,7 +14,8 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 
-ALTER TABLE llx_subventions_subvention_projet ADD UNIQUE INDEX uk_subventions_sub_proj (fk_subvention, fk_project);
+ALTER TABLE llx_subventions_subvention_projet ADD UNIQUE INDEX uk_subventions_sub_proj (fk_subvention, fk_project, annee);
 ALTER TABLE llx_subventions_subvention_projet ADD INDEX idx_subventions_sub_proj_fk_project (fk_project);
+ALTER TABLE llx_subventions_subvention_projet ADD INDEX idx_subventions_sub_proj_annee (annee);
 ALTER TABLE llx_subventions_subvention_projet ADD CONSTRAINT fk_subventions_sub_proj_subvention FOREIGN KEY (fk_subvention) REFERENCES llx_subventions_subvention (rowid);
 ALTER TABLE llx_subventions_subvention_projet ADD CONSTRAINT fk_subventions_sub_proj_project FOREIGN KEY (fk_project) REFERENCES llx_projet (rowid);

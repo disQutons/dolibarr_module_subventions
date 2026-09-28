@@ -64,6 +64,16 @@ class SubventionProject extends CommonObject
 	public $fk_project;
 
 	/**
+	 * @var int Budget year / exercice (e.g. 2026)
+	 */
+	public $annee;
+
+	/**
+	 * @var int Number of months (for auto prorata temporis)
+	 */
+	public $nb_mois;
+
+	/**
 	 * @var float Allocated amount
 	 */
 	public $amount;
@@ -167,10 +177,12 @@ class SubventionProject extends CommonObject
 		$this->db->begin();
 
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX.$this->table_element." (";
-		$sql .= "fk_subvention, fk_project, amount, note, datec, fk_user_creat, entity";
+		$sql .= "fk_subvention, fk_project, annee, nb_mois, amount, note, datec, fk_user_creat, entity";
 		$sql .= ") VALUES (";
 		$sql .= " ".((int) $this->fk_subvention);
 		$sql .= ", ".((int) $this->fk_project);
+		$sql .= ", ".(!empty($this->annee) ? ((int) $this->annee) : "NULL");
+		$sql .= ", ".(!empty($this->nb_mois) ? ((int) $this->nb_mois) : "NULL");
 		$sql .= ", ".((float) $this->amount);
 		$sql .= ", ".(!empty($this->note) ? "'".$this->db->escape($this->note)."'" : "NULL");
 		$sql .= ", '".$this->db->idate(dol_now())."'";
@@ -213,7 +225,7 @@ class SubventionProject extends CommonObject
 	 */
 	public function fetch($id)
 	{
-		$sql = "SELECT sp.rowid, sp.fk_subvention, sp.fk_project, sp.amount, sp.note, sp.datec, sp.tms, sp.fk_user_creat, sp.fk_user_modif, sp.entity,";
+		$sql = "SELECT sp.rowid, sp.fk_subvention, sp.fk_project, sp.annee, sp.nb_mois, sp.amount, sp.note, sp.datec, sp.tms, sp.fk_user_creat, sp.fk_user_modif, sp.entity,";
 		$sql .= " s.ref as subvention_ref, s.fk_soc, s.status as subvention_status";
 		$sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element." as sp";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."subventions_subvention as s ON s.rowid = sp.fk_subvention";
@@ -229,6 +241,8 @@ class SubventionProject extends CommonObject
 				$this->id = $obj->rowid;
 				$this->fk_subvention = $obj->fk_subvention;
 				$this->fk_project = $obj->fk_project;
+				$this->annee = !empty($obj->annee) ? (int) $obj->annee : null;
+				$this->nb_mois = !empty($obj->nb_mois) ? (int) $obj->nb_mois : null;
 				$this->amount = $obj->amount;
 				$this->total_ht = $obj->amount;
 				$this->total_ttc = $obj->amount;
@@ -277,6 +291,8 @@ class SubventionProject extends CommonObject
 
 		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
 		$sql .= " amount = ".((float) $this->amount);
+		$sql .= ", annee = ".(!empty($this->annee) ? ((int) $this->annee) : "NULL");
+		$sql .= ", nb_mois = ".(!empty($this->nb_mois) ? ((int) $this->nb_mois) : "NULL");
 		$sql .= ", note = ".(!empty($this->note) ? "'".$this->db->escape($this->note)."'" : "NULL");
 		$sql .= ", fk_user_modif = ".((int) $user->id);
 		$sql .= " WHERE rowid = ".((int) $this->id);
@@ -327,13 +343,13 @@ class SubventionProject extends CommonObject
 	{
 		$records = array();
 
-		$sql = "SELECT sp.rowid, sp.fk_subvention, sp.fk_project, sp.amount, sp.note, sp.datec,";
+		$sql = "SELECT sp.rowid, sp.fk_subvention, sp.fk_project, sp.annee, sp.nb_mois, sp.amount, sp.note, sp.datec,";
 		$sql .= " sp.fk_user_creat, sp.fk_user_modif,";
 		$sql .= " p.ref as project_ref, p.title as project_title";
 		$sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element." as sp";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."projet as p ON p.rowid = sp.fk_project";
 		$sql .= " WHERE sp.fk_subvention = ".((int) $subvention_id);
-		$sql .= " ORDER BY sp.datec ASC";
+		$sql .= " ORDER BY COALESCE(sp.annee, 9999) ASC, sp.rowid ASC";
 
 		dol_syslog(get_class($this)."::fetchAllBySubvention", LOG_DEBUG);
 		$resql = $this->db->query($sql);
@@ -348,6 +364,8 @@ class SubventionProject extends CommonObject
 				$record->id = $obj->rowid;
 				$record->fk_subvention = $obj->fk_subvention;
 				$record->fk_project = $obj->fk_project;
+				$record->annee = !empty($obj->annee) ? (int) $obj->annee : null;
+				$record->nb_mois = !empty($obj->nb_mois) ? (int) $obj->nb_mois : null;
 				$record->amount = $obj->amount;
 				$record->total_ht = $obj->amount;
 				$record->total_ttc = $obj->amount;
@@ -440,5 +458,111 @@ class SubventionProject extends CommonObject
 			return $subvention->getNomUrl($withpicto, $option, $notooltip, $moreparam, $save_lastsearch_value);
 		}
 		return '';
+	}
+
+	/**
+	 * Generate automatic multi-year repartition (prorata temporis by month)
+	 *
+	 * @param  Subvention $subvention Subvention object
+	 * @param  User       $user       User executing the action
+	 * @param  int        $fk_project Project ID to assign to the ventilation
+	 * @return int                    Number of generated years or <0 if KO
+	 */
+	public function generateAutoRepartitionYears($subvention, $user, $fk_project)
+	{
+		if (empty($subvention->date_d_projet) || empty($subvention->date_f_projet)) {
+			$this->error = 'ErrorMissingProjectDates';
+			return -1;
+		}
+		if (empty($fk_project)) {
+			$this->error = 'ErrorFieldRequired';
+			return -1;
+		}
+
+		$start_year = (int) dol_print_date($subvention->date_d_projet, '%Y');
+		$start_month = (int) dol_print_date($subvention->date_d_projet, '%m');
+		$end_year = (int) dol_print_date($subvention->date_f_projet, '%Y');
+		$end_month = (int) dol_print_date($subvention->date_f_projet, '%m');
+
+		if ($start_year > $end_year || ($start_year == $end_year && $start_month > $end_month)) {
+			$this->error = 'ErrorStartDateGreaterThanEndDate';
+			return -1;
+		}
+
+		// Reference amount: montant_acc if > 0, otherwise montant_dem
+		$total_amount = (!empty($subvention->montant_acc) && $subvention->montant_acc > 0) ? (float) $subvention->montant_acc : (float) $subvention->montant_dem;
+		if ($total_amount <= 0) {
+			$this->error = 'ErrorAmountRequired';
+			return -1;
+		}
+
+		// Calculate months per year
+		$months_per_year = array();
+		$total_months = 0;
+		for ($y = $start_year; $y <= $end_year; $y++) {
+			if ($start_year == $end_year) {
+				$m = $end_month - $start_month + 1;
+			} elseif ($y == $start_year) {
+				$m = 12 - $start_month + 1;
+			} elseif ($y == $end_year) {
+				$m = $end_month;
+			} else {
+				$m = 12;
+			}
+			$months_per_year[$y] = $m;
+			$total_months += $m;
+		}
+
+		if ($total_months <= 0) {
+			$this->error = 'ErrorTotalMonthsZero';
+			return -1;
+		}
+
+		$this->db->begin();
+
+		// Delete existing records for this subvention and project having annee set
+		$sql_del = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
+		$sql_del .= " WHERE fk_subvention = ".((int) $subvention->id);
+		$sql_del .= " AND fk_project = ".((int) $fk_project);
+		$res_del = $this->db->query($sql_del);
+		if (!$res_del) {
+			$this->error = $this->db->lasterror();
+			$this->db->rollback();
+			return -1;
+		}
+
+		$sum_allocated = 0;
+		$years = array_keys($months_per_year);
+		$last_year = end($years);
+		$count = 0;
+
+		foreach ($months_per_year as $y => $m) {
+			if ($y == $last_year) {
+				// Cent-rounding compensation on last year
+				$amount = round($total_amount - $sum_allocated, 2);
+			} else {
+				$amount = round($total_amount * ($m / $total_months), 2);
+				$sum_allocated += $amount;
+			}
+
+			$alloc = new self($this->db);
+			$alloc->fk_subvention = $subvention->id;
+			$alloc->fk_project = $fk_project;
+			$alloc->annee = $y;
+			$alloc->nb_mois = $m;
+			$alloc->amount = $amount;
+			$alloc->note = $m.' '.(($m > 1) ? 'mois' : 'mois').' ('.round(($m / $total_months) * 100, 1).'%)';
+
+			$res = $alloc->create($user);
+			if ($res < 0) {
+				$this->error = $alloc->error;
+				$this->db->rollback();
+				return -1;
+			}
+			$count++;
+		}
+
+		$this->db->commit();
+		return $count;
 	}
 }

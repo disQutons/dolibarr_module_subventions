@@ -1121,6 +1121,19 @@ class modSubventions extends DolibarrModules
 			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_paiement', 'num_paiement', array('type' => 'varchar', 'value' => '50', 'null' => 'NULL'));
 		}
 
+		// Mise à jour structurelle pour la ventilation pluriannuelle (table subventions_subvention_projet)
+		if ($this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'rowid')) {
+			if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'annee')) {
+				$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_subvention_projet', 'annee', array('type' => 'integer', 'null' => 'NULL'));
+			}
+			if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'nb_mois')) {
+				$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_subvention_projet', 'nb_mois', array('type' => 'integer', 'null' => 'NULL'));
+			}
+			if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'entity')) {
+				$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_subvention_projet', 'entity', array('type' => 'integer', 'default' => 1, 'null' => 'NOT NULL'));
+			}
+		}
+
 		return $this->_init($sql, $options);
 	}
 

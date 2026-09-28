@@ -18,6 +18,8 @@ CREATE TABLE llx_subventions_subvention_projet(
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	fk_subvention integer NOT NULL,
 	fk_project integer NOT NULL,
+	annee integer DEFAULT NULL,
+	nb_mois integer DEFAULT NULL,
 	amount double(24,8) NOT NULL DEFAULT 0,
 	note text,
 	datec datetime NOT NULL,

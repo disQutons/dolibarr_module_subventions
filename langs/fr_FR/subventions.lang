@@ -217,3 +217,16 @@ ListSubventionsAllocatedProject=Liste des subventions ventilées sur ce projet
 ProjectAlreadyAllocated=Ce projet est déjà ventilé pour cette subvention
 VentilationOf=Ventilation de
 NoProjectVentilation=Aucune ventilation projet
+
+# Multi-year repartition
+AutoYearAllocation=Répartition pluriannuelle automatique
+AutoYearAllocationShort=Prorata temporis
+ConfirmAutoYearAllocation=Confirmez-vous le calcul automatique de la répartition par année au prorata du nombre de mois du projet pour le projet sélectionné ? (les ventilations existantes de ce projet seront remplacées)
+AutoYearAllocationSuccess=Répartition pluriannuelle calculée avec succès sur %s exercice(s)
+DurationMonths=Durée (mois)
+Months=mois
+Year=Année
+ErrorMissingProjectDates=Les dates de début et de fin de projet doivent être renseignées sur la subvention
+ErrorStartDateGreaterThanEndDate=La date de début de projet doit être antérieure à la date de fin
+ErrorAmountRequired=Un montant accepté ou demandé supérieur à 0 est requis
+ErrorTotalMonthsZero=La durée calculée du projet est nulle
