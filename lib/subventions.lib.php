@@ -313,12 +313,13 @@ function majstatut ($object){
         $m_ref = (float) $obj->montant_ref;
         $stat = (float) $obj->status;
         
-        if ($stat == 0 || $stat == 4 || $stat == 5) {
-            // Brouillon
-            // Déjà financée
-            // Bilan déposé
-            // Clôturée
-            $db->commit(); // On fait un commit pour les créations
+        if ($stat == 0 || $stat == 4 || $stat == 5 || $stat == 7 || $stat == 9) {
+            // 0: Brouillon
+            // 4: Bilan déposé
+            // 5: Clôturée
+            // 7: Archivée
+            // 9: Annulée
+            $db->commit();
             return 0;
         }
             else {

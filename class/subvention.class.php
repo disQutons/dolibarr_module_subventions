@@ -71,6 +71,7 @@ class Subvention extends CommonObject
 	const STATUS_EVALUATED = 4; //Bilan déposé
 	const STATUS_CLOTURED = 5; //Clôturé
 	const STATUS_REFUSED = 6; //Refusé
+	const STATUS_ARCHIVED = 7; //Archivé
 	const STATUS_CANCELED = 9; //Annulé
 
 	/**
@@ -149,7 +150,7 @@ class Subvention extends CommonObject
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
 		"model_pdf" => array("type" => "varchar(255)", "label" => "Model pdf", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
-		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "5", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon/Non déposée", "1" => "Financ&eacute;", "4" => "Clôtur&eacute;", "5" => "Bilan d&eacute;pos&eacute;", "6" => "Refusé", "9" => "Annul&eacute;"), "validate" => "1",),
+		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "5", "default" => "0", "index" => "1", "arrayofkeyval" => array("0" => "Draft", "1" => "Validated", "2" => "Accepted", "3" => "Financed", "4" => "Evaluated", "5" => "Clotured", "6" => "Refused", "7" => "Archived", "9" => "Canceled"), "validate" => "1",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
@@ -719,19 +720,40 @@ class Subvention extends CommonObject
 	 */
 	public function cancel($user, $notrigger = 0)
 	{
-		// Protection
-		if ($this->status != self::STATUS_VALIDATED) {
+		global $langs;
+
+		// Protection : impossible d'annuler si déjà annulé ou archivé
+		if ($this->status == self::STATUS_CANCELED || $this->status == self::STATUS_ARCHIVED) {
 			return 0;
 		}
 
-		/* if (! ((!getDolGlobalInt('MAIN_USE_ADVANCED_PERMS') && $user->hasRight('subventions','write'))
-		 || (getDolGlobalInt('MAIN_USE_ADVANCED_PERMS') && $user->hasRight('subventions','subventions_advance','validate'))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
+		// Protection : impossible d'annuler si des paiements ont déjà été reçus
+		if ((float) $this->montant_fin > 0) {
+			$this->error = $langs->trans('ErrorCannotCancelSubsidyWithPayments');
+			return -1;
+		}
 
 		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SUBVENTIONS_SUBVENTION_CANCEL');
+	}
+
+	/**
+	 * Archiver la subvention
+	 *
+	 * @param   User      $user       Utilisateur qui archive
+	 * @param   int<0,1>  $notrigger  1=Pas de triggers, 0=Triggers
+	 * @return  int                   <0 si KO, >0 si OK
+	 */
+	public function archive($user, $notrigger = 0)
+	{
+		global $langs;
+
+		// Protection : archivable uniquement si Clôturé, Refusé ou Annulé
+		if (!in_array($this->status, array(self::STATUS_CLOTURED, self::STATUS_REFUSED, self::STATUS_CANCELED))) {
+			$this->error = $langs->trans('ErrorCannotArchiveNonClosedSubsidy');
+			return -1;
+		}
+
+		return $this->setStatusCommon($user, self::STATUS_ARCHIVED, $notrigger, 'SUBVENTIONS_SUBVENTION_ARCHIVE');
 	}
 
     public function accepted($user, $notrigger = 0)
@@ -1027,24 +1049,25 @@ class Subvention extends CommonObject
 		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
 			global $langs;
 			//$langs->load("subventions@subventions");
-			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Validated');
-			$this->labelStatus[self::STATUS_ACCEPTED] = $langs->transnoentitiesnoconv('Accepted');
-			$this->labelStatus[self::STATUS_FINANCED] = $langs->transnoentitiesnoconv('Financed');
-			$this->labelStatus[self::STATUS_EVALUATED] = $langs->transnoentitiesnoconv('Evaluated');
-			$this->labelStatus[self::STATUS_CLOTURED] = $langs->transnoentitiesnoconv('Clotured');
-			$this->labelStatus[self::STATUS_REFUSED] = $langs->transnoentitiesnoconv('Refused');
-			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Validated');
-			$this->labelStatusShort[self::STATUS_ACCEPTED] = $langs->transnoentitiesnoconv('Accepted');
-			$this->labelStatusShort[self::STATUS_FINANCED] = $langs->transnoentitiesnoconv('Financed');
-			$this->labelStatusShort[self::STATUS_EVALUATED] = $langs->transnoentitiesnoconv('Evaluated');
-			$this->labelStatusShort[self::STATUS_CLOTURED] = $langs->transnoentitiesnoconv('Clotured');
-			$this->labelStatusShort[self::STATUS_REFUSED] = $langs->transnoentitiesnoconv('Refused');
+			$langs->load("subventions@subventions");
+			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('STATUS_DRAFT');
+			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('STATUS_VALIDATED');
+			$this->labelStatus[self::STATUS_ACCEPTED] = $langs->transnoentitiesnoconv('STATUS_ACCEPTED');
+			$this->labelStatus[self::STATUS_FINANCED] = $langs->transnoentitiesnoconv('STATUS_FINANCED');
+			$this->labelStatus[self::STATUS_EVALUATED] = $langs->transnoentitiesnoconv('STATUS_EVALUATED');
+			$this->labelStatus[self::STATUS_CLOTURED] = $langs->transnoentitiesnoconv('STATUS_CLOTURED');
+			$this->labelStatus[self::STATUS_REFUSED] = $langs->transnoentitiesnoconv('STATUS_REFUSED');
+			$this->labelStatus[self::STATUS_ARCHIVED] = $langs->transnoentitiesnoconv('STATUS_ARCHIVED');
+			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('STATUS_CANCELED');
+			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('STATUS_DRAFT');
+			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('STATUS_VALIDATED');
+			$this->labelStatusShort[self::STATUS_ACCEPTED] = $langs->transnoentitiesnoconv('STATUS_ACCEPTED');
+			$this->labelStatusShort[self::STATUS_FINANCED] = $langs->transnoentitiesnoconv('STATUS_FINANCED');
+			$this->labelStatusShort[self::STATUS_EVALUATED] = $langs->transnoentitiesnoconv('STATUS_EVALUATED');
+			$this->labelStatusShort[self::STATUS_CLOTURED] = $langs->transnoentitiesnoconv('STATUS_CLOTURED');
+			$this->labelStatusShort[self::STATUS_REFUSED] = $langs->transnoentitiesnoconv('STATUS_REFUSED');
+			$this->labelStatusShort[self::STATUS_ARCHIVED] = $langs->transnoentitiesnoconv('STATUS_ARCHIVED');
+			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('STATUS_CANCELED');
 		}
 
 		$statusType = 'status'.$status;
@@ -1072,10 +1095,13 @@ class Subvention extends CommonObject
 		        $statusType = 'status7';
 		        break;
 		    case self::STATUS_REFUSED :
-		        $statusType = 'status10';
+		        $statusType = 'status8';
+		        break;
+		    case self::STATUS_ARCHIVED :
+		        $statusType = 'status6';
 		        break;
 		    case self::STATUS_CANCELED :
-		        $statusType = 'status8';
+		        $statusType = 'status9';
 		        break;
 		}
 

@@ -246,6 +246,54 @@ if (empty($reshook)) {
 	$autocopy = 'MAIN_MAIL_AUTOCOPY_SUBVENTION_TO';
 	$trackid = 'subvention'.$object->id;
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
+
+	// Action: Refuser la subvention
+	if ($action == 'confirm_setrefuse' && $confirm == 'yes' && $permissiontoadd) {
+		$result = $object->refuse($user);
+		if ($result >= 0) {
+			setEventMessages($langs->trans("SubventionRefusedSuccess"), null, 'mesgs');
+			header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
+			exit;
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+		}
+	}
+
+	// Action: Annuler la subvention
+	if ($action == 'confirm_setcancel' && $confirm == 'yes' && $permissiontoadd) {
+		$result = $object->cancel($user);
+		if ($result >= 0) {
+			setEventMessages($langs->trans("SubventionCanceledSuccess"), null, 'mesgs');
+			header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
+			exit;
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+		}
+	}
+
+	// Action: Archiver la subvention
+	if ($action == 'confirm_archive' && $confirm == 'yes' && $permissiontoadd) {
+		$result = $object->archive($user);
+		if ($result >= 0) {
+			setEventMessages($langs->trans("SubventionArchivedSuccess"), null, 'mesgs');
+			header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
+			exit;
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+		}
+	}
+
+	// Action: Rouvrir / Réactiver la subvention
+	if ($action == 'confirm_reopen' && $confirm == 'yes' && $permissiontoadd) {
+		$result = $object->setDraft($user);
+		if ($result >= 0) {
+			setEventMessages($langs->trans("SubventionReopenedSuccess"), null, 'mesgs');
+			header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
+			exit;
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+		}
+	}
 }
 
 
@@ -396,16 +444,28 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 
 
-	// Confirmation of action xxxx (You can use it for xxx = 'close', xxx = 'reopen', ...)
-	if ($action == 'confirm_setrefuse') {
+	// Confirmation dialog: Refuser la subvention
+	if ($action == 'refuse') {
 		$text = $langs->trans('ConfirmActionRefuse', $object->ref);
-		$formquestion = array();
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('Refuse'), $text, 'confirm_setrefuse', array(), 'yes', 1, 220);
+	}
 
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('Refuse'), $text, 'refuse', $formquestion, 0, 1, 220);
+	// Confirmation dialog: Annuler la subvention
+	if ($action == 'cancel_sub') {
+		$text = $langs->trans('ConfirmCancelSubvention', $object->ref);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('CancelSubvention'), $text, 'confirm_setcancel', array(), 'yes', 1, 220);
+	}
 
-		if ($formconfirm) {
-			$object->refuse($user,0);
-		}
+	// Confirmation dialog: Archiver la subvention
+	if ($action == 'archive') {
+		$text = $langs->trans('ConfirmArchiveSubvention', $object->ref);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('Archive'), $text, 'confirm_archive', array(), 'yes', 1, 220);
+	}
+
+	// Confirmation dialog: Rouvrir la subvention
+	if ($action == 'reopen') {
+		$text = $langs->trans('ConfirmReopenSubvention', $object->ref);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('Reopen'), $text, 'confirm_reopen', array(), 'yes', 1, 220);
 	}
 
 	// Call Hook formConfirm
@@ -573,8 +633,13 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// Refuse | Back to draft
 			if ($object->status == $object::STATUS_VALIDATED) {
-				print dolGetButtonAction('', $langs->trans('Refuse'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_setrefuse&token='.newToken(), '', $permissiontoadd);
+				print dolGetButtonAction('', $langs->trans('Refuse'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refuse&token='.newToken(), '', $permissiontoadd);
 				print dolGetButtonAction('', $langs->trans('SetToDraft'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes&token='.newToken(), '', $permissiontoadd);
+			}
+
+			// Cancel (si Brouillon ou Déposé et aucun paiement)
+			if (($object->status == $object::STATUS_DRAFT || $object->status == $object::STATUS_VALIDATED) && (float) $object->montant_fin == 0) {
+				print dolGetButtonAction('', $langs->trans('CancelSubvention'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=cancel_sub&token='.newToken(), '', $permissiontoadd);
 			}
 
 			// Evaluate
@@ -582,7 +647,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				print dolGetButtonAction('', $langs->trans('Evaluate'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=evaluate&token='.newToken(), '', $permissiontoadd);
 			}
 
-			// Clôturer | Backfrom evaluate
+			// Clôturer | Back from evaluate
 			if ($object->status == $object::STATUS_EVALUATED) {
 				print dolGetButtonAction('', $langs->trans('SetFromEvaluate'), 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=setfinanced&token='.newToken(), '', $permissiontoadd);
 				print dolGetButtonAction('', $langs->trans('Cloture'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=cloture&token='.newToken(), '', $permissiontoadd);
@@ -593,8 +658,18 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				print dolGetButtonAction('', $langs->trans('SetFromEvaluate'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=evaluate&token='.newToken(), '', $permissiontoadd);
 			}
 
-			// Evaluate | Modify
-			if ($object->status != $object::STATUS_CLOTURED) {
+			// Archiver (si Clôturé, Refusé ou Annulé)
+			if (in_array($object->status, array($object::STATUS_CLOTURED, $object::STATUS_REFUSED, $object::STATUS_CANCELED))) {
+				print dolGetButtonAction('', $langs->trans('Archive'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=archive&token='.newToken(), '', $permissiontoadd);
+			}
+
+			// Rouvrir / Remettre en brouillon (si Annulé ou Refusé)
+			if ($object->status == $object::STATUS_CANCELED || $object->status == $object::STATUS_REFUSED) {
+				print dolGetButtonAction('', $langs->trans('Reopen'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=reopen&token='.newToken(), '', $permissiontoadd);
+			}
+
+			// Modify (disponible tant que non clôturé et non archivé)
+			if ($object->status != $object::STATUS_CLOTURED && $object->status != $object::STATUS_ARCHIVED) {
 				print dolGetButtonAction('', $langs->trans('Modify'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
 			}
 
