@@ -29,6 +29,20 @@ Requested=Demandé
 SetFromEvaluate=Action non terminée
 SetToEvaluate=Bilan à déposer
 ConfirmActionRefuse=Êtes-vous sûr de vouloir refuser cette subvention ? (tous les financements associés seront indiqués à 0)
+ConfirmCancelSubvention=Êtes-vous sûr de vouloir annuler cette subvention ?
+ConfirmArchiveSubvention=Êtes-vous sûr de vouloir archiver cette subvention ?
+ConfirmReopenSubvention=Êtes-vous sûr de vouloir rouvrir cette subvention et la remettre au statut brouillon ?
+CancelSubvention=Annuler la subvention
+SubventionRefusedSuccess=La subvention a été marquée comme refusée
+SubventionCanceledSuccess=La subvention a été annulée avec succès
+SubventionArchivedSuccess=La subvention a été archivée avec succès
+SubventionReopenedSuccess=La subvention a été rouverte et remise au statut brouillon
+ErrorCannotCancelSubsidyWithPayments=Impossible d'annuler une subvention pour laquelle des paiements ont déjà été reçus
+ErrorCannotArchiveNonClosedSubsidy=Seule une subvention clôturée, refusée ou annulée peut être archivée
+Archived=Archivée
+Canceled=Annulée
+Archive=Archiver
+Reopen=Rouvrir
 
 #
 # subvention_list.php
@@ -177,6 +191,7 @@ STATUS_FINANCED=Financé
 STATUS_EVALUATED=Bilan déposé
 STATUS_CLOTURED=Clôturé
 STATUS_REFUSED=Refusé
+STATUS_ARCHIVED=Archivé
 STATUS_CANCELED=Annulé
 FundingSourceType=Financeur
 ByFundingSource=Par financeurs

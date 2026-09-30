@@ -25,6 +25,20 @@ Requested=Requested
 SetFromEvaluate=Incomplete action
 SetToEvaluate=Report to be submitted
 ConfirmActionRefuse=Are you sure you want to refuse this grant? (all associated fundings will be set to 0)
+ConfirmCancelSubvention=Are you sure you want to cancel this grant?
+ConfirmArchiveSubvention=Are you sure you want to archive this grant?
+ConfirmReopenSubvention=Are you sure you want to reopen this grant and set it back to draft?
+CancelSubvention=Cancel grant
+SubventionRefusedSuccess=Grant marked as refused
+SubventionCanceledSuccess=Grant canceled successfully
+SubventionArchivedSuccess=Grant archived successfully
+SubventionReopenedSuccess=Grant reopened and set back to draft
+ErrorCannotCancelSubsidyWithPayments=Cannot cancel a grant with received payments
+ErrorCannotArchiveNonClosedSubsidy=Only a closed, refused or canceled grant can be archived
+Archived=Archived
+Canceled=Canceled
+Archive=Archive
+Reopen=Reopen
 #
 # subvention_list.php
 #
@@ -165,8 +179,9 @@ STATUS_ACCEPTED=Accepted
 STATUS_FINANCED=Funded
 STATUS_EVALUATED=Report submitted
 STATUS_CLOTURED=Closed
-STATUS_REFUSED=Refused
+STATUS_ARCHIVED=Archived
 STATUS_CANCELED=Canceled
+STATUS_REFUSED=Refused
 FundingSourceType=Funder
 ByFundingSource=By funders
 ByComparison=Amount comparison
