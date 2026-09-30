@@ -867,7 +867,12 @@ while ($i < $imaxinloop) {
 						$ledgerurl = DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref);
 						print '<a href="'.$ledgerurl.'" title="'.$langs->trans("ViewInLedger").'">'.yn(1, 1).' <span class="fa fa-book-open paddingleft"></span></a>';
 					} else {
-						print yn(0, 1);
+						if (getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy')) && function_exists('getSubventionsTransferJournalUrl')) {
+							$url_transfer = getSubventionsTransferJournalUrl('financement', $object);
+							print '<a href="'.$url_transfer.'" title="'.$langs->trans("AccountancyTransferJournal").'">'.yn(0, 1).' <span class="fa fa-arrow-right paddingleft opacitymedium"></span></a>';
+						} else {
+							print yn(0, 1);
+						}
 					}
 				} else {
 					print $object->showOutputField($val, $key, $object->$key, '');

@@ -29,7 +29,7 @@ CREATE TABLE llx_subventions_financement(
 	last_main_doc varchar(255), 
 	import_key varchar(14), 
 	model_pdf varchar(255), 
-	status integer DEFAULT 1 NOT NULL, 
+	status integer DEFAULT 0 NOT NULL, 
 	montant_dem double DEFAULT NULL, 
 	montant_acc double DEFAULT NULL, 
 	montant_fin double DEFAULT NULL, 

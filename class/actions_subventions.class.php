@@ -210,8 +210,9 @@ class ActionsSubventions extends CommonHookActions
 		$journal_od = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_JOURNAL', 'OD');
 		$journal_payment = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT', 'BQ');
 
-		$is_od_journal = (isset($object->nature) && $object->nature == 1) || ($object->code == $journal_od);
-		$is_payment_journal = (isset($object->nature) && $object->nature == 4) || ($object->code == $journal_payment);
+		// Match the default journal configured in Subventions settings, or fallback to nature if unset
+		$is_od_journal = (!empty($journal_od) && $object->code == $journal_od) || (empty($journal_od) && isset($object->nature) && $object->nature == 1);
+		$is_payment_journal = (!empty($journal_payment) && $object->code == $journal_payment) || (empty($journal_payment) && isset($object->nature) && ($object->nature == 4 || $object->nature == 1));
 
 		if (!$is_od_journal && !$is_payment_journal) {
 			return 0;
@@ -237,16 +238,16 @@ class ActionsSubventions extends CommonHookActions
 
 		// Auto-synchronize accounted flags based on bookkeeping existence
 		$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_financement sf SET accounted = 1 WHERE accounted = 0 AND EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type IN ('subvention', 'subvention_financement') AND ab.fk_doc = sf.rowid)");
-		$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement sp SET accounted = 1 WHERE accounted = 0 AND EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'subvention_paiement' AND ab.fk_doc = sp.rowid)");
+		$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement sp SET accounted = 1 WHERE accounted = 0 AND (EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'subvention_paiement' AND ab.fk_doc = sp.rowid) OR (sp.fk_bank IS NOT NULL AND sp.fk_bank > 0 AND EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'bank' AND ab.fk_doc = sp.fk_bank)))");
 		$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_financement sf SET accounted = 0 WHERE accounted = 1 AND NOT EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type IN ('subvention', 'subvention_financement') AND ab.fk_doc = sf.rowid)");
-		$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement sp SET accounted = 0 WHERE accounted = 1 AND NOT EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'subvention_paiement' AND ab.fk_doc = sp.rowid)");
+		$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement sp SET accounted = 0 WHERE accounted = 1 AND NOT EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE (ab.doc_type = 'subvention_paiement' AND ab.fk_doc = sp.rowid) OR (sp.fk_bank IS NOT NULL AND sp.fk_bank > 0 AND ab.doc_type = 'bank' AND ab.fk_doc = sp.fk_bank))");
 
 		// --- 1. Financements (Engagements - OD) ---
 		if ($is_od_journal) {
 		$sqlf = "SELECT f.rowid, f.ref, f.date_creation, f.date_engagement, f.montant_acc, f.fk_soc, f.fk_sub, f.fk_financeur, f.accounted";
 		$sqlf .= " FROM ".MAIN_DB_PREFIX."subventions_financement as f";
 		$sqlf .= " WHERE f.entity IN (".getEntity('financement@subventions').")";
-		$sqlf .= " AND f.status > 0 AND f.montant_acc > 0";
+		$sqlf .= " AND f.status = 2 AND f.montant_acc > 0";
 		if ($date_start && $date_end) {
 			$sqlf .= " AND (";
 			$sqlf .= "   (f.date_engagement IS NOT NULL AND f.date_engagement >= '".$this->db->idate($date_start)."' AND f.date_engagement <= '".$this->db->idate($date_end)."')";
@@ -399,7 +400,7 @@ class ActionsSubventions extends CommonHookActions
 
 		// --- 2. Paiements (Encaissements - Banque / Trésorerie) ---
 		if ($is_payment_journal) {
-		$sqlp = "SELECT p.rowid, p.ref, p.datep, p.date_engagement, p.montant, p.fk_soc, p.fk_sub, p.fk_fin, p.fk_account, p.accounted";
+		$sqlp = "SELECT p.rowid, p.ref, p.datep, p.date_engagement, p.montant, p.fk_soc, p.fk_sub, p.fk_fin, p.fk_account, p.accounted, p.fk_bank";
 		$sqlp .= " FROM ".MAIN_DB_PREFIX."subventions_paiement as p";
 		$sqlp .= " WHERE p.entity IN (".getEntity('paiement@subventions').")";
 		$sqlp .= " AND p.status > 0 AND p.montant > 0";
@@ -410,9 +411,9 @@ class ActionsSubventions extends CommonHookActions
 			$sqlp .= " )";
 		}
 		if ($in_bookkeeping == 'already') {
-			$sqlp .= " AND EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'subvention_paiement' AND ab.fk_doc = p.rowid AND ab.code_journal = '".$this->db->escape($journal)."')";
+			$sqlp .= " AND (EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'subvention_paiement' AND ab.fk_doc = p.rowid AND ab.code_journal = '".$this->db->escape($journal)."') OR (p.fk_bank IS NOT NULL AND p.fk_bank > 0 AND EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'bank' AND ab.fk_doc = p.fk_bank)))";
 		} elseif ($in_bookkeeping == 'notyet') {
-			$sqlp .= " AND NOT EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE ab.doc_type = 'subvention_paiement' AND ab.fk_doc = p.rowid AND ab.code_journal = '".$this->db->escape($journal)."')";
+			$sqlp .= " AND NOT EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ab WHERE (ab.doc_type = 'subvention_paiement' AND ab.fk_doc = p.rowid AND ab.code_journal = '".$this->db->escape($journal)."') OR (p.fk_bank IS NOT NULL AND p.fk_bank > 0 AND ab.doc_type = 'bank' AND ab.fk_doc = p.fk_bank))";
 		}
 		$sqlp .= " ORDER BY p.rowid ASC";
 

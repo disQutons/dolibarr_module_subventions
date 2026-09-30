@@ -32,7 +32,7 @@ ini_set('display_errors', 1);
 
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
-dol_include_once('/custom/subventions/lib/subventions.lib.php');
+dol_include_once('/subventions/lib/subventions.lib.php');
 
 /**
  * Class for Financement
@@ -67,6 +67,10 @@ class Financement extends CommonObject
 
 	const STATUS_DRAFT = 0;
 	const STATUS_VALIDATED = 1;
+	const STATUS_DEPOSITED = 1;
+	const STATUS_ACCEPTED = 2;
+	const STATUS_GRANTED = 2;
+	const STATUS_REFUSED = 3;
 	const STATUS_CANCELED = 9;
 
 	/**
@@ -130,7 +134,7 @@ class Financement extends CommonObject
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
 		"model_pdf" => array("type" => "varchar(255)", "label" => "Model pdf", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
-		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "2", "noteditable" => "1", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon", "1" => "Valid&eacute;", "9" => "Annul&eacute;"), "validate" => "1",),
+		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "2", "noteditable" => "1", "default" => "0", "index" => "1", "arrayofkeyval" => array("0" => "Draft", "1" => "STATUS_VALIDATED", "2" => "STATUS_ACCEPTED", "3" => "STATUS_REFUSED"), "validate" => "1",),
 		"montant_dem" => array("type" => "price", "label" => "Montant demandé", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant demandé", "validate" => "1",),
 		"montant_acc" => array("type" => "price", "label" => "Montant accepté", "enabled" => "1", 'position' => 42, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant accepté", "validate" => "1",),
 		"montant_fin" => array("type" => "price", "label" => "Montant financé", "enabled" => "1", 'position' => 44, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant avec des financements reçus", "validate" => "1",),
@@ -138,8 +142,8 @@ class Financement extends CommonObject
 		"montant_ref" => array("type" => "price", "label" => "Montant refusé", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "1", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant refusé", "validate" => "1",),
 		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('subventions')", 'position' => 25, 'notnull' => 1, "visible" => "1",),
 		"fk_financeur" => array("type" => "integer", "label" => "Type de financeur", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "La liste des financeurs peut être modifié dans les dictionnaires.",),
-		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "1", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"),),
-		"date_engagement" => array("type" => "date", "label" => "DateEngagement", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "1",),
+		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"),),
+		"date_engagement" => array("type" => "date", "label" => "DateEngagement", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "5",),
 		"fk_bookkeeping_receivable" => array("type" => "integer", "label" => "BookkeepingReceivable", "enabled" => "1", 'position' => 62, 'notnull' => 0, "visible" => "0",),
 		"fk_bookkeeping_product" => array("type" => "integer", "label" => "BookkeepingProduct", "enabled" => "1", 'position' => 63, 'notnull' => 0, "visible" => "0",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
@@ -294,8 +298,8 @@ class Financement extends CommonObject
 		$resultcreate = $this->createCommon($user, $notrigger);
 
 		// uncomment lines below if you want to validate object after creation
-		$this->fetch($this->id); // needed to retrieve some fields (ie date_creation for masked ref)
-		$resultvalidate = $this->validate($user, $notrigger);
+		//$this->fetch($this->id); // needed to retrieve some fields (ie date_creation for masked ref)
+		//$resultvalidate = $this->validate($user, $notrigger);
 
 		// Mise à jour des montants des financements liés
 		$resultmaj = majMontantsFinancementSubvention($this);
@@ -440,12 +444,15 @@ class Financement extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = 0)
 	{
+		global $langs;
+
+		if (!empty($this->accounted)) {
+			$this->error = $langs->trans("ErrorCannotDeleteAccountedObject");
+			return -1;
+		}
+
 		$result = $this->deleteCommon($user, $notrigger);
 		//return $this->deleteCommon($user, $notrigger, 1);
-
-		if ($result > 0 && !empty($this->accounted)) {
-			$this->unbookkeep($user);
-		}
 
 		// Mise à jour des montants des financements liés
 		$resultmaj = majMontantsFinancementSubvention($this);
@@ -601,6 +608,8 @@ class Financement extends CommonObject
 
 		if (!$error) {
 			$this->db->commit();
+			majMontantsFinancementSubvention($this);
+			majstatut($this);
 			return 1;
 		} else {
 			$this->db->rollback();
@@ -630,7 +639,12 @@ class Financement extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SUBVENTIONS_FINANCEMENT_UNVALIDATE');
+		$result = $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SUBVENTIONS_FINANCEMENT_UNVALIDATE');
+		if ($result > 0) {
+			majMontantsFinancementSubvention($this);
+			majstatut($this);
+		}
+		return $result;
 	}
 
 	/**
@@ -658,7 +672,138 @@ class Financement extends CommonObject
 	}
 
 	/**
-	 *	Set back to validated status
+	 *	Set accepted status
+	 *
+	 *	@param	User		$user				Object user that modifies
+	 *	@param	int|string	$date_engagement	Date of commitment/notification (timestamp or 'YYYY-MM-DD')
+	 *	@param	float|null	$montant_acc		Granted amount (null to keep current)
+	 *	@param	int<0,1>	$notrigger			1=Does not execute triggers, 0=Execute triggers
+	 *	@return	int								Return integer <0 if KO, >0 if OK
+	 */
+	public function accept($user, $date_engagement, $montant_acc = null, $notrigger = 0)
+	{
+		global $langs;
+
+		$error = 0;
+
+		$this->db->begin();
+
+		if (is_numeric($date_engagement)) {
+			$this->date_engagement = (int) $date_engagement;
+		} else {
+			$this->date_engagement = $this->db->jdate($date_engagement);
+		}
+
+		if (!is_null($montant_acc)) {
+			$this->montant_acc = price2num($montant_acc);
+		} elseif (is_null($this->montant_acc) || $this->montant_acc == 0) {
+			$this->montant_acc = (float) $this->montant_dem;
+		}
+
+		// Calculate refused amount
+		if ((float) $this->montant_dem > (float) $this->montant_acc) {
+			$this->montant_ref = (float) $this->montant_dem - (float) $this->montant_acc;
+		} else {
+			$this->montant_ref = 0;
+		}
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET ";
+		$sql .= "status = ".self::STATUS_ACCEPTED.", ";
+		$sql .= "date_engagement = ".($this->date_engagement ? "'".$this->db->idate($this->date_engagement)."'" : "NULL").", ";
+		$sql .= "montant_acc = ".price2num($this->montant_acc).", ";
+		$sql .= "montant_ref = ".price2num($this->montant_ref)." ";
+		$sql .= "WHERE rowid = ".((int) $this->id);
+
+		$resql = $this->db->query($sql);
+		if (!$resql) {
+			$this->error = $this->db->lasterror();
+			$this->db->rollback();
+			return -1;
+		}
+
+		$this->status = self::STATUS_ACCEPTED;
+
+		if (!$notrigger) {
+			$result = $this->call_trigger('SUBVENTIONS_FINANCEMENT_ACCEPT', $user);
+			if ($result < 0) {
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			$this->db->commit();
+			// Update related subvention and financement totals & statuses
+			majMontantsFinancementSubvention($this);
+			majstatut($this);
+			return 1;
+		} else {
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+	/**
+	 *	Set refused status
+	 *
+	 *	@param	User		$user				Object user that modifies
+	 *	@param	int|string	$date_notification	Date of refusal notification (timestamp or 'YYYY-MM-DD')
+	 *	@param	int<0,1>	$notrigger			1=Does not execute triggers, 0=Execute triggers
+	 *	@return	int								Return integer <0 if KO, >0 if OK
+	 */
+	public function refuse($user, $date_notification, $notrigger = 0)
+	{
+		global $langs;
+
+		$error = 0;
+
+		$this->db->begin();
+
+		if (is_numeric($date_notification)) {
+			$this->date_engagement = (int) $date_notification;
+		} else {
+			$this->date_engagement = $this->db->jdate($date_notification);
+		}
+
+		$this->montant_acc = 0;
+		$this->montant_ref = (float) $this->montant_dem;
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET ";
+		$sql .= "status = ".self::STATUS_REFUSED.", ";
+		$sql .= "date_engagement = ".($this->date_engagement ? "'".$this->db->idate($this->date_engagement)."'" : "NULL").", ";
+		$sql .= "montant_acc = 0, ";
+		$sql .= "montant_ref = ".price2num($this->montant_ref)." ";
+		$sql .= "WHERE rowid = ".((int) $this->id);
+
+		$resql = $this->db->query($sql);
+		if (!$resql) {
+			$this->error = $this->db->lasterror();
+			$this->db->rollback();
+			return -1;
+		}
+
+		$this->status = self::STATUS_REFUSED;
+
+		if (!$notrigger) {
+			$result = $this->call_trigger('SUBVENTIONS_FINANCEMENT_REFUSE', $user);
+			if ($result < 0) {
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			$this->db->commit();
+			// Update related subvention and financement totals & statuses
+			majMontantsFinancementSubvention($this);
+			majstatut($this);
+			return 1;
+		} else {
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+	/**
+	 *	Set back to deposited status (from accepted, refused or canceled)
 	 *
 	 *	@param	User		$user			Object user that modify
 	 *  @param	int<0,1>	$notrigger		1=Does not execute triggers, 0=Execute triggers
@@ -671,14 +816,18 @@ class Financement extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((!getDolGlobalInt('MAIN_USE_ADVANCED_PERMS') && $user->hasRight('subventions','write'))
-		 || (getDolGlobalInt('MAIN_USE_ADVANCED_PERMS') && $user->hasRight('subventions','subventions_advance','validate'))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
+		// Do not allow reopening if already accounted in general ledger
+		if (!empty($this->accounted)) {
+			$this->error = 'ErrorCannotReopenAccountedFinancement';
+			return -1;
+		}
 
-		return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SUBVENTIONS_FINANCEMENT_REOPEN');
+		$result = $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SUBVENTIONS_FINANCEMENT_REOPEN');
+		if ($result > 0) {
+			majMontantsFinancementSubvention($this);
+			majstatut($this);
+		}
+		return $result;
 	}
 
 	/**
@@ -920,19 +1069,37 @@ class Financement extends CommonObject
 
 		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
 			global $langs;
-			//$langs->load("subventions@subventions");
-			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
-			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('Draft');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('Disabled');
+			$langs->load("subventions@subventions");
+			$this->labelStatus[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('STATUS_DRAFT');
+			$this->labelStatus[self::STATUS_DEPOSITED] = $langs->transnoentitiesnoconv('STATUS_VALIDATED');
+			$this->labelStatus[self::STATUS_ACCEPTED] = $langs->transnoentitiesnoconv('STATUS_ACCEPTED');
+			$this->labelStatus[self::STATUS_REFUSED] = $langs->transnoentitiesnoconv('STATUS_REFUSED');
+			$this->labelStatus[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('STATUS_CANCELED');
+
+			$this->labelStatusShort[self::STATUS_DRAFT] = $langs->transnoentitiesnoconv('STATUS_DRAFT');
+			$this->labelStatusShort[self::STATUS_DEPOSITED] = $langs->transnoentitiesnoconv('STATUS_VALIDATED');
+			$this->labelStatusShort[self::STATUS_ACCEPTED] = $langs->transnoentitiesnoconv('STATUS_ACCEPTED');
+			$this->labelStatusShort[self::STATUS_REFUSED] = $langs->transnoentitiesnoconv('STATUS_REFUSED');
+			$this->labelStatusShort[self::STATUS_CANCELED] = $langs->transnoentitiesnoconv('STATUS_CANCELED');
 		}
 
-		$statusType = 'status'.$status;
-		//if ($status == self::STATUS_VALIDATED) $statusType = 'status1';
-		if ($status == self::STATUS_CANCELED) {
-			$statusType = 'status6';
+		$statusType = 'status0';
+		switch ($status) {
+			case self::STATUS_DRAFT:
+				$statusType = 'status0';
+				break;
+			case self::STATUS_DEPOSITED:
+				$statusType = 'status1';
+				break;
+			case self::STATUS_ACCEPTED:
+				$statusType = 'status4';
+				break;
+			case self::STATUS_REFUSED:
+				$statusType = 'status8';
+				break;
+			case self::STATUS_CANCELED:
+				$statusType = 'status6';
+				break;
 		}
 
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
@@ -1341,47 +1508,6 @@ class Financement extends CommonObject
 
 		$resql = $this->db->query($sql);
 		if (!$resql) {
-			$this->error = $this->db->lasterror();
-			$this->db->rollback();
-			return -1;
-		}
-
-		$this->db->commit();
-		return 1;
-	}
-
-	/**
-	 * Remove accounting engagement from Dolibarr General Ledger (BookKeeping)
-	 *
-	 * @param  User $user User cancelling the entry
-	 * @return int        >0 if OK, <0 if KO
-	 */
-	public function unbookkeep($user)
-	{
-		global $conf;
-
-		$this->db->begin();
-
-		// Delete bookkeeping entries linked to this financement
-		$sql = "DELETE FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ";
-		$sql .= "WHERE doc_type IN ('subvention', 'subvention_financement') AND fk_doc = ".((int) $this->id)." AND entity = ".((int) $conf->entity);
-		$resql = $this->db->query($sql);
-		if (!$resql) {
-			$this->error = $this->db->lasterror();
-			$this->db->rollback();
-			return -1;
-		}
-
-		$this->accounted = 0;
-		$this->date_engagement = null;
-		$this->fk_bookkeeping_receivable = null;
-		$this->fk_bookkeeping_product = null;
-
-		$sql2 = "UPDATE ".MAIN_DB_PREFIX."subventions_financement SET ";
-		$sql2 .= "accounted = 0, date_engagement = NULL, fk_bookkeeping_receivable = NULL, fk_bookkeeping_product = NULL ";
-		$sql2 .= "WHERE rowid = ".((int) $this->id);
-		$resql2 = $this->db->query($sql2);
-		if (!$resql2) {
 			$this->error = $this->db->lasterror();
 			$this->db->rollback();
 			return -1;

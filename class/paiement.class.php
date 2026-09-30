@@ -32,7 +32,7 @@ ini_set('display_errors', 1);
 
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
-dol_include_once('/custom/subventions/lib/subventions.lib.php');
+dol_include_once('/subventions/lib/subventions.lib.php');
 
 if (!class_exists('Paiement')) {
 /**
@@ -138,7 +138,7 @@ class Paiement extends CommonObject
 		"fk_account" => array("type" => "integer:Account:compta/bank/class/account.class.php:1:(t.clos:=:0)", "label" => "BankAccount", "picto" => "bank_account", "enabled" => "isModEnabled('banque')", 'position' => 53, 'notnull' => 0, "visible" => "1",),
 		"fk_paiement" => array("type" => "sellist:c_paiement:libelle:id::active=1", "label" => "PaymentMode", "enabled" => "1", 'position' => 54, 'notnull' => 0, "visible" => "1",),
 		"num_paiement" => array("type" => "varchar(50)", "label" => "NumPayment", "enabled" => "1", 'position' => 55, 'notnull' => 0, "visible" => "1",),
-		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "1", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"),),
+		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"),),
 		"date_engagement" => array("type" => "date", "label" => "EngagementDate", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 61, 'notnull' => 0, "visible" => "0",),
 		"fk_bookkeeping_bank" => array("type" => "integer", "label" => "BookkeepingBank", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 62, 'notnull' => 0, "visible" => "0",),
 		"fk_bookkeeping_receivable" => array("type" => "integer", "label" => "BookkeepingReceivable", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 63, 'notnull' => 0, "visible" => "0",),
@@ -413,9 +413,11 @@ class Paiement extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = 0)
 	{
-		// If accounted in ledger, unbookkeep first
+		global $langs;
+
 		if (!empty($this->accounted)) {
-			$this->unbookkeep($user);
+			$this->error = $langs->trans("ErrorCannotDeleteAccountedObject");
+			return -1;
 		}
 
 		$result = $this->deleteCommon($user, $notrigger);
@@ -423,8 +425,13 @@ class Paiement extends CommonObject
 
 		if ($result > 0 && !empty($this->fk_bank) && isModEnabled('banque')) {
 			require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
-			$acc = new Account($this->db);
-			$acc->delete_line($user, $this->fk_bank);
+			$accline = new AccountLine($this->db);
+			$resfetch = $accline->fetch($this->fk_bank);
+			if ($resfetch == 0) {
+				$accline->id = $accline->rowid = $this->fk_bank;
+			}
+			$accline->delete_urls($user);
+			$accline->delete($user);
 		}
 
 		// mise à jour des montants des financements liés
@@ -1373,47 +1380,6 @@ class Paiement extends CommonObject
 
 		$resql = $this->db->query($sql);
 		if (!$resql) {
-			$this->error = $this->db->lasterror();
-			$this->db->rollback();
-			return -1;
-		}
-
-		$this->db->commit();
-		return 1;
-	}
-
-	/**
-	 * Remove accounting engagement from Dolibarr General Ledger (BookKeeping)
-	 *
-	 * @param  User $user User cancelling the entry
-	 * @return int        >0 if OK, <0 if KO
-	 */
-	public function unbookkeep($user)
-	{
-		global $conf;
-
-		$this->db->begin();
-
-		// Delete bookkeeping entries linked to this payment
-		$sql = "DELETE FROM ".MAIN_DB_PREFIX."accounting_bookkeeping ";
-		$sql .= "WHERE doc_type = 'subvention_paiement' AND fk_doc = ".((int) $this->id)." AND entity = ".((int) $conf->entity);
-		$resql = $this->db->query($sql);
-		if (!$resql) {
-			$this->error = $this->db->lasterror();
-			$this->db->rollback();
-			return -1;
-		}
-
-		$this->accounted = 0;
-		$this->date_engagement = null;
-		$this->fk_bookkeeping_bank = null;
-		$this->fk_bookkeeping_receivable = null;
-
-		$sql2 = "UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET ";
-		$sql2 .= "accounted = 0, date_engagement = NULL, fk_bookkeeping_bank = NULL, fk_bookkeeping_receivable = NULL ";
-		$sql2 .= "WHERE rowid = ".((int) $this->id);
-		$resql2 = $this->db->query($sql2);
-		if (!$resql2) {
 			$this->error = $this->db->lasterror();
 			$this->db->rollback();
 			return -1;

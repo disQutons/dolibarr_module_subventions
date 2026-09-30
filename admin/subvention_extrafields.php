@@ -60,7 +60,7 @@ if (!$res) {
 }
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-require_once '../lib/subventions.lib.php';
+dol_include_once('/subventions/lib/subventions.lib.php');
 
 /**
  * @var Conf $conf

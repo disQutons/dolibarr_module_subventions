@@ -755,6 +755,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 						<td style="width: 24px"></td>';
 						print '<td style="width: 200">'.$langs->trans("ReferenceFunding").'</td>';
 						print '<td style="width: 300">'.$langs->trans("FundingSource").'</td>';
+						print '<td style="width: 120" class="center">'.$langs->trans("Status").'</td>';
 						print '<td style="width: 150" class="right">'.$langs->trans("Requested").'</td>';
 						print '<td style="width: 150" class="right">'.$langs->trans("Accepted").'</td>';
 						print '<td style="width: 150" class="right">'.$langs->trans("Financed").'</td>';
@@ -765,7 +766,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 						}
 					print '</tr>';
 
-		$sql = "SELECT f.rowid, f.ref, f.fk_soc, f.montant_dem, f.montant_acc, f.montant_fin, f.montant_att, f.montant_ref, f.accounted, f.date_engagement, fk_sub, s.nom, s.rowid as sref";
+		$sql = "SELECT f.rowid, f.ref, f.fk_soc, f.montant_dem, f.montant_acc, f.montant_fin, f.montant_att, f.montant_ref, f.status, f.accounted, f.date_engagement, fk_sub, s.nom, s.rowid as sref";
 		$sql .= " FROM ".MAIN_DB_PREFIX."subventions_financement as f";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on f.fk_soc = s.rowid";
 		$sql .= " WHERE f.fk_sub = ".$id;
@@ -788,6 +789,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				print '<td></td>';
 				print '<td>'.$financement->getNomUrl(1, '', 0, '', -1, '&sub='.$object->id).'</td>';
 				print '<td>'.$societe->getNomUrl(1).'</td>';
+				print '<td class="center">'.$financement->getLibStatut(5).'</td>';
 				print '<td class="right"><span class="amount">'.$obj->montant_dem.'</span></td>';
         		print '<td class="right"><span class="amount">'.$obj->montant_acc.'</span></td>';
         		print '<td class="right"><span class="amount">'.$obj->montant_fin.'</span></td>';
@@ -812,6 +814,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		print '<td></td>';
 		print '<td>Nombre : '.$i.'</td>';
 		print '<td class="right">Total :</td>';
+		print '<td></td>';
 		print '<td class="right"><span class="amount">'.$object->montant_dem.'</span></td>';
 		print '<td class="right"><span class="amount">'.$object->montant_acc.'</span></td>';
 		print '<td class="right"><span class="amount">'.$object->montant_fin.'</span></td>';

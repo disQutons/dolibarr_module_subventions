@@ -58,7 +58,7 @@ if (!$res) {
 // Libraries
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
-require_once '../lib/subventions.lib.php';
+dol_include_once('/subventions/lib/subventions.lib.php');
 
 /**
  * @var Conf $conf
