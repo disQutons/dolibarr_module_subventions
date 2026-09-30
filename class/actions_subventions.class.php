@@ -25,7 +25,6 @@
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonhookactions.class.php';
-dol_include_once('/custom/subventions/class/subvention.class.php');
 
 /**
  * Class ActionsSubventions
@@ -149,9 +148,9 @@ class ActionsSubventions extends CommonHookActions
 				} else {
 					dol_syslog("Erreur SQL : " . $this->db->lasterror(), LOG_ERR);
 				}
+				$parameters['head'][$counter][0] = dol_buildpath('/subventions/subvention_list.php', 1) . '?socid='.$id.'&search_fk_soc='.$id;
+				$parameters['head'][$counter][1] = $langs->trans('Subventions');
 				if ($datacount > 0) {
-					$parameters['head'][$counter][0] = dol_buildpath('/subventions/subvention_list.php', 1) . '?socid='.$id.'&search_fk_soc='.$id;
-					$parameters['head'][$counter][1] = $langs->trans('Subventions');
 					$parameters['head'][$counter][1] .= '<span class="badge marginleftonlyshort">' . $datacount . '</span>';
 				}
 				$parameters['head'][$counter][2] = 'subventions';
@@ -168,9 +167,9 @@ class ActionsSubventions extends CommonHookActions
 					dol_syslog("Erreur SQL : " . $this->db->lasterror(), LOG_ERR);
 				}
 
+				$parameters['head'][$counter][0] = dol_buildpath('/subventions/financement_list.php', 1) . '?socid='.$id.'&search_fk_soc='.$id;
+				$parameters['head'][$counter][1] = $langs->trans('Financements');
 				if ($datacount > 0) {
-					$parameters['head'][$counter][0] = dol_buildpath('/subventions/financement_list.php', 1) . '?socid='.$id.'&search_fk_soc='.$id;
-					$parameters['head'][$counter][1] = $langs->trans('Financements');
 					$parameters['head'][$counter][1] .= '<span class="badge marginleftonlyshort">' . $datacount . '</span>';
 				}
 				$parameters['head'][$counter][2] = 'financements';

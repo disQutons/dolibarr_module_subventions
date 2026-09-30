@@ -28,10 +28,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 */
 
-// Inclusions des classes nécessaires
-dol_include_once('/custom/subventions/class/subvention.class.php');
-dol_include_once('/custom/subventions/class/financement.class.php');
-dol_include_once('/custom/subventions/class/paiement.class.php');
 
 /**
  * Prepare admin pages header
@@ -382,7 +378,8 @@ function refuseSub ($object){
         while ($obj = $db->fetch_object($resql)) {
             if (empty($obj->montant_acc)) {
                 // Créer un objet Dolibarr pour la mise à jour
-                $financement = new financement($db);
+                dol_include_once('/custom/subventions/class/financement.class.php');
+                $financement = new Financement($db);
                 $financement->fetch($obj->rowid);
                 
                 // Mettre à jour les propriétés
