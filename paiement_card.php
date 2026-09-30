@@ -388,6 +388,31 @@ jQuery(document).ready(function() {
             });
         }
     });
+
+    // Fix issue #21: Chargement initial si fk_sub est déjà rempli au chargement de la page
+    var initialFkSub = jQuery('#fk_sub').val();
+    var initialFkFin = jQuery('#fk_fin').val();
+    if (initialFkSub > 0) {
+        jQuery.ajax({
+            url: '<?php echo dol_buildpath("/custom/subventions/scripts/interface.php", 1); ?>',
+            type: 'POST',
+            data: {
+                action: 'getFinancementsBySubvention',
+                fk_sub: initialFkSub,
+                token: csrfToken
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    jQuery('#fk_fin').html(data.options);
+                    // Restaurer la sélection initiale si fk_fin était pré-rempli
+                    if (initialFkFin > 0) {
+                        jQuery('#fk_fin').val(initialFkFin);
+                    }
+                }
+            }
+        });
+    }
 });
 </script>
 <?php
