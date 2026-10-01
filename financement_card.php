@@ -243,21 +243,23 @@ if (empty($reshook)) {
 	$trackid = 'financement'.$object->id;
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 
-	// Actions for accounting engagement
-	if ($action == 'confirm_bookkeep' && $confirm == 'yes' && $permissiontoadd) {
-		$date_engagement = dol_mktime(12, 0, 0, GETPOSTINT('date_engagementmonth'), GETPOSTINT('date_engagementday'), GETPOSTINT('date_engagementyear'));
+	// Synchronize accounting status with ledger
+	if (getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy'))) {
+		if (function_exists('syncSubventionsAccountedStatus')) {
+			syncSubventionsAccountedStatus('financement', $object);
+		}
+	}
+
+	// Action accept (Passage à Accordé)
+	if ($action == 'confirm_accept' && $confirm == 'yes' && $permissiontoadd) {
+		$date_engagement = dol_mktime(GETPOSTINT('date_engagementhour'), GETPOSTINT('date_engagementmin'), GETPOSTINT('date_engagementsec'), GETPOSTINT('date_engagementmonth'), GETPOSTINT('date_engagementday'), GETPOSTINT('date_engagementyear'));
+		$montant_acc = price2num(GETPOST('montant_acc'));
 		if (empty($date_engagement)) {
 			$date_engagement = dol_now();
 		}
-		$journal = GETPOST('journal', 'alpha');
-		$account_receivable = GETPOST('account_receivable', 'alpha');
-		$account_product = GETPOST('account_product', 'alpha');
-		$label = GETPOST('label_engagement', 'restricthtml');
-		$subledger = GETPOST('subledger_account', 'alpha');
-
-		$res = $object->bookkeep($user, $date_engagement, $journal, $account_receivable, $account_product, $label, $subledger);
+		$res = $object->accept($user, $date_engagement, $montant_acc);
 		if ($res > 0) {
-			setEventMessages($langs->trans("SubventionBookkeptSuccess"), null, 'mesgs');
+			setEventMessages($langs->trans("FinancementAccepted"), null, 'mesgs');
 			header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
 			exit;
 		} else {
@@ -266,10 +268,28 @@ if (empty($reshook)) {
 		}
 	}
 
-	if ($action == 'confirm_unbookkeep' && $confirm == 'yes' && $permissiontoadd) {
-		$res = $object->unbookkeep($user);
+	// Action refuse (Passage à Refusé)
+	if ($action == 'confirm_refuse' && $confirm == 'yes' && $permissiontoadd) {
+		$date_notification = dol_mktime(GETPOSTINT('date_notificationhour'), GETPOSTINT('date_notificationmin'), GETPOSTINT('date_notificationsec'), GETPOSTINT('date_notificationmonth'), GETPOSTINT('date_notificationday'), GETPOSTINT('date_notificationyear'));
+		if (empty($date_notification)) {
+			$date_notification = dol_now();
+		}
+		$res = $object->refuse($user, $date_notification);
 		if ($res > 0) {
-			setEventMessages($langs->trans("SubventionUnbookkeptSuccess"), null, 'mesgs');
+			setEventMessages($langs->trans("FinancementRefused"), null, 'mesgs');
+			header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
+			exit;
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+			$action = '';
+		}
+	}
+
+	// Action reopen (Remettre en déposé)
+	if ($action == 'confirm_reopen' && $confirm == 'yes' && $permissiontoadd) {
+		$res = $object->reopen($user);
+		if ($res > 0) {
+			setEventMessages($langs->trans("FinancementReopened"), null, 'mesgs');
 			header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
 			exit;
 		} else {
@@ -346,6 +366,9 @@ if ($action == 'create') {
 
 	print '<table class="border centpercent tableforfieldcreate">'."\n";
 
+	unset($object->fields['accounted']);
+	unset($object->fields['date_engagement']);
+
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_add.tpl.php';
 
@@ -381,6 +404,9 @@ if (($id || $ref) && $action == 'edit') {
 	print dol_get_fiche_head();
 
 	print '<table class="border centpercent tableforfieldedit">'."\n";
+
+	unset($object->fields['accounted']);
+	unset($object->fields['date_engagement']);
 
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_edit.tpl.php';
@@ -447,60 +473,47 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('XXX'), $text, 'confirm_xxx', $formquestion, 0, 1, 220);
 	}
 
-	// Confirmation of accounting engagement
-	if ($action == 'bookkeep') {
-		$default_receivable = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT', '441000');
-		$default_product = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_CODE_PRODUCT_DEFAULT', '740000');
-		if ($object->fk_financeur > 0) {
-			$sqlf = "SELECT accountancy_code_receivable, accountancy_code FROM ".MAIN_DB_PREFIX."c_subventions_financeur WHERE rowid = ".((int) $object->fk_financeur);
-			$resf = $db->query($sqlf);
-			if ($resf && ($objf = $db->fetch_object($resf))) {
-				if (!empty($objf->accountancy_code_receivable)) {
-					$default_receivable = $objf->accountancy_code_receivable;
-				}
-				if (!empty($objf->accountancy_code)) {
-					$default_product = $objf->accountancy_code;
-				}
-			}
-		}
 
-		$TJournal = array();
-		if (isModEnabled('accounting') || isModEnabled('accountancy')) {
-			$sqlj = "SELECT code, label FROM ".MAIN_DB_PREFIX."accounting_journal WHERE active = 1 ORDER BY label";
-			$resj = $db->query($sqlj);
-			if ($resj) {
-				while ($objj = $db->fetch_object($resj)) {
-					$TJournal[$objj->code] = $objj->code.' - '.$objj->label;
-				}
-			}
-		}
-		if (empty($TJournal)) {
-			$TJournal['OD'] = 'OD - '.$langs->trans("VariousOperations");
-		}
-		$default_journal = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_JOURNAL', 'OD');
-
-		$thirdparty = new Societe($db);
-		if ($object->fk_soc > 0) {
-			$thirdparty->fetch($object->fk_soc);
-		}
-		$default_subledger = !empty($thirdparty->code_compta_client) ? $thirdparty->code_compta_client : '';
-
+	// Formconfirm pour passer au statut Accordé
+	if ($action == 'accept') {
 		$formquestion = array(
-			array('type' => 'date', 'name' => 'date_engagement', 'label' => $langs->trans("EngagementDate"), 'value' => dol_now()),
-			array('type' => 'select', 'name' => 'journal', 'label' => $langs->trans("Journal"), 'values' => $TJournal, 'default' => $default_journal, 'morecss' => 'minwidth300'),
-			array('type' => 'text', 'name' => 'account_receivable', 'label' => $langs->trans("SubventionReceivableAccount").' (Débit)', 'value' => $default_receivable, 'morecss' => 'minwidth200'),
-			array('type' => 'text', 'name' => 'subledger_account', 'label' => $langs->trans("SubledgerAccount").' (Tiers)', 'value' => $default_subledger, 'morecss' => 'minwidth200'),
-			array('type' => 'text', 'name' => 'account_product', 'label' => $langs->trans("SubventionProductAccount").' (Crédit)', 'value' => $default_product, 'morecss' => 'minwidth200'),
-			array('type' => 'text', 'name' => 'label_engagement', 'label' => $langs->trans("Label"), 'value' => $langs->trans("SubventionEngagement").': '.$object->ref.' ('.$thirdparty->name.')', 'morecss' => 'centpercent minwidth400'),
+			array(
+				'type' => 'date',
+				'name' => 'date_engagement',
+				'label' => $langs->trans("EngagementDate"),
+				'value' => dol_now(),
+				'datenow' => 1
+			),
+			array(
+				'type' => 'text',
+				'name' => 'montant_acc',
+				'label' => $langs->trans("AmountAccepted"),
+				'value' => (empty($object->montant_acc) || $object->montant_acc == 0) ? $object->montant_dem : $object->montant_acc
+			)
 		);
-
-		$text = $langs->trans("ConfirmBookkeepFinancement", price($object->montant_acc, 0, $langs, 1, -1, -1, $conf->currency));
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans("BookkeepFinancement"), $text, 'confirm_bookkeep', $formquestion, 'yes', 1, 'auto', 780);
+		$text = $langs->trans("ConfirmAcceptFinancement");
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans("GrantFinancement"), $text, 'confirm_accept', $formquestion, 'yes', 1, 260);
 	}
 
-	if ($action == 'unbookkeep') {
-		$text = $langs->trans("ConfirmUnbookkeepFinancement");
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans("UnbookkeepFinancement"), $text, 'confirm_unbookkeep', array(), 'yes', 1, 'auto', 550);
+	// Formconfirm pour passer au statut Refusé
+	if ($action == 'refuse') {
+		$formquestion = array(
+			array(
+				'type' => 'date',
+				'name' => 'date_notification',
+				'label' => $langs->trans("DateNotificationRefus"),
+				'value' => dol_now(),
+				'datenow' => 1
+			)
+		);
+		$text = $langs->trans("ConfirmRefuseFinancement");
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans("RefuseFinancement"), $text, 'confirm_refuse', $formquestion, 'yes', 1, 240);
+	}
+
+	// Formconfirm pour rouvrir / remettre en déposé
+	if ($action == 'reopen') {
+		$text = $langs->trans("ConfirmReopenFinancement");
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans("ReopenFinancement"), $text, 'confirm_reopen', array(), 'yes', 1, 'auto', 550);
 	}
 
 	// Call Hook formConfirm
@@ -573,12 +586,30 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	//$keyforbreak='fieldkeytoswitchonsecondcolumn';	// We change column just before this field
 	//unset($object->fields['fk_project']);				// Hide field already shown in banner
 	//unset($object->fields['fk_soc']);					// Hide field already shown in banner
-	
+	unset($object->fields['accounted']);
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
+
+	if (getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy'))) {
+		$url_transfer = function_exists('getSubventionsTransferJournalUrl') ? getSubventionsTransferJournalUrl('financement', $object) : DOL_URL_ROOT.'/accountancy/journal/variousjournal.php?mainmenu=accountancy&leftmenu=accountancy_transfer_journal';
+		print '<tr><td class="titlefield">'.$langs->trans("Accounted").'</td>';
+		if (!empty($object->accounted)) {
+			print '<td><span class="badge badge-status4 badge-status"><i class="fa fa-check"></i> '.$langs->trans("Accounted").'</span>';
+			if (!empty($object->date_engagement)) {
+				print ' <span class="opacitymedium">('.$langs->trans("EngagementDate").': '.dol_print_date($object->date_engagement, 'day').')</span>';
+			}
+			print '</td></tr>';
+		} else {
+			print '<td><span class="badge badge-status0 badge-status">'.$langs->trans("NotAccounted").'</span>';
+			if (!empty($object->montant_acc) && $object->montant_acc > 0) {
+				print ' <a href="'.$url_transfer.'" class="marginleftonly"><span class="fa fa-arrow-right"></span> '.$langs->trans("AccountancyTransferJournal").'</a>';
+			}
+			print '</td></tr>';
+		}
+	}
 
 	print '</table>';
 	print '</div>';
@@ -654,33 +685,63 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		}
 
 		if (empty($reshook)) {
+			// Status 0: Brouillon -> Déposer
+			if ($object->status == Financement::STATUS_DRAFT && $permissiontoadd) {
+				print dolGetButtonAction('', $langs->trans('DeposeFinancement'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_validate&confirm=yes&token='.newToken(), '', $permissiontoadd);
+			}
 
-			// Debug button
-			//print dolGetButtonAction('', $langs->trans('Recalcul'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recalcul&token='.newToken(), '', $permissiontoadd);
+			// Status 1: Déposé -> Accorder, Refuser, Remettre en brouillon
+			if ($object->status == Financement::STATUS_DEPOSITED && $permissiontoadd) {
+				print dolGetButtonAction('', $langs->trans('GrantFinancement'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=accept&token='.newToken(), '', $permissiontoadd);
+				print dolGetButtonAction('', $langs->trans('RefuseFinancement'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refuse&token='.newToken(), '', $permissiontoadd);
+				print dolGetButtonAction('', $langs->trans('SetToDraft'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_setdraft&confirm=yes&token='.newToken(), '', $permissiontoadd);
+			}
 
+			// Status 2 (Accordé) ou 3 (Refusé): Rouvrir / Remettre en déposé
+			if (($object->status == Financement::STATUS_ACCEPTED || $object->status == Financement::STATUS_REFUSED) && $permissiontoadd) {
+				// Only allow reopening if not already accounted in general ledger
+				if (empty($object->accounted)) {
+					print dolGetButtonAction('', $langs->trans('ReopenFinancement'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=reopen&token='.newToken(), '', $permissiontoadd);
+				}
+			}
 
-			// Modify
+			// Create associated payment (only if Accordé and not fully paid)
+			if ($object->status == Financement::STATUS_ACCEPTED && $permissiontoadd) {
+				$remaining = (float) $object->montant_acc - (float) $object->montant_fin;
+				if ($remaining > 0) {
+					$urlNewPayment = dol_buildpath('/subventions/paiement_card.php', 1).'?action=create';
+					$urlNewPayment .= '&fk_sub='.$object->fk_sub;
+					$urlNewPayment .= '&fk_fin='.$object->id;
+					$urlNewPayment .= '&fk_soc='.$object->fk_soc;
+					$urlNewPayment .= '&backtopage='.urlencode($_SERVER['PHP_SELF'].'?id='.$object->id);
+					print dolGetButtonAction('', $langs->trans('AddAPayment'), 'default', $urlNewPayment, '', $permissiontoadd);
+				}
+			}
+
+			// Modify (available for all statuses if write permission)
 			print dolGetButtonAction('', $langs->trans('Modify'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
 
-			// Accounting engagement (OD)
-			if (getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy'))) {
+			// Accounting transfer / ledger (only for Accordé status)
+			if ($object->status == Financement::STATUS_ACCEPTED && getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy'))) {
+				$url_transfer = function_exists('getSubventionsTransferJournalUrl') ? getSubventionsTransferJournalUrl('financement', $object) : DOL_URL_ROOT.'/accountancy/journal/variousjournal.php?mainmenu=accountancy&leftmenu=accountancy_transfer_journal';
 				if (empty($object->accounted) && !empty($object->montant_acc) && $object->montant_acc > 0) {
-					print dolGetButtonAction('', $langs->trans('BookkeepInLedger'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=bookkeep&token='.newToken(), '', $permissiontoadd);
+					print dolGetButtonAction('', $langs->trans('AccountancyTransferJournal'), 'default', $url_transfer, '', $permissiontoadd);
 				} elseif (!empty($object->accounted)) {
-					print dolGetButtonAction('', $langs->trans('UnbookkeepInLedger'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unbookkeep&token='.newToken(), '', $permissiontoadd);
 					print dolGetButtonAction('', $langs->trans('ViewInLedger'), 'default', DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref), '', 1);
 				}
 			}
 
-			// Delete (with preloaded confirm popup)
-			$deleteUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delete&token='.newToken();
-			$buttonId = 'action-delete-no-ajax';
-			if ($conf->use_javascript_ajax && empty($conf->dol_use_jmobile)) {	// We can use preloaded confirm if not jmobile
-				$deleteUrl = '';
-				$buttonId = 'action-delete';
+			// Delete (with preloaded confirm popup - disabled if accounted)
+			if (empty($object->accounted)) {
+				$deleteUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delete&token='.newToken();
+				$buttonId = 'action-delete-no-ajax';
+				if ($conf->use_javascript_ajax && empty($conf->dol_use_jmobile)) {	// We can use preloaded confirm if not jmobile
+					$deleteUrl = '';
+					$buttonId = 'action-delete';
+				}
+				$params = array();
+				print dolGetButtonAction('', $langs->trans("Delete"), 'delete', $deleteUrl, $buttonId, $permissiontodelete, $params);
 			}
-			$params = array();
-			print dolGetButtonAction('', $langs->trans("Delete"), 'delete', $deleteUrl, $buttonId, $permissiontodelete, $params);
 		}
 		print '</div>'."\n";
 	}

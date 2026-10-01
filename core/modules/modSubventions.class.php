@@ -192,7 +192,32 @@ class modSubventions extends DolibarrModules
 			),
 			// Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
 			/* BEGIN MODULEBUILDER HOOKSCONTEXTS */
-			'hooks' => array('data' => array('thirdpartycard','projectOverview','accountingjournaldao',),'entity' => '0',),
+			'hooks' => array(
+				'data' => array(
+					'thirdpartycard',
+					'thirdpartycomm',
+					'thirdpartysupplier',
+					'thirdpartycontact',
+					'thirdpartycontactcard',
+					'thirdpartynote',
+					'thirdpartydocument',
+					'thirdpartyagenda',
+					'agendathirdparty',
+					'thirdpartybancard',
+					'thirdpartyproject',
+					'projectthirdparty',
+					'thirdpartyconsumption',
+					'consumptionthirdparty',
+					'thirdpartycustomerprice',
+					'thirdpartywebsite',
+					'websitethirdpartylist',
+					'thirdpartynotification',
+					'globalcard',
+					'projectOverview',
+					'accountingjournaldao',
+				),
+				'entity' => '0',
+			),
 			
 									
 			/*'hooks' => array(

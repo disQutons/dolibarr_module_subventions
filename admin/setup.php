@@ -65,8 +65,9 @@ if (!$res) {
 }
 
 // Libraries
-require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
-dol_include_once('/custom/subventions/lib/subventions.lib.php');
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+dol_include_once('/subventions/lib/subventions.lib.php');
 
 /**
  * @var Conf $conf
@@ -199,9 +200,11 @@ if (empty($TJournalPayment) || count($TJournalPayment) <= 1) {
 }
 $item = $formSetup->newItem('SUBVENTIONS_ACCOUNTANCY_JOURNAL')->setAsSelect($TJournal);
 $item->defaultFieldValue = 'OD';
+$item->help = $langs->trans('SUBVENTIONS_ACCOUNTANCY_JOURNAL_HELP');
 
 $item = $formSetup->newItem('SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT')->setAsSelect($TJournalPayment);
 $item->defaultFieldValue = 'BQ';
+$item->help = $langs->trans('SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT_HELP');
 
 $item = $formSetup->newItem('SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT');
 $item->defaultFieldValue = '441000';
