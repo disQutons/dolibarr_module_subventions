@@ -1,5 +1,8 @@
 # CHANGELOG MODULE SUBVENTIONS POUR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 ## 1.3
+- ADD #2 Support multi-projets : ventilation d'une subvention sur plusieurs projets distincts
+- ADD #10 Répartition pluriannuelle : ventilation par exercice budgétaire et calcul automatique « Prorata temporis » selon la durée en mois
+- ADD Affichage détaillé des ventilations (Année, Nombre de mois, montants et total) dans la vue d'ensemble du projet
 - ADD Refonte des statuts des financements : Brouillon (0), Déposé (1), Accordé (2), Refusé (3)
 - ADD Dialogue de confirmation lors du passage à Accordé (saisie de la date d'engagement et du montant accordé)
 - ADD Dialogue de confirmation lors du passage à Refusé (saisie de la date de notification)

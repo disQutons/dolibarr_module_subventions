@@ -44,3 +44,36 @@ ALTER TABLE llx_subventions_paiement ADD COLUMN accounted tinyint DEFAULT 0;
 ALTER TABLE llx_subventions_paiement ADD COLUMN date_engagement date DEFAULT NULL;
 ALTER TABLE llx_subventions_paiement ADD COLUMN fk_bookkeeping_bank integer DEFAULT NULL;
 ALTER TABLE llx_subventions_paiement ADD COLUMN fk_bookkeeping_receivable integer DEFAULT NULL;
+
+-- Create multi-project & multi-year allocation table
+CREATE TABLE IF NOT EXISTS llx_subventions_subvention_projet(
+	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	fk_subvention integer NOT NULL,
+	fk_project integer NOT NULL,
+	annee integer DEFAULT NULL,
+	nb_mois integer DEFAULT NULL,
+	amount double(24,8) NOT NULL DEFAULT 0,
+	note text,
+	datec datetime NOT NULL,
+	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	fk_user_creat integer NOT NULL,
+	fk_user_modif integer,
+	entity integer DEFAULT 1 NOT NULL
+) ENGINE=innodb;
+
+-- Columns annee and nb_mois if table already exists
+ALTER TABLE llx_subventions_subvention_projet ADD COLUMN annee integer DEFAULT NULL;
+ALTER TABLE llx_subventions_subvention_projet ADD COLUMN nb_mois integer DEFAULT NULL;
+ALTER TABLE llx_subventions_subvention_projet ADD COLUMN entity integer DEFAULT 1 NOT NULL;
+
+-- Drop old unique index if exists and recreate with annee
+ALTER TABLE llx_subventions_subvention_projet DROP INDEX uk_subventions_sub_proj;
+ALTER TABLE llx_subventions_subvention_projet ADD UNIQUE INDEX uk_subventions_sub_proj (fk_subvention, fk_project, annee);
+ALTER TABLE llx_subventions_subvention_projet ADD INDEX idx_subventions_sub_proj_fk_project (fk_project);
+ALTER TABLE llx_subventions_subvention_projet ADD INDEX idx_subventions_sub_proj_annee (annee);
+
+-- Migrate existing single-project links to the junction table
+INSERT IGNORE INTO llx_subventions_subvention_projet (fk_subvention, fk_project, amount, datec, fk_user_creat, entity)
+SELECT rowid, fk_project, COALESCE(montant_acc, 0), NOW(), fk_user_creat, entity
+FROM llx_subventions_subvention
+WHERE fk_project IS NOT NULL AND fk_project > 0;

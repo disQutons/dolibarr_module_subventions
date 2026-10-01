@@ -84,16 +84,35 @@ class ActionsSubventions extends CommonHookActions
 		global $conf, $user, $langs;
 
 		if ($object->element == 'project' && getDolGlobalInt('SUBVENTIONS_PROJECT')) {
+			// Handle custom unlink action for subventions_subvention_projet
+			if ($action == 'unlink' && GETPOST('tablename', 'aZ09') == 'subventions_subvention_projet') {
+				$elementselectid = GETPOSTINT('elementselect');
+				if ($elementselectid > 0) {
+					dol_include_once('/custom/subventions/class/subventionproject.class.php');
+					$sp = new SubventionProject($this->db);
+					$sp->id = $elementselectid;
+					$sp->delete($user);
+					$action = '';
+					setEventMessages($langs->trans("RecordDeleted"), null, 'mesgs');
+				}
+			}
+
+			// Check if multi-project ventilation table exists and has data for this project
+			dol_include_once('/custom/subventions/class/subventionproject.class.php');
+			$subventionproject = new SubventionProject($this->db);
+			$ventilations = $subventionproject->fetchAllBySubvention(0); // dummy call to check class
+
+			// Use the junction table for ventilated amounts per project
 			$this->results = array(
 				'subvention' => array(
-				'name' => $langs->trans("Subsidys"),
-				'title' => $langs->trans("ListSubventionsAssociatedProject"),
-				'class' => 'Subvention',
-				'table' => 'subventions_subvention',
-				'datefieldname' => 'date_creation',
+				'name' => $langs->trans("SubventionsAllocated"),
+				'title' => $langs->trans("ListSubventionsAllocatedProject"),
+				'class' => 'SubventionProject',
+				'table' => 'subventions_subvention_projet',
+				'datefieldname' => 'datec',
 				'margin' => 'add',
 				'project_field' => 'fk_project',
-				'url' => dol_buildpath('/subventions/subvention_list.php', 1).'?fk_project='.$object->id, // URL pour lister les subventions
+				'url' => dol_buildpath('/subventions/subvention_list.php', 1).'?search_fk_project='.$object->id,
 				'urlnew' => dol_buildpath('/subventions/subvention_card.php', 1).'?action=create&origin=project&originid='.$object->id.'&backtopage='.urlencode($_SERVER['PHP_SELF'].'?id='.$object->id),
 				'lang' => 'subventions',
 				'buttonnew' => $langs->trans('AddSubvention'),
@@ -104,6 +123,162 @@ class ActionsSubventions extends CommonHookActions
         	return 0;
     	}
 	}
+
+	/**
+	 * Hook printOverviewDetail: customize detail table for subventions in project overview
+	 *
+	 * @param	array<string,mixed>	$parameters		Hook parameters ('key', 'value', 'dates', 'datee')
+	 * @param	CommonObject		$object			Project object
+	 * @param	string				$action			Current action
+	 * @param	Hookmanager			$hookmanager	Hook manager
+	 * @return	int									0 to let standard code execute, 1 to replace with $this->resprints
+	 */
+	public function printOverviewDetail($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf, $user, $langs;
+
+		if (empty($parameters['key']) || $parameters['key'] !== 'subvention') {
+			return 0;
+		}
+
+		$value = $parameters['value'];
+		if (empty($value['test'])) {
+			return 0;
+		}
+
+		$langs->loadLangs(array('main', 'subventions@subventions', 'projects', 'companies', 'bills'));
+
+		$title = $value['title'];
+		$tablename = $value['table'];
+		$datefieldname = $value['datefieldname'];
+		$urlnew = empty($value['urlnew']) ? '' : $value['urlnew'];
+		$buttonnew = empty($value['buttonnew']) ? '' : $value['buttonnew'];
+		$testnew = empty($value['testnew']) ? '' : $value['testnew'];
+		$project_field = empty($value['project_field']) ? 'fk_project' : $value['project_field'];
+		$dates = $parameters['dates'];
+		$datee = $parameters['datee'];
+
+		$elementarray = $object->get_element_list('subvention', $tablename, $datefieldname, $dates, $datee, $project_field);
+
+		$addform = '';
+		if (!getDolGlobalString('PROJECT_CREATE_ON_OVERVIEW_DISABLED') && $urlnew) {
+			$addform .= '<div class="inline-block valignmiddle">';
+			if ($testnew) {
+				$addform .= '<a class="buttonxxx marginleftonly" href="'.$urlnew.'" title="'.dol_escape_htmltag($langs->trans($buttonnew)).'"><span class="fa fa-plus-circle valignmiddle paddingleft"></span></a>';
+			} elseif (!getDolGlobalString('MAIN_BUTTON_HIDE_UNAUTHORIZED')) {
+				$addform .= '<span title="'.dol_escape_htmltag($langs->trans($buttonnew)).'"><a class="buttonxxx marginleftonly buttonRefused" disabled="disabled" href="#"><span class="fa fa-plus-circle valignmiddle paddingleft"></span></a></span>';
+			}
+			$addform .= '</div>';
+		}
+
+		$out = '<a id="table_'.$tablename.'"></a>';
+		$out .= load_fiche_titre($langs->trans($title), $addform, '');
+		$out .= "\n<!-- Table for tablename = ".$tablename." -->\n";
+		$out .= '<div class="div-table-responsive">';
+		$out .= '<table class="noborder centpercent">';
+
+		// Table header
+		$out .= '<tr class="liste_titre">';
+		$out .= '<td style="width: 24px"></td>';
+		$out .= '<td style="width: 200px">'.$langs->trans("Ref").'</td>';
+		$out .= '<td class="center" style="width: 80px">'.$langs->trans("Year").'</td>';
+		$out .= '<td class="center" style="width: 100px">'.$langs->trans("NumberOfMonths").'</td>';
+		$out .= '<td class="center" style="width: 120px">'.$langs->trans("Date").'</td>';
+		$out .= '<td>'.$langs->trans("ThirdParty").'</td>';
+		$out .= '<td class="right" width="120">'.$langs->trans("AmountHT").'</td>';
+		$out .= '<td class="right" width="120">'.$langs->trans("AmountTTC").'</td>';
+		$out .= '<td class="right" width="200">'.$langs->trans("Status").'</td>';
+		$out .= '</tr>';
+
+		if (is_array($elementarray) && count($elementarray) > 0) {
+			dol_include_once('/custom/subventions/class/subventionproject.class.php');
+			dol_include_once('/custom/subventions/class/subvention.class.php');
+
+			$total_ht = 0;
+			$total_ttc = 0;
+			$total_months = 0;
+			$i = 0;
+
+			foreach ($elementarray as $elem) {
+				$tmp = explode('_', $elem);
+				$idofelement = (int) $tmp[0];
+
+				$element = new SubventionProject($this->db);
+				if ($element->fetch($idofelement) <= 0) {
+					continue;
+				}
+
+				$i++;
+				$out .= '<tr class="oddeven">';
+
+				// Remove link column
+				$out .= '<td style="width: 24px">';
+				if (!getDolGlobalString('PROJECT_DISABLE_UNLINK_FROM_OVERVIEW') || !empty($user->admin)) {
+					$unlinkUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unlink&token='.newToken().'&tablename='.$tablename.'&elementselect='.$element->id.($project_field ? '&projectfield='.$project_field : '');
+					$out .= '<a href="'.$unlinkUrl.'" class="reposition">';
+					$out .= img_picto($langs->trans('Unlink'), 'unlink');
+					$out .= '</a>';
+				}
+				$out .= '</td>';
+
+				// Ref
+				$out .= '<td class="left nowraponall">';
+				$out .= $element->getNomUrl(1);
+				$out .= '</td>';
+
+				// Year
+				$out .= '<td class="center">'.(!empty($element->annee) ? $element->annee : '').'</td>';
+
+				// Duration in months
+				$out .= '<td class="center">'.(!empty($element->nb_mois) ? $element->nb_mois : '').'</td>';
+
+				// Date
+				$out .= '<td class="center">'.dol_print_date($element->datec, 'day').'</td>';
+
+				// ThirdParty
+				$out .= '<td class="tdoverflowmax150">';
+				if (is_object($element->thirdparty)) {
+					$out .= $element->thirdparty->getNomUrl(1, '', 48);
+				}
+				$out .= '</td>';
+
+				// Amount HT
+				$out .= '<td class="right"><span class="amount">'.price($element->amount).'</span></td>';
+
+				// Amount TTC
+				$out .= '<td class="right"><span class="amount">'.price($element->amount).'</span></td>';
+
+				// Status
+				$out .= '<td class="right">'.$element->getLibStatut(5).'</td>';
+
+				$out .= '</tr>';
+
+				$total_ht += $element->amount;
+				$total_ttc += $element->amount;
+				if (!empty($element->nb_mois)) {
+					$total_months += $element->nb_mois;
+				}
+			}
+
+			// Total
+			$out .= '<tr class="liste_total">';
+			$out .= '<td colspan="3">'.$langs->trans("Number").': '.$i.'</td>';
+			$out .= '<td class="center">'.($total_months > 0 ? $total_months : '').'</td>';
+			$out .= '<td colspan="2"></td>';
+			$out .= '<td class="right">'.$langs->trans("TotalHT").' : '.price($total_ht).'</td>';
+			$out .= '<td class="right">'.$langs->trans("TotalTTC").' : '.price($total_ttc).'</td>';
+			$out .= '<td></td>';
+			$out .= '</tr>';
+		} else {
+			$out .= '<tr class="oddeven"><td colspan="9" class="opacitymedium">'.$langs->trans("None").'</td></tr>';
+		}
+
+		$out .= '</table></div>';
+
+		$this->resprints = $out;
+		return 1;
+	}
+
 
 	/**
 	 * Execute action completeTabsHead

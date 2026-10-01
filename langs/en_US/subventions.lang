@@ -214,3 +214,37 @@ SubsidysSetup=Grants configuration
 BackToSub=Back to subsidy
 XXX=
 bytes=bytes
+
+#
+# Project ventilation (multi-projects)
+#
+ProjectVentilation=Project allocation
+ListOfFundedProjects=List of funded projects
+AddProjectVentilation=Add allocation
+AllocatedAmount=Allocated amount
+AllocatedPercentage=Percentage
+TotalVentilated=Total allocated
+RemainingToAllocate=Remaining to allocate
+VentilationExceedsTotal=Allocated total exceeds accepted amount
+VentilationIncomplete=Allocation is incomplete
+ConfirmDeleteVentilation=Are you sure you want to delete this allocation?
+SubventionsAllocated=Grants (allocated)
+ListSubventionsAllocatedProject=List of grants allocated to this project
+ProjectAlreadyAllocated=This project is already allocated for this grant
+VentilationOf=Allocation of
+NoProjectVentilation=No project allocation
+
+# Multi-year repartition
+AutoYearAllocation=Automatic multi-year repartition
+AutoYearAllocationShort=Prorata temporis
+ConfirmAutoYearAllocation=Do you confirm automatic multi-year allocation by number of months for the selected project? (existing allocations for this project will be replaced)
+AutoYearAllocationSuccess=Multi-year allocation successfully calculated over %s fiscal year(s)
+DurationMonths=Duration (months)
+NumberOfMonths=Number of months
+NbOfMonths=Nb of months
+Months=months
+Year=Year
+ErrorMissingProjectDates=Project start and end dates must be defined on the subsidy
+ErrorStartDateGreaterThanEndDate=Project start date must be before end date
+ErrorAmountRequired=An accepted or requested amount greater than 0 is required
+ErrorTotalMonthsZero=Calculated project duration is zero
