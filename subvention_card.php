@@ -241,6 +241,99 @@ if (empty($reshook)) {
 		$object->setProject(GETPOSTINT('projectid'));
 	}
 
+	// Actions for project & multi-year ventilation
+	if ($action == 'addventilation' && $permissiontoadd) {
+		dol_include_once('/custom/subventions/class/subventionproject.class.php');
+		$ventilation = new SubventionProject($db);
+		$ventilation->fk_subvention = $object->id;
+		$ventilation->fk_project = GETPOSTINT('ventil_projectid');
+		$ventilation->annee = GETPOSTINT('ventil_annee') > 0 ? GETPOSTINT('ventil_annee') : null;
+		$ventilation->nb_mois = GETPOSTINT('ventil_nb_mois') > 0 ? GETPOSTINT('ventil_nb_mois') : null;
+		$ventilation->amount = (float) price2num(GETPOST('ventil_amount', 'alpha'));
+		$ventilation->note = GETPOST('ventil_note', 'alpha');
+
+		if (empty($ventilation->fk_project)) {
+			setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('Project')), null, 'errors');
+		} elseif ($ventilation->amount <= 0) {
+			setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('AllocatedAmount')), null, 'errors');
+		} else {
+			// Check total does not exceed montant_acc
+			$totalExisting = $ventilation->getTotalVentilated($object->id);
+			$montantRef = !empty($object->montant_acc) ? $object->montant_acc : 0;
+			if ($montantRef > 0 && ($totalExisting + $ventilation->amount) > $montantRef * 1.001) {
+				setEventMessages($langs->trans('VentilationExceedsTotal'), null, 'warnings');
+			}
+			$result = $ventilation->create($user);
+			if ($result < 0) {
+				if (strpos($ventilation->error, 'Duplicate') !== false || strpos($ventilation->error, 'uk_subventions_sub_proj') !== false) {
+					setEventMessages($langs->trans('ProjectAlreadyAllocated'), null, 'errors');
+				} else {
+					setEventMessages($ventilation->error, $ventilation->errors, 'errors');
+				}
+			} else {
+				setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
+			}
+		}
+	}
+	if ($action == 'updateventilation' && $permissiontoadd) {
+		dol_include_once('/custom/subventions/class/subventionproject.class.php');
+		$ventilid = GETPOSTINT('ventilid');
+		$ventilation = new SubventionProject($db);
+		if ($ventilation->fetch($ventilid) > 0) {
+			$ventilation->annee = GETPOSTINT('ventil_annee') > 0 ? GETPOSTINT('ventil_annee') : null;
+			$ventilation->nb_mois = GETPOSTINT('ventil_nb_mois') > 0 ? GETPOSTINT('ventil_nb_mois') : null;
+			$ventilation->amount = (float) price2num(GETPOST('ventil_amount', 'alpha'));
+			$ventilation->note = GETPOST('ventil_note', 'alpha');
+
+			// Check total does not exceed montant_acc
+			$totalExisting = $ventilation->getTotalVentilated($object->id) - $ventilation->amount; // subtract old amount
+			$newAmount = (float) price2num(GETPOST('ventil_amount', 'alpha'));
+			$montantRef = !empty($object->montant_acc) ? $object->montant_acc : 0;
+			if ($montantRef > 0 && ($totalExisting + $newAmount) > $montantRef * 1.001) {
+				setEventMessages($langs->trans('VentilationExceedsTotal'), null, 'warnings');
+			}
+
+			$ventilation->amount = $newAmount;
+			$result = $ventilation->update($user);
+			if ($result < 0) {
+				setEventMessages($ventilation->error, $ventilation->errors, 'errors');
+			} else {
+				setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
+			}
+		}
+	}
+	if ($action == 'confirm_deleteventilation' && GETPOST('confirm', 'alpha') == 'yes' && $permissiontoadd) {
+		dol_include_once('/custom/subventions/class/subventionproject.class.php');
+		$ventilid = GETPOSTINT('ventilid');
+		$ventilation = new SubventionProject($db);
+		if ($ventilation->fetch($ventilid) > 0) {
+			$result = $ventilation->delete($user);
+			if ($result < 0) {
+				setEventMessages($ventilation->error, $ventilation->errors, 'errors');
+			} else {
+				setEventMessages($langs->trans('RecordDeleted'), null, 'mesgs');
+			}
+		}
+	}
+	if ($action == 'confirm_autorepartition' && GETPOST('confirm', 'alpha') == 'yes' && $permissiontoadd) {
+		dol_include_once('/custom/subventions/class/subventionproject.class.php');
+		$target_project = GETPOSTINT('autorepart_projectid');
+		if (empty($target_project) && !empty($object->fk_project)) {
+			$target_project = (int) $object->fk_project;
+		}
+		if (empty($target_project)) {
+			setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('Project')), null, 'errors');
+		} else {
+			$ventilation = new SubventionProject($db);
+			$res = $ventilation->generateAutoRepartitionYears($object, $user, $target_project);
+			if ($res > 0) {
+				setEventMessages($langs->trans('AutoYearAllocationSuccess', $res), null, 'mesgs');
+			} else {
+				setEventMessages($langs->trans($ventilation->error), $ventilation->errors, 'errors');
+			}
+		}
+	}
+
 	// Actions to send emails
 	$triggersendname = 'SUBVENTIONS_SUBVENTION_SENTBYMAIL';
 	$autocopy = 'MAIN_MAIL_AUTOCOPY_SUBVENTION_TO';
@@ -938,6 +1031,269 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		print '</tbody>
 			</table>
 		</div>';
+
+		// ---------------------------------------------------------------
+		// Project ventilation section
+		// ---------------------------------------------------------------
+		if (isModEnabled('project')) {
+			dol_include_once('/custom/subventions/class/subventionproject.class.php');
+			require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+
+			$subventionproject = new SubventionProject($db);
+			$ventilations = $subventionproject->fetchAllBySubvention($object->id);
+			if (!is_array($ventilations)) {
+				$ventilations = array();
+			}
+
+			$totalVentilated = 0;
+			$distinctProjects = array();
+			foreach ($ventilations as $v) {
+				$totalVentilated += $v->amount;
+				if (!empty($v->fk_project)) {
+					$distinctProjects[$v->fk_project] = true;
+				}
+			}
+			$montantRef = !empty($object->montant_acc) ? (float) $object->montant_acc : 0;
+			$percentTotal = ($montantRef > 0) ? round($totalVentilated / $montantRef * 100, 1) : 0;
+			$remaining = $montantRef - $totalVentilated;
+			$canAutoRepart = (!empty($object->date_d_projet) && !empty($object->date_f_projet) && $remaining > 0.01 && count($distinctProjects) <= 1);
+
+			// Confirmation dialog for deletion
+			if ($action == 'deleteventilation') {
+				$ventilid = GETPOSTINT('ventilid');
+				print $form->formconfirm(
+					$_SERVER['PHP_SELF'].'?id='.$object->id.'&ventilid='.$ventilid,
+					$langs->trans('Delete'),
+					$langs->trans('ConfirmDeleteVentilation'),
+					'confirm_deleteventilation',
+					'',
+					0,
+					1
+				);
+			}
+
+			// Formconfirm for automatic multi-year repartition
+			if ($action == 'autorepartition' && $permissiontoadd) {
+				$formquestion = array();
+				// Select project to allocate to
+				$projOptionsList = array();
+				$allProjects = $formproject->select_projects_list(-1, 0, 'dummy', 64, 0, 1, 1, 0, 0, 1);
+				if (is_array($allProjects)) {
+					foreach ($allProjects as $pdata) {
+						$projOptionsList[$pdata['key']] = $pdata['labelx'];
+					}
+				}
+				$defaultProj = !empty($object->fk_project) ? (int) $object->fk_project : 0;
+				$formquestion[] = array(
+					'type' => 'select',
+					'name' => 'autorepart_projectid',
+					'label' => $langs->trans('Project'),
+					'values' => $projOptionsList,
+					'default' => $defaultProj
+				);
+				print $form->formconfirm(
+					$_SERVER['PHP_SELF'].'?id='.$object->id,
+					$langs->trans('AutoYearAllocation'),
+					$langs->trans('ConfirmAutoYearAllocation'),
+					'confirm_autorepartition',
+					$formquestion,
+					'yes',
+					1
+				);
+			}
+
+			// Section header
+			print '<table class="notopnoleftnoright table-fiche-title showlinkedobjectblock">
+				<tbody>
+					<tr class="toptitle">
+						<td class="nobordernopadding valignmiddle col-title">
+							<div class="titre inline-block">
+								<span class="inline-block valignmiddle">';
+								print img_picto('', 'project', 'class="pictofixedwidth"');
+								print $langs->trans('ListOfFundedProjects');
+							print '</span>
+							</div>
+						</td>
+						<td class="nobordernopadding titre_right wordbreakimp right valignmiddle col-right">';
+						if ($permissiontoadd) {
+							print '<div class="inline-block valignmiddle">';
+							if ($canAutoRepart) {
+								print '<a class="button small marginleftonly" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=autorepartition&token='.newToken().'" title="'.$langs->trans('AutoYearAllocation').'">
+									<span class="fa fa-calculator valignmiddle paddingright"></span>'.$langs->trans('AutoYearAllocationShort').'
+								</a> ';
+							}
+							print '<a class="buttonxxx marginleftonly" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=addventilform&token='.newToken().'" title="'.$langs->trans('AddProjectVentilation').'">
+								<span class="fa fa-plus-circle valignmiddle paddingleft"></span>
+							</a>
+							</div>';
+						}
+					print '</td>
+					</tr>
+				</tbody>
+			</table>';
+
+			print '<div class="div-table-responsive">
+				<table class="noborder centpercent">
+					<tbody>
+						<tr class="liste_titre">
+							<td style="width: 24px"></td>';
+							print '<td>'.$langs->trans("Project").'</td>';
+							print '<td style="width: 100px">'.$langs->trans("Year").'</td>';
+							print '<td class="center" style="width: 100px">'.$langs->trans("DurationMonths").'</td>';
+							print '<td class="right" style="width: 150px">'.$langs->trans("AllocatedAmount").'</td>';
+							print '<td class="right" style="width: 100px">'.$langs->trans("AllocatedPercentage").'</td>';
+							print '<td style="width: 200px">'.$langs->trans("Note").'</td>';
+							if ($permissiontoadd) {
+								print '<td class="center" style="width: 80px">'.$langs->trans("Action").'</td>';
+							}
+						print '</tr>';
+
+			$nbVentil = 0;
+			$editVentilId = ($action == 'editventilation') ? GETPOSTINT('ventilid') : 0;
+			$currentYear = (int) dol_print_date(dol_now(), '%Y');
+
+			foreach ($ventilations as $v) {
+				$nbVentil++;
+				$percent = ($montantRef > 0) ? round($v->amount / $montantRef * 100, 1) : 0;
+
+				if ($editVentilId == $v->id && $permissiontoadd) {
+					// Edit form for this row
+					print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
+					print '<input type="hidden" name="token" value="'.newToken().'">';
+					print '<input type="hidden" name="action" value="updateventilation">';
+					print '<input type="hidden" name="ventilid" value="'.$v->id.'">';
+					print '<tr class="oddeven">';
+					print '<td></td>';
+					// Project name (not editable)
+					$proj = new Project($db);
+					$proj->fetch($v->fk_project);
+					print '<td>'.$proj->getNomUrl(1);
+					if ($proj->title) {
+						print ' <span class="opacitymedium">- '.dol_escape_htmltag($proj->title).'</span>';
+					}
+					print '</td>';
+					// Year input
+					print '<td><input type="number" name="ventil_annee" value="'.(!empty($v->annee) ? $v->annee : '').'" min="2000" max="2100" size="5" class="flat width75"></td>';
+					// Months input
+					print '<td class="center"><input type="number" name="ventil_nb_mois" value="'.(!empty($v->nb_mois) ? $v->nb_mois : '').'" min="1" max="120" size="3" class="flat width50 center"></td>';
+					print '<td class="right"><input type="text" name="ventil_amount" value="'.price($v->amount).'" size="10" class="flat right"></td>';
+					print '<td class="right opacitymedium">'.$percent.' %</td>';
+					print '<td><input type="text" name="ventil_note" value="'.dol_escape_htmltag($v->note).'" size="20" class="flat"></td>';
+					print '<td class="center">';
+					print '<input type="submit" class="button buttongen smallpaddingimp" value="'.$langs->trans('Save').'">';
+					print ' <a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">'.$langs->trans('Cancel').'</a>';
+					print '</td>';
+					print '</tr>';
+					print '</form>';
+				} else {
+					// Display row
+					print '<tr class="oddeven">';
+					print '<td></td>';
+					// Project
+					$proj = new Project($db);
+					$proj->fetch($v->fk_project);
+					print '<td>'.$proj->getNomUrl(1);
+					if ($proj->title) {
+						print ' <span class="opacitymedium">- '.dol_escape_htmltag($proj->title).'</span>';
+					}
+					print '</td>';
+					// Year
+					print '<td>'.(!empty($v->annee) ? '<strong>'.$v->annee.'</strong>' : '<span class="opacitymedium">-</span>').'</td>';
+					// Months
+					print '<td class="center">'.(!empty($v->nb_mois) ? $v->nb_mois.' '.$langs->trans('Months') : '<span class="opacitymedium">-</span>').'</td>';
+					print '<td class="right"><span class="amount">'.price($v->amount, 0, $langs, 1, -1, -1, $conf->currency).'</span></td>';
+					print '<td class="right">'.$percent.' %</td>';
+					print '<td>'.dol_escape_htmltag($v->note).'</td>';
+					if ($permissiontoadd) {
+						print '<td class="center nowraponall">';
+						print '<a class="editfielda reposition" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=editventilation&ventilid='.$v->id.'&token='.newToken().'">'.img_edit().'</a>';
+						print ' <a class="reposition" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=deleteventilation&ventilid='.$v->id.'&token='.newToken().'">'.img_delete().'</a>';
+						print '</td>';
+					}
+					print '</tr>';
+				}
+			}
+
+			// Add form (inline row)
+			if (($action == 'addventilform' || $action == 'addventilation') && $permissiontoadd) {
+				print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
+				print '<input type="hidden" name="token" value="'.newToken().'">';
+				print '<input type="hidden" name="action" value="addventilation">';
+				print '<tr class="oddeven">';
+				print '<td></td>';
+				// Project selector
+				print '<td>';
+				$projectOptions = $formproject->select_projects_list(-1, 0, 'ventil_projectid', 64, 0, 1, 1, 0, 0, 1);
+				print '<select class="flat minwidth200" name="ventil_projectid" id="ventil_projectid">';
+				print '<option value="0">&nbsp;</option>';
+				if (is_array($projectOptions)) {
+					foreach ($projectOptions as $optionData) {
+						$selectedProj = (!empty($object->fk_project) && $object->fk_project == $optionData['key']) ? ' selected' : '';
+						$disabledAttr = !empty($optionData['disabled']) ? ' disabled' : '';
+						print '<option value="'.$optionData['key'].'"'.$selectedProj.$disabledAttr.'>'.dol_escape_htmltag($optionData['labelx']).'</option>';
+					}
+				}
+				print '</select>';
+				if (!empty($conf->use_javascript_ajax)) {
+					include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
+					print ajax_combobox('ventil_projectid');
+				}
+				print '</td>';
+				// Year selector
+				print '<td>';
+				print '<select class="flat width75" name="ventil_annee" id="ventil_annee">';
+				print '<option value="0">&nbsp;</option>';
+				for ($y = $currentYear - 2; $y <= $currentYear + 5; $y++) {
+					$selected = ($y == $currentYear) ? ' selected' : '';
+					print '<option value="'.$y.'"'.$selected.'>'.$y.'</option>';
+				}
+				print '</select>';
+				print '</td>';
+				// Months
+				print '<td class="center"><input type="number" name="ventil_nb_mois" value="" min="1" max="120" size="3" class="flat width50 center" placeholder="12"></td>';
+				// Amount
+				$defaultAmount = ($remaining > 0) ? $remaining : '';
+				print '<td class="right"><input type="text" name="ventil_amount" value="'.$defaultAmount.'" size="10" class="flat right" placeholder="'.$langs->trans('Amount').'"></td>';
+				print '<td class="right"></td>';
+				// Note
+				print '<td><input type="text" name="ventil_note" value="" size="20" class="flat" placeholder="'.$langs->trans('Note').'"></td>';
+				print '<td class="center"><input type="submit" class="button buttongen smallpaddingimp" value="'.$langs->trans('Add').'"></td>';
+				print '</tr>';
+				print '</form>';
+			}
+
+			// Total row with progress bar
+			print '<tr class="liste_total">';
+			print '<td></td>';
+			print '<td>';
+			print $langs->trans('TotalVentilated').' : ';
+			print '<strong>'.price($totalVentilated, 0, $langs, 1, -1, -1, $conf->currency).'</strong>';
+			print ' / '.price($montantRef, 0, $langs, 1, -1, -1, $conf->currency);
+			print ' ('.$percentTotal.' %)';
+			if ($remaining > 0.01) {
+				print ' — <span class="opacitymedium">'.$langs->trans('RemainingToAllocate').' : '.price($remaining, 0, $langs, 1, -1, -1, $conf->currency).'</span>';
+			}
+			print '</td>';
+			// Progress bar spanning remaining columns
+			$colSpan = $permissiontoadd ? 4 : 3;
+			print '<td colspan="'.$colSpan.'">';
+			$barColor = '#4CAF50'; // green
+			if ($percentTotal > 100) {
+				$barColor = '#f44336'; // red
+			} elseif ($percentTotal < 100 && $percentTotal > 0) {
+				$barColor = '#ff9800'; // orange
+			}
+			$barWidth = min($percentTotal, 100);
+			print '<div style="background-color: #e0e0e0; border-radius: 4px; height: 12px; width: 100%; max-width: 300px;">';
+			print '<div style="background-color: '.$barColor.'; height: 12px; border-radius: 4px; width: '.$barWidth.'%;"></div>';
+			print '</div>';
+			print '</td>';
+			print '</tr>';
+
+			print '</tbody>
+				</table>
+			</div>';
+		}
 
 		// TODO Documents
 		/*
