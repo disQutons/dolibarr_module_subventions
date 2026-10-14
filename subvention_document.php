@@ -137,16 +137,13 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->subventions->multidir_output[$object->entity ? $object->entity : $conf->entity]."/subvention/".get_exdir(0, 0, 0, 1, $object);
 }
 
-// Permissions
-// (There are several ways to check permission.)
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'subvention', 'read');
-	$permissiontoadd  = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd  = 1;
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'subvention', 'read');
+$permissiontoadd  = $user->hasRight('subventions', 'subvention', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
+
+// Entity security: never display or modify records from another entity
+if (!empty($object->id) && isset($object->entity) && !in_array((int) $object->entity, array_map('intval', explode(',', getEntity($object->element))))) {
+	accessforbidden('NotAllowedToAccessEntity');
 }
 
 // Security check (enable the most restrictive one)

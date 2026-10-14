@@ -116,17 +116,14 @@ if ($id > 0 || !empty($ref)) {
 }
 
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
-	$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write');
-	$permissionnote = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_setnotes.inc.php
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1;
-	$permissionnote = 1;
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
+$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write');
+$permissionnote = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_setnotes.inc.php
+
+// Entity security: never display or modify records from another entity
+if (!empty($object->id) && isset($object->entity) && !in_array((int) $object->entity, array_map('intval', explode(',', getEntity($object->element))))) {
+	accessforbidden('NotAllowedToAccessEntity');
 }
 
 // Security check (enable the most restrictive one)

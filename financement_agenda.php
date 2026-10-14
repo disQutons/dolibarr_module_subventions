@@ -144,15 +144,13 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->subventions->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity]."/".$object->id;
 }
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'financement', 'read');
-	$permissiontoadd = $user->hasRight('subventions', 'financement', 'write');
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1;
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'financement', 'read');
+$permissiontoadd = $user->hasRight('subventions', 'financement', 'write');
+
+// Entity security: never display or modify records from another entity
+if (!empty($object->id) && isset($object->entity) && !in_array((int) $object->entity, array_map('intval', explode(',', getEntity($object->element))))) {
+	accessforbidden('NotAllowedToAccessEntity');
 }
 
 // Security check (enable the most restrictive one)

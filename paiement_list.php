@@ -203,18 +203,10 @@ $object->fields = dol_sort_array($object->fields, 'position');
 //$arrayfields['anotherfield'] = array('type'=>'integer', 'label'=>'AnotherField', 'checked'=>1, 'enabled'=>1, 'position'=>90, 'csslist'=>'right');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
-	$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write');
-	$permissiontodelete = $user->hasRight('subventions', 'paiement', 'delete');
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1;
-	$permissiontodelete = 1;
-}
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
+$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write');
+$permissiontodelete = $user->hasRight('subventions', 'paiement', 'delete');
 
 // Security check (enable the most restrictive one)
 if ($user->socid > 0) {
