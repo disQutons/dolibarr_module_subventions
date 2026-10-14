@@ -165,7 +165,7 @@ class modSubventions extends DolibarrModules
 		// Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
 			// Set this to 1 if module has its own trigger directory (core/triggers)
-			'triggers' => 0,
+			'triggers' => 1,
 			// Set this to 1 if module has its own login method file (core/login)
 			'login' => 0,
 			// Set this to 1 if module has its own substitution function file (core/substitutions)
@@ -1156,6 +1156,47 @@ class modSubventions extends DolibarrModules
 			}
 			if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'entity')) {
 				$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_subvention_projet', 'entity', array('type' => 'integer', 'default' => 1, 'null' => 'NOT NULL'));
+			}
+		}
+
+		// Insertion des triggers agenda dans llx_c_action_trigger et activation par défaut
+		$triggers_to_add = array(
+			array('SUBVENTION_CREATE', 'Subvention created', 'Executed when a subvention is created', 16001),
+			array('SUBVENTION_VALIDATE', 'Subvention validated', 'Executed when a subvention is validated', 16002),
+			array('SUBVENTION_MODIFY', 'Subvention modified', 'Executed when a subvention is modified', 16003),
+			array('SUBVENTION_ACCEPT', 'Subvention accepted', 'Executed when a subvention is accepted', 16004),
+			array('SUBVENTION_REFUSE', 'Subvention refused', 'Executed when a subvention is refused', 16005),
+			array('SUBVENTION_FINANCED', 'Subvention financed', 'Executed when a subvention is fully financed', 16006),
+			array('SUBVENTION_EVALUATE', 'Subvention report submitted', 'Executed when a subvention evaluation report is submitted', 16007),
+			array('SUBVENTION_CLOTURE', 'Subvention closed', 'Executed when a subvention is closed', 16008),
+			array('SUBVENTION_CANCEL', 'Subvention canceled', 'Executed when a subvention is canceled', 16009),
+			array('SUBVENTION_ARCHIVE', 'Subvention archived', 'Executed when a subvention is archived', 16010),
+			array('SUBVENTION_UNVALIDATE', 'Subvention back to draft', 'Executed when a subvention is set back to draft', 16011),
+			array('SUBVENTION_REOPEN', 'Subvention reopened', 'Executed when a subvention is reopened', 16012),
+			array('SUBVENTION_DELETE', 'Subvention deleted', 'Executed when a subvention is deleted', 16013),
+			array('FINANCEMENT_CREATE', 'Funding created', 'Executed when a funding request is created', 16101),
+			array('FINANCEMENT_VALIDATE', 'Funding validated', 'Executed when a funding request is validated', 16102),
+			array('FINANCEMENT_MODIFY', 'Funding modified', 'Executed when a funding is modified', 16103),
+			array('FINANCEMENT_ACCEPT', 'Funding accepted', 'Executed when a funding is accepted', 16104),
+			array('FINANCEMENT_REFUSE', 'Funding refused', 'Executed when a funding is refused', 16105),
+			array('FINANCEMENT_CANCEL', 'Funding canceled', 'Executed when a funding is canceled', 16106),
+			array('FINANCEMENT_UNVALIDATE', 'Funding back to draft', 'Executed when a funding is set back to draft', 16107),
+			array('FINANCEMENT_REOPEN', 'Funding reopened', 'Executed when a funding is reopened', 16108),
+			array('FINANCEMENT_DELETE', 'Funding deleted', 'Executed when a funding is deleted', 16109),
+			array('PAIEMENT_CREATE', 'Subsidy payment created', 'Executed when a subsidy payment is created', 16201),
+			array('PAIEMENT_VALIDATE', 'Subsidy payment validated', 'Executed when a subsidy payment is validated', 16202),
+			array('PAIEMENT_MODIFY', 'Subsidy payment modified', 'Executed when a subsidy payment is modified', 16203),
+			array('PAIEMENT_DELETE', 'Subsidy payment deleted', 'Executed when a subsidy payment is deleted', 16204),
+		);
+		foreach ($triggers_to_add as $trig) {
+			$sqltrig = "INSERT IGNORE INTO ".MAIN_DB_PREFIX."c_action_trigger (elementtype, code, label, description, rang) ";
+			$sqltrig .= "VALUES ('subventions', '".$this->db->escape($trig[0])."', '".$this->db->escape($trig[1])."', '".$this->db->escape($trig[2])."', ".((int) $trig[3]).")";
+			$this->db->query($sqltrig);
+
+			// Enable by default in agenda actions auto if not already configured
+			$keyconst = 'MAIN_AGENDA_ACTIONAUTO_'.$trig[0];
+			if (!getDolGlobalString($keyconst)) {
+				dolibarr_set_const($this->db, $keyconst, '1', 'chaine', 0, '', $conf->entity);
 			}
 		}
 
