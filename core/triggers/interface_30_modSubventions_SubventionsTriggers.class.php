@@ -81,7 +81,29 @@ class InterfaceSubventionsTriggers extends DolibarrTriggers
 		}
 
 		// Load required language files
-		$langs->loadLangs(array("subventions@subventions", "agenda", "other", "companies", "bills"));
+		$langs->loadLangs(array("subventions@subventions", "agenda", "other", "companies", "bills", "projects"));
+
+		// Special handling for Subvention ventilation (SubventionProject)
+		if (preg_match('/^SUBVENTION_VENTILATION_/', $cleanAction) || (property_exists($object, 'element') && $object->element == 'subventionproject')) {
+			if (empty($object->socid) && !empty($object->fk_subvention)) {
+				dol_include_once('/subventions/class/subvention.class.php');
+				$subObj = new Subvention($this->db);
+				if ($subObj->fetch($object->fk_subvention) > 0) {
+					$object->socid = $subObj->fk_soc;
+					if (empty($object->ref)) {
+						$object->ref = $subObj->ref;
+					}
+				}
+			}
+
+			// Point object to parent subvention so ActionsAuto links the event to the subvention
+			if (!empty($object->fk_subvention)) {
+				$object->orig_id = $object->id;
+				$object->orig_element = $object->element;
+				$object->id = $object->fk_subvention;
+				$object->element = 'subvention';
+			}
+		}
 
 		// 1. Ensure thirdparty ID (socid) is set on object
 		if (empty($object->socid) && !empty($object->fk_soc)) {
@@ -122,8 +144,36 @@ class InterfaceSubventionsTriggers extends DolibarrTriggers
 		if (empty($object->actionmsg)) {
 			$desc = $object->actionmsg2;
 
-			// Contextual details based on element type
-			if (property_exists($object, 'element')) {
+			if (preg_match('/^SUBVENTION_VENTILATION_/', $cleanAction)) {
+				if (!empty($object->fk_project)) {
+					require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+					$proj = new Project($this->db);
+					if ($proj->fetch($object->fk_project) > 0) {
+						$desc .= "\n".$langs->transnoentities("Project").": ".$proj->ref.(!empty($proj->title) ? ' - '.$proj->title : '');
+					}
+				}
+				if (!empty($object->annee)) {
+					$desc .= "\n".$langs->transnoentities("Year").": ".$object->annee;
+				}
+				if (!empty($object->nb_mois)) {
+					$desc .= "\n".$langs->transnoentities("DurationMonths").": ".$object->nb_mois;
+				}
+				if (isset($object->amount) && $object->amount !== '' && $object->amount > 0) {
+					$desc .= "\n".$langs->transnoentities("AllocatedAmount").": ".price($object->amount);
+				}
+				if (!empty($object->note)) {
+					$desc .= "\n".$langs->transnoentities("Note").": ".$object->note;
+				}
+				if (!empty($object->autorepart_count)) {
+					$desc .= "\n".$langs->transnoentities("NumberOfYears").": ".$object->autorepart_count;
+				}
+				if (!empty($object->autorepart_years) && is_array($object->autorepart_years)) {
+					$desc .= "\n".$langs->transnoentities("Years").": ".implode(', ', $object->autorepart_years);
+				}
+				if (!empty($object->autorepart_total)) {
+					$desc .= "\n".$langs->transnoentities("TotalVentilated").": ".price($object->autorepart_total);
+				}
+			} elseif (property_exists($object, 'element')) {
 				if ($object->element == 'subvention') {
 					if (!empty($object->label)) {
 						$desc .= "\n".$langs->transnoentities("Label").": ".$object->label;
