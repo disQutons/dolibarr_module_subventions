@@ -3,6 +3,7 @@
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
  * Copyright (C) 2025		François Brichart		<francois@disqutons.fr>
  * Copyright (C) 2026		Daniel Bachmann			<d.bachmann@digiconn.de>
+ * Copyright (C) 2026		Romain MP		<romain.mp@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
