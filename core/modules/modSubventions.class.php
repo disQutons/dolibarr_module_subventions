@@ -1160,6 +1160,22 @@ class modSubventions extends DolibarrModules
 		}
 
 		// Insertion des triggers agenda dans llx_c_action_trigger et activation par défaut
+		$this->checkAndInitTriggers();
+
+		return $this->_init($sql, $options);
+	}
+
+	/**
+	 * Check and initialize triggers in llx_c_action_trigger and llx_const
+	 *
+	 * @return void
+	 */
+	public function checkAndInitTriggers()
+	{
+		global $conf;
+
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+
 		$triggers_to_add = array(
 			array('SUBVENTION_CREATE', 'Subvention created', 'Executed when a subvention is created', 16001),
 			array('SUBVENTION_VALIDATE', 'Subvention validated', 'Executed when a subvention is validated', 16002),
@@ -1192,6 +1208,7 @@ class modSubventions extends DolibarrModules
 			array('PAIEMENT_MODIFY', 'Subsidy payment modified', 'Executed when a subsidy payment is modified', 16203),
 			array('PAIEMENT_DELETE', 'Subsidy payment deleted', 'Executed when a subsidy payment is deleted', 16204),
 		);
+
 		foreach ($triggers_to_add as $trig) {
 			$sqltrig = "INSERT IGNORE INTO ".MAIN_DB_PREFIX."c_action_trigger (elementtype, code, label, description, rang) ";
 			$sqltrig .= "VALUES ('subventions', '".$this->db->escape($trig[0])."', '".$this->db->escape($trig[1])."', '".$this->db->escape($trig[2])."', ".((int) $trig[3]).")";
@@ -1203,8 +1220,6 @@ class modSubventions extends DolibarrModules
 				dolibarr_set_const($this->db, $keyconst, '1', 'chaine', 0, '', $conf->entity);
 			}
 		}
-
-		return $this->_init($sql, $options);
 	}
 
 	/**

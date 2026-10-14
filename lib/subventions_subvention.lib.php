@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Romain MP					<romain.mp@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,15 @@ function subventionPrepareHead($object)
 	global $db, $langs, $conf;
 
 	$langs->load("subventions@subventions");
+
+	// Ensure agenda triggers and default constants are registered
+	if (!getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_SUBVENTION_VENTILATION_CREATE')) {
+		dol_include_once('/subventions/core/modules/modSubventions.class.php');
+		$modSub = new modSubventions($db);
+		if (method_exists($modSub, 'checkAndInitTriggers')) {
+			$modSub->checkAndInitTriggers();
+		}
+	}
 
 	$showtabofpagecontact = 1;
 	$showtabofpagenote = 1;

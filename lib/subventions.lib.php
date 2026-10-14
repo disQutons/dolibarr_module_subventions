@@ -42,6 +42,15 @@ if (!function_exists('subventionsAdminPrepareHead')) {
 
 		$langs->load("subventions@subventions");
 
+		// Ensure agenda triggers and default constants are registered
+		if (!getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_SUBVENTION_VENTILATION_CREATE')) {
+			dol_include_once('/subventions/core/modules/modSubventions.class.php');
+			$modSub = new modSubventions($db);
+			if (method_exists($modSub, 'checkAndInitTriggers')) {
+				$modSub->checkAndInitTriggers();
+			}
+		}
+
 		$h = 0;
 		$head = array();
 

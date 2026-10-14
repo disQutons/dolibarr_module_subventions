@@ -78,6 +78,15 @@ class InterfaceSubventionsTriggers extends DolibarrTriggers
 			$conf->global->{'MAIN_AGENDA_ACTIONAUTO_'.$action} = getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_'.$cleanAction);
 		} elseif (getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_'.$action) && !getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_'.$cleanAction)) {
 			$conf->global->{'MAIN_AGENDA_ACTIONAUTO_'.$cleanAction} = getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_'.$action);
+		} elseif (!getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_'.$cleanAction) && !getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_'.$action)) {
+			// Auto-initialize triggers if missing from database
+			dol_include_once('/subventions/core/modules/modSubventions.class.php');
+			$modSub = new modSubventions($this->db);
+			if (method_exists($modSub, 'checkAndInitTriggers')) {
+				$modSub->checkAndInitTriggers();
+			}
+			$conf->global->{'MAIN_AGENDA_ACTIONAUTO_'.$cleanAction} = '1';
+			$conf->global->{'MAIN_AGENDA_ACTIONAUTO_'.$action} = '1';
 		}
 
 		// Load required language files
