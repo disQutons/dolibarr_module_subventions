@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Romain MP					<romain.mp@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -312,6 +313,7 @@ function majstatut ($object){
             throw new Exception("Erreur SQL : ".$db->lasterror());
         }
         $obj = $db->fetch_object($resql);
+        $m_acc_is_null = is_null($obj->montant_acc);
         $m_dem = (float) $obj->montant_dem;
         $m_acc = (float) $obj->montant_acc;
         $m_fin = (float) $obj->montant_fin;
@@ -336,7 +338,7 @@ function majstatut ($object){
             elseif ($m_acc == $m_fin && $m_att == 0 && $m_acc > 0){
                 $stat = 3; // Financée
             }
-            elseif (($m_dem == 0 && is_null($m_acc)) || ($m_dem > 0 && $m_acc == 0 && $m_ref == 0)){
+            elseif (($m_dem == 0 && $m_acc_is_null) || ($m_dem > 0 && $m_acc == 0 && $m_ref == 0)){
                 $stat = 1; // Validé
             }
             elseif (($m_dem == 0 && $m_acc == 0) || ($m_acc == 0 && $m_ref == $m_dem && $m_dem > 0)){

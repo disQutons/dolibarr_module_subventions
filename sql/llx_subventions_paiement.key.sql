@@ -1,4 +1,5 @@
 -- Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+-- Copyright (C) 2026		Romain MP					<romain.mp@gmail.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
 
 
 -- BEGIN MODULEBUILDER INDEXES
-ALTER TABLE llx_subventions_paiement ADD INDEX idx_subventions_paiement_rowid (rowid);
+
 ALTER TABLE llx_subventions_paiement ADD UNIQUE INDEX uk_subventions_paiement_ref (ref);
 ALTER TABLE llx_subventions_paiement ADD INDEX idx_subventions_paiement_fk_soc (fk_soc);
 ALTER TABLE llx_subventions_paiement ADD INDEX idx_subventions_paiement_status (status);

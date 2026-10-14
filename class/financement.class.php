@@ -451,14 +451,25 @@ class Financement extends CommonObject
 			return -1;
 		}
 
+		$fk_sub = (int) $this->fk_sub;
 		$result = $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
+		if ($result <= 0) {
+			return $result;
+		}
 
-		// Mise à jour des montants des financements liés
-		$resultmaj = majMontantsFinancementSubvention($this);
+		// Mise à jour des montants de la subvention parente (pas de l'objet supprimé)
+		if ($fk_sub > 0) {
+			$sub = new Subvention($this->db);
+			if ($sub->fetch($fk_sub) > 0) {
+				$resultmaj = majMontantsFinancementSubvention($sub);
+				if ($resultmaj < 0) {
+					$this->error = 'ErrorRecalculationAfterDelete';
+					return $resultmaj;
+				}
+			}
+		}
 
 		return $result;
-
 	}
 
 	/**

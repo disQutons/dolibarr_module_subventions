@@ -90,6 +90,24 @@ class SubventionStats extends Stats
 	public $fundingsource;
 
 	/**
+	 *	Sanitize a date column name coming from configuration before using it in SQL.
+	 *	Prevents broken queries (e.g. a stored '$date_creation' value) and SQL injection.
+	 *
+	 *	@param		string	$value		Configured value
+	 *	@param		string	$default	Fallback column
+	 *	@return	string				Safe column name
+	 */
+	private function sanitizeDateStat($value, $default = 'date_creation')
+	{
+		$value = preg_replace('/[^a-z_]/i', '', (string) $value);
+		$allowed = array('date_creation', 'date_attendue', 'date_d_projet', 'date_f_projet', 'date_bilan');
+		if (!in_array($value, $allowed)) {
+			$value = $default;
+		}
+		return $value;
+	}
+
+	/**
 	 *	Constructor
 	 *
 	 *	@param 		DoliDB		$db			Database handler
@@ -105,10 +123,7 @@ class SubventionStats extends Stats
 		$this->fundingsource = $object_fundingsource;				
 
 		if ($this->mode == 'subvention') {
-			$this->date_stat = getDolGlobalString('SUBVENTIONS_STATISTIC_DATE');
-			if (empty($this->date_stat)) {
-				$this->date_stat = 'date_creation';
-			}
+			$this->date_stat = $this->sanitizeDateStat(getDolGlobalString('SUBVENTIONS_STATISTIC_DATE'));
 			$object = new Subvention($this->db);
 			
 			if ($this->fundingsource > 0) {
@@ -135,6 +150,12 @@ class SubventionStats extends Stats
 			}
 		} else {
 			return 0;
+		}
+
+		if ($this->mode === 'subvention') {
+			$this->where .= " AND x.entity IN (".getEntity('subvention').")";
+		} elseif ($this->mode === 'financement') {
+			$this->where .= " AND x.entity IN (".getEntity('financement').")";
 		}
 
 		if ($this->socid) {
@@ -229,12 +250,7 @@ class SubventionStats extends Stats
 	 */
 	public function getAllByYear()
 	{
-		if (empty($this->date_stat)) {
-			$this->date_stat = getDolGlobalString('SUBVENTIONS_STATISTIC_DATE');
-		}
-		if (empty($this->date_stat)) {
-			$this->date_stat = 'date_creation';
-		}
+		$this->date_stat = $this->sanitizeDateStat(getDolGlobalString('SUBVENTIONS_STATISTIC_DATE'));
 		$sql = "SELECT date_format(x.".$this->date_stat.",'%Y') as year, count(*) as nb, sum(x.".$this->montant.") as total, avg(x.".$this->montant.") as avg";
 		$sql .= " FROM ".$this->from;
 		$sql .= " WHERE ".$this->where;
@@ -252,10 +268,7 @@ class SubventionStats extends Stats
 	 */
 	public function getStatsFundingSource($sumary, $year = 0)
 	{
-		$this->date_stat = getDolGlobalString('SUBVENTIONS_STATISTIC_DATE');
-		if (empty($this->date_stat)) {
-			$this->date_stat = 'date_creation';
-		}
+		$this->date_stat = $this->sanitizeDateStat(getDolGlobalString('SUBVENTIONS_STATISTIC_DATE'));
 		if ($sumary){
 			$sql = "SELECT MAX(x.fk_soc) as fk_soc, COUNT(x.ref) AS nb, SUM(x.montant_dem) as montant_dem, SUM(x.montant_acc) as montant_acc, SUM(x.montant_fin) as montant_fin, MAX(COALESCE(y.".$this->date_stat.", y.date_creation)) as date, x.fk_financeur, s.label as nom";
 			$sql .= " FROM ".$this->from;
