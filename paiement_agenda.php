@@ -2,6 +2,7 @@
 /* Copyright (C) 2017       Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
  * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Romain MP					<romain.mp@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -321,16 +322,28 @@ if ($object->id > 0) {
 		}
 
 		// Try to know count of actioncomm from cache
-		$nbEvent = 0;
-		//require_once DOL_DOCUMENT_ROOT.'/core/lib/memory.lib.php';
-		//$cachekey = 'count_events_paiement_'.$object->id;
-		//$nbEvent = dol_getcache($cachekey);
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/memory.lib.php';
+		$cachekey = 'count_events_paiement_'.$object->id;
+		$nbEvent = dol_getcache($cachekey);
+		if (is_null($nbEvent)) {
+			$sql = "SELECT COUNT(id) as nb FROM ".MAIN_DB_PREFIX."actioncomm";
+			$sql .= " WHERE fk_element = ".((int) $object->id);
+			$sql .= " AND elementtype IN ('paiement', 'paiement@subventions')";
+			$resql = $db->query($sql);
+			if ($resql) {
+				$obj = $db->fetch_object($resql);
+				$nbEvent = (int) $obj->nb;
+			} else {
+				$nbEvent = 0;
+			}
+			dol_setcache($cachekey, $nbEvent, 120);
+		}
 		$titlelist = $langs->trans("Actions").(is_numeric($nbEvent) ? '<span class="opacitymedium colorblack paddingleft">('.$nbEvent.')</span>' : '');
 		if (!empty($conf->dol_optimize_smallscreen)) {
 			$titlelist = $langs->trans("Actions").(is_numeric($nbEvent) ? '<span class="opacitymedium colorblack paddingleft">('.$nbEvent.')</span>' : '');
 		}
 
-		print_barre_liste($titlelist, 0, $_SERVER["PHP_SELF"], '', $sortfield, $sortorder, '', 0, -1, '', 0, $morehtmlright, '', 0, 1, 0);
+		print_barre_liste($titlelist, 0, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', 0, -1, '', 0, $morehtmlright, '', 0, 1, 0);
 
 		// List of all actions
 		$filters = array();

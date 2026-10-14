@@ -65,6 +65,21 @@ class InterfaceSubventionsTriggers extends DolibarrTriggers
 			return 0;
 		}
 
+		// Invalidate event counter cache if an actioncomm linked to our objects is created/modified/deleted
+		if (in_array($action, array('ACTION_CREATE', 'ACTION_MODIFY', 'ACTION_DELETE'))) {
+			if (!empty($object->fk_element) && !empty($object->elementtype)) {
+				require_once DOL_DOCUMENT_ROOT.'/core/lib/memory.lib.php';
+				if (in_array($object->elementtype, array('subvention', 'subvention@subventions'))) {
+					dol_delcache('count_events_subvention_'.$object->fk_element);
+				} elseif (in_array($object->elementtype, array('financement', 'financement@subventions'))) {
+					dol_delcache('count_events_financement_'.$object->fk_element);
+				} elseif (in_array($object->elementtype, array('paiement', 'paiement@subventions'))) {
+					dol_delcache('count_events_paiement_'.$object->fk_element);
+				}
+			}
+			return 0;
+		}
+
 		// Only handle Subventions module events
 		if (!preg_match('/^(SUBVENTION_|SUBVENTIONS_SUBVENTION_|FINANCEMENT_|SUBVENTIONS_FINANCEMENT_|PAIEMENT_)/', $action)) {
 			return 0;
@@ -214,6 +229,26 @@ class InterfaceSubventionsTriggers extends DolibarrTriggers
 			}
 
 			$object->actionmsg = $desc;
+		}
+
+		// Invalidate event counter cache for current object and parents
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/memory.lib.php';
+		if (!empty($object->id)) {
+			if (property_exists($object, 'element')) {
+				if ($object->element == 'subvention') {
+					dol_delcache('count_events_subvention_'.$object->id);
+				} elseif ($object->element == 'financement') {
+					dol_delcache('count_events_financement_'.$object->id);
+				} elseif ($object->element == 'paiement') {
+					dol_delcache('count_events_paiement_'.$object->id);
+				}
+			}
+		}
+		if (!empty($object->fk_subvention)) {
+			dol_delcache('count_events_subvention_'.$object->fk_subvention);
+		}
+		if (!empty($object->fk_sub)) {
+			dol_delcache('count_events_subvention_'.$object->fk_sub);
 		}
 
 		return 1;

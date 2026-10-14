@@ -30,7 +30,7 @@
  */
 function subventionPrepareHead($object)
 {
-	global $db, $langs, $conf;
+	global $db, $langs, $conf, $user;
 
 	$langs->load("subventions@subventions");
 
@@ -100,6 +100,35 @@ function subventionPrepareHead($object)
 	if ($showtabofpageagenda) {
 		$head[$h][0] = dol_buildpath("/subventions/subvention_agenda.php", 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans("Events");
+		if (isModEnabled('agenda') && (!is_object($user) || $user->hasRight('agenda', 'myactions', 'read') || $user->hasRight('agenda', 'allactions', 'read'))) {
+			$nbEvent = 0;
+			// Enable caching of subvention count actioncomm
+			require_once DOL_DOCUMENT_ROOT.'/core/lib/memory.lib.php';
+			$cachekey = 'count_events_subvention_'.$object->id;
+			$dataretrieved = dol_getcache($cachekey);
+			if (!is_null($dataretrieved)) {
+				$nbEvent = $dataretrieved;
+			} else {
+				$sql = "SELECT COUNT(id) as nb";
+				$sql .= " FROM ".MAIN_DB_PREFIX."actioncomm";
+				$sql .= " WHERE fk_element = ".((int) $object->id);
+				$sql .= " AND elementtype IN ('subvention', 'subvention@subventions')";
+				$resql = $db->query($sql);
+				if ($resql) {
+					$obj = $db->fetch_object($resql);
+					$nbEvent = (int) $obj->nb;
+				} else {
+					dol_syslog('Failed to count actioncomm '.$db->lasterror(), LOG_ERR);
+				}
+				dol_setcache($cachekey, $nbEvent, 120);
+			}
+
+			$head[$h][1] .= '/';
+			$head[$h][1] .= $langs->trans("Agenda");
+			if ($nbEvent > 0) {
+				$head[$h][1] .= '<span class="badge marginleftonlyshort">'.$nbEvent.'</span>';
+			}
+		}
 		$head[$h][2] = 'agenda';
 		$h++;
 	}
