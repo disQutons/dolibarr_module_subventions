@@ -2,6 +2,7 @@
 /* Copyright (C) 2017       Laurent Destailleur      <eldy@users.sourceforge.net>
  * Copyright (C) 2023-2024  Frédéric France          <frederic.france@free.fr>
  * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Romain MP					<romain.mp@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -708,7 +709,7 @@ class Subvention extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SUBVENTIONS_SUBVENTION_UNVALIDATE');
+		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SUBVENTION_UNVALIDATE');
 	}
 
 	/**
@@ -733,7 +734,7 @@ class Subvention extends CommonObject
 			return -1;
 		}
 
-		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SUBVENTIONS_SUBVENTION_CANCEL');
+		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SUBVENTION_CANCEL');
 	}
 
 	/**
@@ -753,37 +754,49 @@ class Subvention extends CommonObject
 			return -1;
 		}
 
-		return $this->setStatusCommon($user, self::STATUS_ARCHIVED, $notrigger, 'SUBVENTIONS_SUBVENTION_ARCHIVE');
+		return $this->setStatusCommon($user, self::STATUS_ARCHIVED, $notrigger, 'SUBVENTION_ARCHIVE');
 	}
 
-    public function accepted($user, $notrigger = 0)
+	public function accepted($user, $notrigger = 0)
 	{
 		if ($this->status != self::STATUS_VALIDATED) {
 			return 0;
 		}
 
-		return majstatut($this);
+		$result = $this->setStatusCommon($user, self::STATUS_ACCEPTED, $notrigger, 'SUBVENTION_ACCEPT');
+		if ($result > 0) {
+			majstatut($this);
+		}
+		return $result;
 	}
-    public function refuse($user, $notrigger = 0)
+
+	public function refuse($user, $notrigger = 0)
 	{
 		refuseSub($this);
-		$this->setStatusCommon($user, self::STATUS_REFUSED, $notrigger, '');
-		return majstatut($this);
+		$result = $this->setStatusCommon($user, self::STATUS_REFUSED, $notrigger, 'SUBVENTION_REFUSE');
+		majstatut($this);
+		return $result;
 	}
-    public function evaluate($user, $notrigger = 0)
+
+	public function evaluate($user, $notrigger = 0)
 	{
-		$this->setStatusCommon($user, self::STATUS_EVALUATED, $notrigger, '');
-		return majstatut($this);
+		$result = $this->setStatusCommon($user, self::STATUS_EVALUATED, $notrigger, 'SUBVENTION_EVALUATE');
+		majstatut($this);
+		return $result;
 	}
-    public function setfinanced($user, $notrigger = 0)
+
+	public function setfinanced($user, $notrigger = 0)
 	{
-		$this->setStatusCommon($user, self::STATUS_FINANCED, $notrigger, '');
-		return majstatut($this);
+		$result = $this->setStatusCommon($user, self::STATUS_FINANCED, $notrigger, 'SUBVENTION_FINANCED');
+		majstatut($this);
+		return $result;
 	}
-    public function cloture($user, $notrigger = 0)
+
+	public function cloture($user, $notrigger = 0)
 	{
-		$this->setStatusCommon($user, self::STATUS_CLOTURED, $notrigger, '');
-		return majstatut($this);
+		$result = $this->setStatusCommon($user, self::STATUS_CLOTURED, $notrigger, 'SUBVENTION_CLOTURE');
+		majstatut($this);
+		return $result;
 	}
 
 	/**
@@ -800,15 +813,11 @@ class Subvention extends CommonObject
 			return 0;
 		}
 
-		/*if (! ((!getDolGlobalInt('MAIN_USE_ADVANCED_PERMS') && $user->hasRight('subventions','write'))
-		 || (getDolGlobalInt('MAIN_USE_ADVANCED_PERMS') && $user->hasRight('subventions','subventions_advance','validate'))))
-		 {
-		 $this->error='Permission denied';
-		 return -1;
-		 }*/
-
-		//return $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SUBVENTIONS_SUBVENTION_REOPEN');
-		return majstatut($this);
+		$result = $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SUBVENTION_REOPEN');
+		if ($result > 0) {
+			majstatut($this);
+		}
+		return $result;
 	}
 
 	/**

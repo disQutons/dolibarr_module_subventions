@@ -1,5 +1,6 @@
 <?php
 /* Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Romain MP					<romain.mp@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +41,15 @@ if (!function_exists('subventionsAdminPrepareHead')) {
 		global $db;
 
 		$langs->load("subventions@subventions");
+
+		// Ensure agenda triggers and default constants are registered
+		if (!getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_SUBVENTION_VENTILATION_CREATE')) {
+			dol_include_once('/subventions/core/modules/modSubventions.class.php');
+			$modSub = new modSubventions($db);
+			if (method_exists($modSub, 'checkAndInitTriggers')) {
+				$modSub->checkAndInitTriggers();
+			}
+		}
 
 		$h = 0;
 		$head = array();
@@ -155,38 +165,40 @@ if (!function_exists('majMontantsFinancementSubvention')) {
                 throw new Exception("Erreur SQL : ".$db->lasterror());
             }
             $obj = $db->fetch_object($resql);
-            $m_acc = $obj->montant_acc;
-            $m_dem = (float) $obj->montant_dem;
+            if ($obj) {
+                $m_acc = $obj->montant_acc;
+                $m_dem = (float) $obj->montant_dem;
 
-            // Calcule la somme des montants reçus (paiements) pour ce financement
-            $resql = $db->query("SELECT SUM(montant) as total FROM ".MAIN_DB_PREFIX."subventions_paiement WHERE fk_fin = ".$fk_fin);
-            if (!$resql) {
-                throw new Exception("Erreur SQL : ".$db->lasterror());
-            }
-            $obj = $db->fetch_object($resql);
-            $m_fin = (float) $obj->total;
+                // Calcule la somme des montants reçus (paiements) pour ce financement
+                $resql = $db->query("SELECT SUM(montant) as total FROM ".MAIN_DB_PREFIX."subventions_paiement WHERE fk_fin = ".$fk_fin);
+                if (!$resql) {
+                    throw new Exception("Erreur SQL : ".$db->lasterror());
+                }
+                $obj2 = $db->fetch_object($resql);
+                $m_fin = (float) $obj2->total;
 
-            // Calcule le montant attendu (montant_acc - somme des paiements) ne peut pas être négatif
-            $m_att = ($m_acc - $m_fin < 0) ? 0 : $m_acc - $m_fin;
-            
-            // Si aucun montant n'a été saisi ou qu'aucune demande n'avait été faite, on ne calcul rien
-            if (is_null($m_acc) || is_null($m_dem) && $m_acc > 0){
-                $m_ref = 0;    
-            }
-            else{
-                // Calcule le montant refusé (montant_dem - montant_acc) ne peut pas être négatif
-                $m_ref = ($m_dem - $m_acc < 0) ? 0 : $m_dem - $m_acc;
-            }
+                // Calcule le montant attendu (montant_acc - somme des paiements) ne peut pas être négatif
+                $m_att = ($m_acc - $m_fin < 0) ? 0 : $m_acc - $m_fin;
+                
+                // Si aucun montant n'a été saisi ou qu'aucune demande n'avait été faite, on ne calcule rien
+                if (is_null($m_acc) || (is_null($m_dem) && $m_acc > 0)){
+                    $m_ref = 0;    
+                }
+                else{
+                    // Calcule le montant refusé (montant_dem - montant_acc) ne peut pas être négatif
+                    $m_ref = ($m_dem - $m_acc < 0) ? 0 : $m_dem - $m_acc;
+                }
 
-            // Màj financement
-            $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_financement SET ";
-            $sql .= "montant_fin = ".$m_fin.", ";
-            $sql .= "montant_ref = ".$m_ref.", ";
-            $sql .= "montant_att = ".$m_att." ";
-            $sql .= "WHERE rowid = ".$fk_fin;
-            $resql = $db->query($sql);
-            if (!$resql) {
-                throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
+                // Màj financement
+                $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_financement SET ";
+                $sql .= "montant_fin = ".$m_fin.", ";
+                $sql .= "montant_ref = ".$m_ref.", ";
+                $sql .= "montant_att = ".$m_att." ";
+                $sql .= "WHERE rowid = ".$fk_fin;
+                $resql = $db->query($sql);
+                if (!$resql) {
+                    throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
+                }
             }
         }
 
@@ -343,17 +355,37 @@ function majstatut ($object){
                 $stat = 6; // Refusé
             }
         
-            // Màj statut de la subvention
-            $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_subvention SET ";
-            $sql .= " status = ".$stat." ";
-            $sql .= " WHERE rowid = ".$sub;
-            $resql = $db->query($sql);
-            if (!$resql) {
-                throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
-            }
+            $old_stat = (int) $obj->status;
+            if ($stat != $old_stat) {
+                // Màj statut de la subvention
+                $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_subvention SET ";
+                $sql .= " status = ".$stat." ";
+                $sql .= " WHERE rowid = ".$sub;
+                $resql = $db->query($sql);
+                if (!$resql) {
+                    throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
+                }
 
-            $db->commit();
-            return 1;
+                $db->commit();
+
+                // Lancement du trigger si le statut a changé automatiquement
+                dol_include_once('/subventions/class/subvention.class.php');
+                $subObj = new Subvention($db);
+                if ($subObj->fetch($sub) > 0) {
+                    if ($stat == Subvention::STATUS_ACCEPTED) {
+                        $subObj->call_trigger('SUBVENTION_ACCEPT', $user);
+                    } elseif ($stat == Subvention::STATUS_FINANCED) {
+                        $subObj->call_trigger('SUBVENTION_FINANCED', $user);
+                    } elseif ($stat == Subvention::STATUS_REFUSED) {
+                        $subObj->call_trigger('SUBVENTION_REFUSE', $user);
+                    }
+                }
+
+                return 1;
+            } else {
+                $db->commit();
+                return 0;
+            }
         }
     }
     catch (Exception $e) {

@@ -22,6 +22,8 @@
 - ADD Script de migration SQL 1.2.0-1.3.0 et auto-migration au chargement du module
 - ADD Traductions complètes (fr_FR, en_US)
 - FIX Correction de l'erreur fatale de redéclaration de subventionsAdminPrepareHead() sur les onglets d'administration
+- FIX Enregistrement automatique des événements dans l'Agenda Dolibarr (création, modification, transitions de statuts subventions/financements/paiements) et déclaration des triggers dans llx_c_action_trigger
+- ADD Déclencheurs d'actions (triggers) et enregistrement Agenda pour la ventilation d'une subvention sur les projets (création, modification, suppression, répartition automatique)
 
 ## 1.2 Merci @romainmp
 - FIX #26 Traductions manquantes

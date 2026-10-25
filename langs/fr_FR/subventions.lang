@@ -256,8 +256,81 @@ DurationMonths=Durée (mois)
 NumberOfMonths=Nombre de mois
 NbOfMonths=Nb de mois
 Months=mois
+NumberOfYears=Nombre d'exercices
+Years=Exercices
 Year=Année
+Project=Projet
 ErrorMissingProjectDates=Les dates de début et de fin de projet doivent être renseignées sur la subvention
 ErrorStartDateGreaterThanEndDate=La date de début de projet doit être antérieure à la date de fin
 ErrorAmountRequired=Un montant accepté ou demandé supérieur à 0 est requis
 ErrorTotalMonthsZero=La durée calculée du projet est nulle
+
+#
+# Agenda automatic actions and triggers
+#
+Notify_SUBVENTION_CREATE=Création d'une subvention
+Notify_SUBVENTION_VALIDATE=Validation/Dépôt d'une subvention
+Notify_SUBVENTION_MODIFY=Modification d'une subvention
+Notify_SUBVENTION_ACCEPT=Acceptation d'une subvention
+Notify_SUBVENTION_REFUSE=Refus d'une subvention
+Notify_SUBVENTION_FINANCED=Financement total d'une subvention
+Notify_SUBVENTION_EVALUATE=Dépôt du bilan d'une subvention
+Notify_SUBVENTION_CLOTURE=Clôture d'une subvention
+Notify_SUBVENTION_CANCEL=Annulation d'une subvention
+Notify_SUBVENTION_ARCHIVE=Archivage d'une subvention
+Notify_SUBVENTION_UNVALIDATE=Remise en brouillon d'une subvention
+Notify_SUBVENTION_REOPEN=Réouverture d'une subvention
+Notify_SUBVENTION_DELETE=Suppression d'une subvention
+Notify_SUBVENTION_VENTILATION_CREATE=Ventilation sur un projet créée
+Notify_SUBVENTION_VENTILATION_MODIFY=Ventilation sur un projet modifiée
+Notify_SUBVENTION_VENTILATION_DELETE=Ventilation sur un projet supprimée
+Notify_SUBVENTION_VENTILATION_AUTOREPARTITION=Répartition pluriannuelle automatique générée
+
+SUBVENTION_CREATEInDolibarr=Subvention %s créée
+SUBVENTION_VALIDATEInDolibarr=Subvention %s déposée
+SUBVENTION_MODIFYInDolibarr=Subvention %s modifiée
+SUBVENTION_ACCEPTInDolibarr=Subvention %s acceptée
+SUBVENTION_REFUSEInDolibarr=Subvention %s refusée
+SUBVENTION_FINANCEDInDolibarr=Subvention %s intégralement financée
+SUBVENTION_EVALUATEInDolibarr=Subvention %s : bilan déposé
+SUBVENTION_CLOTUREInDolibarr=Subvention %s clôturée
+SUBVENTION_CANCELInDolibarr=Subvention %s annulée
+SUBVENTION_ARCHIVEInDolibarr=Subvention %s archivée
+SUBVENTION_UNVALIDATEInDolibarr=Subvention %s remise en brouillon
+SUBVENTION_REOPENInDolibarr=Subvention %s réouverte
+SUBVENTION_DELETEInDolibarr=Subvention %s supprimée
+SUBVENTION_VENTILATION_CREATEInDolibarr=Ventilation sur projet créée pour %s
+SUBVENTION_VENTILATION_MODIFYInDolibarr=Ventilation sur projet modifiée pour %s
+SUBVENTION_VENTILATION_DELETEInDolibarr=Ventilation sur projet supprimée pour %s
+SUBVENTION_VENTILATION_AUTOREPARTITIONInDolibarr=Répartition pluriannuelle automatique pour %s
+
+Notify_FINANCEMENT_CREATE=Création d'une demande de financement
+Notify_FINANCEMENT_VALIDATE=Dépôt d'une demande de financement
+Notify_FINANCEMENT_MODIFY=Modification d'un financement
+Notify_FINANCEMENT_ACCEPT=Accord d'un financement
+Notify_FINANCEMENT_REFUSE=Refus d'un financement
+Notify_FINANCEMENT_CANCEL=Annulation d'un financement
+Notify_FINANCEMENT_UNVALIDATE=Remise en brouillon d'un financement
+Notify_FINANCEMENT_REOPEN=Réouverture d'un financement
+Notify_FINANCEMENT_DELETE=Suppression d'un financement
+
+FINANCEMENT_CREATEInDolibarr=Demande de financement %s créée
+FINANCEMENT_VALIDATEInDolibarr=Demande de financement %s déposée
+FINANCEMENT_MODIFYInDolibarr=Financement %s modifié
+FINANCEMENT_ACCEPTInDolibarr=Financement %s accordé
+FINANCEMENT_REFUSEInDolibarr=Financement %s refusé
+FINANCEMENT_CANCELInDolibarr=Financement %s annulé
+FINANCEMENT_UNVALIDATEInDolibarr=Financement %s remis en brouillon
+FINANCEMENT_REOPENInDolibarr=Financement %s réouvert
+FINANCEMENT_DELETEInDolibarr=Financement %s supprimé
+
+Notify_PAIEMENT_CREATE=Création d'un paiement de subvention
+Notify_PAIEMENT_VALIDATE=Validation d'un paiement de subvention
+Notify_PAIEMENT_MODIFY=Modification d'un paiement de subvention
+Notify_PAIEMENT_DELETE=Suppression d'un paiement de subvention
+
+PAIEMENT_CREATEInDolibarr=Paiement de subvention %s créé
+PAIEMENT_VALIDATEInDolibarr=Paiement de subvention %s validé
+PAIEMENT_MODIFYInDolibarr=Paiement de subvention %s modifié
+PAIEMENT_DELETEInDolibarr=Paiement de subvention %s supprimé
+

@@ -639,7 +639,7 @@ class Financement extends CommonObject
 		 return -1;
 		 }*/
 
-		$result = $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SUBVENTIONS_FINANCEMENT_UNVALIDATE');
+		$result = $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'FINANCEMENT_UNVALIDATE');
 		if ($result > 0) {
 			majMontantsFinancementSubvention($this);
 			majstatut($this);
@@ -668,7 +668,7 @@ class Financement extends CommonObject
 		 return -1;
 		 }*/
 
-		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'SUBVENTIONS_FINANCEMENT_CANCEL');
+		return $this->setStatusCommon($user, self::STATUS_CANCELED, $notrigger, 'FINANCEMENT_CANCEL');
 	}
 
 	/**
@@ -724,7 +724,7 @@ class Financement extends CommonObject
 		$this->status = self::STATUS_ACCEPTED;
 
 		if (!$notrigger) {
-			$result = $this->call_trigger('SUBVENTIONS_FINANCEMENT_ACCEPT', $user);
+			$result = $this->call_trigger('FINANCEMENT_ACCEPT', $user);
 			if ($result < 0) {
 				$error++;
 			}
@@ -784,7 +784,7 @@ class Financement extends CommonObject
 		$this->status = self::STATUS_REFUSED;
 
 		if (!$notrigger) {
-			$result = $this->call_trigger('SUBVENTIONS_FINANCEMENT_REFUSE', $user);
+			$result = $this->call_trigger('FINANCEMENT_REFUSE', $user);
 			if ($result < 0) {
 				$error++;
 			}
@@ -822,7 +822,7 @@ class Financement extends CommonObject
 			return -1;
 		}
 
-		$result = $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'SUBVENTIONS_FINANCEMENT_REOPEN');
+		$result = $this->setStatusCommon($user, self::STATUS_VALIDATED, $notrigger, 'FINANCEMENT_REOPEN');
 		if ($result > 0) {
 			majMontantsFinancementSubvention($this);
 			majstatut($this);

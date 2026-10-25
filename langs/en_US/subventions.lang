@@ -243,8 +243,81 @@ DurationMonths=Duration (months)
 NumberOfMonths=Number of months
 NbOfMonths=Nb of months
 Months=months
+NumberOfYears=Number of budget years
+Years=Budget years
 Year=Year
+Project=Project
 ErrorMissingProjectDates=Project start and end dates must be defined on the subsidy
 ErrorStartDateGreaterThanEndDate=Project start date must be before end date
 ErrorAmountRequired=An accepted or requested amount greater than 0 is required
 ErrorTotalMonthsZero=Calculated project duration is zero
+
+#
+# Agenda automatic actions and triggers
+#
+Notify_SUBVENTION_CREATE=Subvention created
+Notify_SUBVENTION_VALIDATE=Subvention validated
+Notify_SUBVENTION_MODIFY=Subvention modified
+Notify_SUBVENTION_ACCEPT=Subvention accepted
+Notify_SUBVENTION_REFUSE=Subvention refused
+Notify_SUBVENTION_FINANCED=Subvention financed
+Notify_SUBVENTION_EVALUATE=Subvention report submitted
+Notify_SUBVENTION_CLOTURE=Subvention closed
+Notify_SUBVENTION_CANCEL=Subvention canceled
+Notify_SUBVENTION_ARCHIVE=Subvention archived
+Notify_SUBVENTION_UNVALIDATE=Subvention back to draft
+Notify_SUBVENTION_REOPEN=Subvention reopened
+Notify_SUBVENTION_DELETE=Subvention deleted
+Notify_SUBVENTION_VENTILATION_CREATE=Project allocation created
+Notify_SUBVENTION_VENTILATION_MODIFY=Project allocation modified
+Notify_SUBVENTION_VENTILATION_DELETE=Project allocation deleted
+Notify_SUBVENTION_VENTILATION_AUTOREPARTITION=Automatic multi-year allocation generated
+
+SUBVENTION_CREATEInDolibarr=Subvention %s created
+SUBVENTION_VALIDATEInDolibarr=Subvention %s submitted
+SUBVENTION_MODIFYInDolibarr=Subvention %s modified
+SUBVENTION_ACCEPTInDolibarr=Subvention %s accepted
+SUBVENTION_REFUSEInDolibarr=Subvention %s refused
+SUBVENTION_FINANCEDInDolibarr=Subvention %s fully financed
+SUBVENTION_EVALUATEInDolibarr=Subvention %s: evaluation submitted
+SUBVENTION_CLOTUREInDolibarr=Subvention %s closed
+SUBVENTION_CANCELInDolibarr=Subvention %s canceled
+SUBVENTION_ARCHIVEInDolibarr=Subvention %s archived
+SUBVENTION_UNVALIDATEInDolibarr=Subvention %s back to draft
+SUBVENTION_REOPENInDolibarr=Subvention %s reopened
+SUBVENTION_DELETEInDolibarr=Subvention %s deleted
+SUBVENTION_VENTILATION_CREATEInDolibarr=Project allocation created for %s
+SUBVENTION_VENTILATION_MODIFYInDolibarr=Project allocation modified for %s
+SUBVENTION_VENTILATION_DELETEInDolibarr=Project allocation deleted for %s
+SUBVENTION_VENTILATION_AUTOREPARTITIONInDolibarr=Automatic multi-year allocation for %s
+
+Notify_FINANCEMENT_CREATE=Funding request created
+Notify_FINANCEMENT_VALIDATE=Funding request submitted
+Notify_FINANCEMENT_MODIFY=Funding modified
+Notify_FINANCEMENT_ACCEPT=Funding granted
+Notify_FINANCEMENT_REFUSE=Funding refused
+Notify_FINANCEMENT_CANCEL=Funding canceled
+Notify_FINANCEMENT_UNVALIDATE=Funding back to draft
+Notify_FINANCEMENT_REOPEN=Funding reopened
+Notify_FINANCEMENT_DELETE=Funding deleted
+
+FINANCEMENT_CREATEInDolibarr=Funding request %s created
+FINANCEMENT_VALIDATEInDolibarr=Funding request %s submitted
+FINANCEMENT_MODIFYInDolibarr=Funding %s modified
+FINANCEMENT_ACCEPTInDolibarr=Funding %s granted
+FINANCEMENT_REFUSEInDolibarr=Funding %s refused
+FINANCEMENT_CANCELInDolibarr=Funding %s canceled
+FINANCEMENT_UNVALIDATEInDolibarr=Funding %s back to draft
+FINANCEMENT_REOPENInDolibarr=Funding %s reopened
+FINANCEMENT_DELETEInDolibarr=Funding %s deleted
+
+Notify_PAIEMENT_CREATE=Subsidy payment created
+Notify_PAIEMENT_VALIDATE=Subsidy payment validated
+Notify_PAIEMENT_MODIFY=Subsidy payment modified
+Notify_PAIEMENT_DELETE=Subsidy payment deleted
+
+PAIEMENT_CREATEInDolibarr=Subsidy payment %s created
+PAIEMENT_VALIDATEInDolibarr=Subsidy payment %s validated
+PAIEMENT_MODIFYInDolibarr=Subsidy payment %s modified
+PAIEMENT_DELETEInDolibarr=Subsidy payment %s deleted
+

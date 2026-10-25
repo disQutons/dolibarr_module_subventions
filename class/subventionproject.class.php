@@ -203,6 +203,22 @@ class SubventionProject extends CommonObject
 			$this->total_ht = $this->amount;
 			$this->total_ttc = $this->amount;
 
+			if (!$notrigger) {
+				// Call trigger
+				$result = $this->call_trigger('SUBVENTION_VENTILATION_CREATE', $user);
+				if (isset($this->orig_id)) {
+					$this->id = $this->orig_id;
+					unset($this->orig_id);
+				}
+				if (isset($this->orig_element)) {
+					$this->element = $this->orig_element;
+					unset($this->orig_element);
+				}
+				if ($result < 0) {
+					$error++;
+				}
+			}
+
 			if (!$error) {
 				$this->db->commit();
 				return $this->id;
@@ -287,10 +303,14 @@ class SubventionProject extends CommonObject
 	 */
 	public function update(User $user, $notrigger = 0)
 	{
+		$error = 0;
+
 		if ($this->amount < 0) {
 			$this->error = 'ErrorNegativeAmount';
 			return -1;
 		}
+
+		$this->db->begin();
 
 		$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
 		$sql .= " amount = ".((float) $this->amount);
@@ -306,9 +326,33 @@ class SubventionProject extends CommonObject
 		if ($resql) {
 			$this->total_ht = $this->amount;
 			$this->total_ttc = $this->amount;
-			return 1;
+
+			if (!$notrigger) {
+				// Call trigger
+				$result = $this->call_trigger('SUBVENTION_VENTILATION_MODIFY', $user);
+				if (isset($this->orig_id)) {
+					$this->id = $this->orig_id;
+					unset($this->orig_id);
+				}
+				if (isset($this->orig_element)) {
+					$this->element = $this->orig_element;
+					unset($this->orig_element);
+				}
+				if ($result < 0) {
+					$error++;
+				}
+			}
+
+			if (!$error) {
+				$this->db->commit();
+				return 1;
+			} else {
+				$this->db->rollback();
+				return -1;
+			}
 		} else {
 			$this->error = $this->db->lasterror();
+			$this->db->rollback();
 			return -1;
 		}
 	}
@@ -322,16 +366,47 @@ class SubventionProject extends CommonObject
 	 */
 	public function delete(User $user, $notrigger = 0)
 	{
-		$sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
-		$sql .= " WHERE rowid = ".((int) $this->id);
+		$error = 0;
 
-		dol_syslog(get_class($this)."::delete", LOG_DEBUG);
-		$resql = $this->db->query($sql);
+		if (empty($this->fk_subvention) || empty($this->fk_project)) {
+			$this->fetch($this->id);
+		}
 
-		if ($resql) {
-			return 1;
+		$this->db->begin();
+
+		if (!$notrigger) {
+			// Call trigger
+			$result = $this->call_trigger('SUBVENTION_VENTILATION_DELETE', $user);
+			if (isset($this->orig_id)) {
+				$this->id = $this->orig_id;
+				unset($this->orig_id);
+			}
+			if (isset($this->orig_element)) {
+				$this->element = $this->orig_element;
+				unset($this->orig_element);
+			}
+			if ($result < 0) {
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			$sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
+			$sql .= " WHERE rowid = ".((int) $this->id);
+
+			dol_syslog(get_class($this)."::delete", LOG_DEBUG);
+			$resql = $this->db->query($sql);
+
+			if ($resql) {
+				$this->db->commit();
+				return 1;
+			} else {
+				$this->error = $this->db->lasterror();
+				$this->db->rollback();
+				return -1;
+			}
 		} else {
-			$this->error = $this->db->lasterror();
+			$this->db->rollback();
 			return -1;
 		}
 	}
@@ -469,9 +544,10 @@ class SubventionProject extends CommonObject
 	 * @param  Subvention $subvention Subvention object
 	 * @param  User       $user       User executing the action
 	 * @param  int        $fk_project Project ID to assign to the ventilation
+	 * @param  int        $notrigger  0=launch triggers, 1=disable triggers
 	 * @return int                    Number of generated years or <0 if KO
 	 */
-	public function generateAutoRepartitionYears($subvention, $user, $fk_project)
+	public function generateAutoRepartitionYears($subvention, $user, $fk_project, $notrigger = 0)
 	{
 		if (empty($subvention->date_d_projet) || empty($subvention->date_f_projet)) {
 			$this->error = 'ErrorMissingProjectDates';
@@ -556,13 +632,35 @@ class SubventionProject extends CommonObject
 			$alloc->amount = $amount;
 			$alloc->note = $m.' '.(($m > 1) ? 'mois' : 'mois').' ('.round(($m / $total_months) * 100, 1).'%)';
 
-			$res = $alloc->create($user);
+			$res = $alloc->create($user, 1);
 			if ($res < 0) {
 				$this->error = $alloc->error;
 				$this->db->rollback();
 				return -1;
 			}
 			$count++;
+		}
+
+		if (!$notrigger) {
+			$this->fk_subvention = $subvention->id;
+			$this->fk_project = $fk_project;
+			$this->autorepart_count = $count;
+			$this->autorepart_total = $total_amount;
+			$this->autorepart_years = array_keys($months_per_year);
+			$resTrig = $this->call_trigger('SUBVENTION_VENTILATION_AUTOREPARTITION', $user);
+			if (isset($this->orig_id)) {
+				$this->id = $this->orig_id;
+				unset($this->orig_id);
+			}
+			if (isset($this->orig_element)) {
+				$this->element = $this->orig_element;
+				unset($this->orig_element);
+			}
+			if ($resTrig < 0) {
+				$this->error = $this->db->lasterror();
+				$this->db->rollback();
+				return -1;
+			}
 		}
 
 		$this->db->commit();
