@@ -155,22 +155,12 @@ if (empty($action) && empty($id) && empty($ref)) {
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be 'include', not 'include_once'.
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
-	$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->hasRight('subventions', 'paiement', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-	$permissionnote = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_setnotes.inc.php
-	$permissiondellink = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_dellink.inc.php
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = 1;
-	$permissionnote = 1;
-	$permissiondellink = 1;
-}
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'paiement', 'read');
+$permissiontoadd = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->hasRight('subventions', 'paiement', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissionnote = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_setnotes.inc.php
+$permissiondellink = $user->hasRight('subventions', 'paiement', 'write'); // Used by the include of actions_dellink.inc.php
 
 $upload_dir = $conf->subventions->multidir_output[isset($object->entity) ? $object->entity : 1].'/paiement';
 
@@ -184,6 +174,10 @@ if (!isModEnabled($object->module)) {
 }
 if (!$permissiontoread) {
 	accessforbidden();
+}
+// Entity security: never display or modify records from another entity
+if (!empty($object->id) && isset($object->entity) && !in_array((int) $object->entity, array_map('intval', explode(',', getEntity($object->element))))) {
+	accessforbidden('NotAllowedToAccessEntity');
 }
 
 $error = 0;
