@@ -2,6 +2,7 @@
 /* Copyright (C) 2007-2017  Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2024       Frédéric France         <frederic.france@free.fr>
  * Copyright (C) 2025		François Brichart			<francois@disqutons.fr>
+ * Copyright (C) 2026		Romain MP		<romain.mp@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,16 +138,13 @@ if ($id > 0 || !empty($ref)) {
 	$upload_dir = $conf->subventions->multidir_output[$object->entity ? $object->entity : $conf->entity]."/financement/".get_exdir(0, 0, 0, 1, $object);
 }
 
-// Permissions
-// (There are several ways to check permission.)
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = getDolGlobalInt('SUBVENTIONS_ENABLE_PERMISSION_CHECK');
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('subventions', 'financement', 'read');
-	$permissiontoadd  = $user->hasRight('subventions', 'financement', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd  = 1;
+// Permissions are always checked server-side (no optional bypass).
+$permissiontoread = $user->hasRight('subventions', 'financement', 'read');
+$permissiontoadd  = $user->hasRight('subventions', 'financement', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_linkedfiles.inc.php
+
+// Entity security: never display or modify records from another entity
+if (!empty($object->id) && isset($object->entity) && !in_array((int) $object->entity, array_map('intval', explode(',', getEntity($object->element))))) {
+	accessforbidden('NotAllowedToAccessEntity');
 }
 
 // Security check (enable the most restrictive one)
