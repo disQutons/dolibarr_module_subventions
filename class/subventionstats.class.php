@@ -122,7 +122,7 @@ class SubventionStats extends Stats
 		$this->userid = $userid;
 		$this->fundingsource = $object_fundingsource;				
 
-		if ($this->mode == 'subvention') {
+		if ($this->mode === 'subvention') {
 			$this->date_stat = $this->sanitizeDateStat(getDolGlobalString('SUBVENTIONS_STATISTIC_DATE'));
 			$object = new Subvention($this->db);
 			
@@ -136,7 +136,7 @@ class SubventionStats extends Stats
 				$this->from = MAIN_DB_PREFIX.$object->table_element." as x";
 				$this->where .= " x.status != -1";
 			}
-		} elseif ($this->mode == 'financement') {
+		} elseif ($this->mode === 'financement') {
 			$this->date_stat = 'date_creation';
 			$object = new Financement($this->db);
 
