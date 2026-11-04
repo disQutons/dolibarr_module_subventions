@@ -349,7 +349,7 @@ class modSubventions extends DolibarrModules
 		 // List of fields (result of select to show dictionary)
 		 'tabfield' => array("ref,label,accountancy_code,accountancy_code_receivable,position"),
 		 // List of fields (list of fields to edit a record)
-		 'tabfieldvalue' => array("label,accountancy_code,accountancy_code_receivable,position"),
+		 'tabfieldvalue' => array("ref,label,accountancy_code,accountancy_code_receivable,position"),
 		 // List of fields (list of fields for insert)
 		 'tabfieldinsert' => array("ref,label,accountancy_code,accountancy_code_receivable,position"),
 		 // Name of columns with primary key (try to always name it 'rowid')
