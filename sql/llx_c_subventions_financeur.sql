@@ -21,6 +21,7 @@ CREATE TABLE llx_c_subventions_financeur (
     label varchar(128) NOT NULL,
     accountancy_code varchar(32) DEFAULT NULL,
     accountancy_code_receivable varchar(32) DEFAULT NULL,
+    use_subledger tinyint(4) NOT NULL DEFAULT 1,
     active tinyint(4) NOT NULL DEFAULT 1,
     module varchar(32) DEFAULT NULL,
     position int(11) NOT NULL DEFAULT 0,

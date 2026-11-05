@@ -149,7 +149,7 @@ class modSubventions extends DolibarrModules
 		$this->editor_squarred_logo = 'logo_disQutons.png@subventions';					// Must be image filename into the module/img directory followed with @modulename. Example: 'myimage.png@subventions'
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated', 'experimental_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.3.0';
+		$this->version = '1.3.1';
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
 
@@ -280,6 +280,12 @@ class modSubventions extends DolibarrModules
 			4 => array('SUBVENTIONS_STATISTIC_COLOR_GREEN', 'chaine', '75', 'Pourcentage minimum pour s\'afficher en vert', 1),
 			5 => array('SUBVENTIONS_STATISTIC_COLOR_ORANGE', 'chaine', '50', 'Pourcentage minimum pour s\'afficher en orange', 1),
 			6 => array('SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT', 'chaine', 'BQ', 'Journal par défaut pour les paiements de subventions', 1),
+			7 => array('SUBVENTIONS_SUBVENTION_ADDON', 'chaine', 'mod_subvention_standard', 'Modèle de numérotation par défaut des subventions', 0),
+			8 => array('SUBVENTIONS_FINANCEMENT_ADDON', 'chaine', 'mod_financement_standard', 'Modèle de numérotation par défaut des financements', 0),
+			9 => array('SUBVENTIONS_PAIEMENT_ADDON', 'chaine', 'mod_paiement_standard', 'Modèle de numérotation par défaut des paiements', 0),
+			10 => array('SUBVENTIONS_SUBVENTION_ADVANCED_MASK', 'chaine', 'SUB{yy}{mm}-{0000}', 'Masque de numérotation par défaut des subventions', 0),
+			11 => array('SUBVENTIONS_FINANCEMENT_ADVANCED_MASK', 'chaine', 'FIN{yy}{mm}-{0000}', 'Masque de numérotation par défaut des financements', 0),
+			12 => array('SUBVENTIONS_PAIEMENT_ADVANCED_MASK', 'chaine', 'PAI{yy}{mm}-{0000}', 'Masque de numérotation par défaut des paiements', 0),
 		);	
 
 		// Some keys to add into the overwriting translation tables
@@ -343,21 +349,21 @@ class modSubventions extends DolibarrModules
 		 // Label of tables
 		 'tablib' => array("Subventions : Financeurs principaux et comptabilité"),
 		 // Request to select fields
-		 'tabsql' => array('SELECT f.rowid as rowid, f.ref, f.label, f.accountancy_code, f.accountancy_code_receivable, f.active, f.position FROM '.MAIN_DB_PREFIX.'c_subventions_financeur as f'),
+		 'tabsql' => array('SELECT f.rowid as rowid, f.ref, f.label, f.accountancy_code, f.accountancy_code_receivable, f.use_subledger, f.active, f.position FROM '.MAIN_DB_PREFIX.'c_subventions_financeur as f'),
 		 // Sort order
 		 'tabsqlsort' => array("position ASC, rowid ASC"),
 		 // List of fields (result of select to show dictionary)
-		 'tabfield' => array("ref,label,accountancy_code,accountancy_code_receivable,position"),
+		 'tabfield' => array("ref,label,accountancy_code,accountancy_code_receivable,use_subledger,position"),
 		 // List of fields (list of fields to edit a record)
-		 'tabfieldvalue' => array("ref,label,accountancy_code,accountancy_code_receivable,position"),
+		 'tabfieldvalue' => array("ref,label,accountancy_code,accountancy_code_receivable,use_subledger,position"),
 		 // List of fields (list of fields for insert)
-		 'tabfieldinsert' => array("ref,label,accountancy_code,accountancy_code_receivable,position"),
+		 'tabfieldinsert' => array("ref,label,accountancy_code,accountancy_code_receivable,use_subledger,position"),
 		 // Name of columns with primary key (try to always name it 'rowid')
 		 'tabrowid' => array("rowid"),
 		 // Condition to show each dictionary
 		 'tabcond' => array(isModEnabled('subventions')),
 		 // Tooltip for every fields of dictionaries: DO NOT PUT AN EMPTY ARRAY
-		 'tabhelp' => array(array('code' => $langs->trans('CodeTooltipHelp'), 'accountancy_code' => $langs->trans('AccountancyCodeProductHelp'), 'accountancy_code_receivable' => $langs->trans('AccountancyCodeReceivableHelp'))),
+		 'tabhelp' => array(array('code' => $langs->trans('CodeTooltipHelp'), 'accountancy_code' => $langs->trans('AccountancyCodeProductHelp'), 'accountancy_code_receivable' => $langs->trans('AccountancyCodeReceivableHelp'), 'use_subledger' => $langs->trans('UseSubledgerHelp'))),
 		 );
 		/* END MODULEBUILDER DICTIONARIES */
 
@@ -761,7 +767,7 @@ class modSubventions extends DolibarrModules
 		
 		// Subvention
 		$langs->load("subventions@subventions");
-		$this->export_code[$r] = $this->rights_class.'_'.$r;
+		$this->export_code[$r] = $this->rights_class.'_complet';	// Ce code donne son nom au fichier exporté
 		$this->export_label[$r] = 'Subventions, financements et paiements';	// Translation key (used only if key ExportDataset_xxx_z not found)
 		$this->export_icon[$r] = $this->picto;
 
@@ -853,7 +859,7 @@ class modSubventions extends DolibarrModules
 
 		// Import subventions
 		$langs->load("subventions@subventions");
-		$this->import_code[$r] = $this->rights_class.'_'.$r;
+		$this->import_code[$r] = $this->rights_class.'_subvention';	// Ce code donne son nom au fichier d'exemple
 		$this->import_label[$r] = 'Subventions';	// Translation key (used only if key ExportDataset_xxx_z not found)
 		$this->import_icon[$r] = $this->picto;
 		$this->import_permission[$r] = array(array('subventions', 'subvention', 'import'));
@@ -876,7 +882,7 @@ class modSubventions extends DolibarrModules
 		include DOL_DOCUMENT_ROOT.'/core/extrafieldsinimport.inc.php';
 
 		$this->import_regex_array[$r] = array(
-			's.status'=>'^[0|1|2|3|4|5|6|9]$',
+			's.status'=>'^[0|1|2|3|4|5|6|7|9]$',
 			's.date_d_projet'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$',
 			's.date_f_projet'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$',
 			's.date_attendue'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$',
@@ -891,7 +897,7 @@ class modSubventions extends DolibarrModules
 		);
 		
 		$import_sample = array(
-			's.ref'=>"SUB202501-001", 's.label'=>"Subvention de fonctionnement", 's.fk_soc'=>"123", 's.status'=>"1",
+			's.ref'=>"SUB2501-0001", 's.label'=>"Subvention de fonctionnement", 's.fk_soc'=>"123", 's.status'=>"1",
 			's.note_public'=>"Note :", 's.note_private'=>"Note :", 's.montant_dem'=>"10000", 's.montant_acc'=>"70000",
 			's.montant_fin'=>"2000", 's.montant_att'=>"5000", 's.montant_ref'=>"3000", 's.fk_project'=>"357",
 			's.description'=>"Main goals", 's.evaluation'=>"evaluation", 's.date_d_projet'=>"2025-01-01", 's.date_f_projet'=>"2025-12-31",
@@ -904,13 +910,13 @@ class modSubventions extends DolibarrModules
 		$this->import_convertvalue_array[$r] = array(
 			's.ref' => array(
 				'rule'=>'getrefifauto',
-				'class'=>(!getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON') ? 'mod_subvention_standard' : getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON')),
-				'path'=>"/core/modules/subventions/".(!getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON') ? 'mod_subvention_standard' : getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON')).'.php',
+				'class'=>getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON', 'mod_subvention_standard'),
+				'path'=>'/custom/subventions/core/modules/subventions/'.getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON', 'mod_subvention_standard').'.php',
 				'classobject'=>'Subvention',
-				'pathobject'=>'/subventions/class/subvention.class.php',
+				'pathobject'=>'/custom/subventions/class/subvention.class.php',
 			),
 			's.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
-			's.fk_project' => array('rule' => 'fetchidfromref', 'file' => '/projet/class/projet.class.php', 'class' => 'Projet', 'method' => 'fetch', 'element' => 'Project'),
+			's.fk_project' => array('rule' => 'fetchidfromref', 'file' => '/projet/class/project.class.php', 'class' => 'Project', 'method' => 'fetch', 'element' => 'Project'),
 		);
 
 		$this->import_run_sql_after_array[$r] = array();
@@ -918,7 +924,7 @@ class modSubventions extends DolibarrModules
 		
 
 		// Import financements
-		$this->import_code[$r] = $this->rights_class.'_'.$r;
+		$this->import_code[$r] = $this->rights_class.'_financement';	// Ce code donne son nom au fichier d'exemple
 		$this->import_label[$r] = 'Financements';	// Translation key (used only if key ExportDataset_xxx_z not found)
 		$this->import_icon[$r] = 'fa-handshake';
 		$this->import_permission[$r] = array(array('subventions', 'subvention', 'import'));
@@ -930,7 +936,7 @@ class modSubventions extends DolibarrModules
 		$this->import_fields_array[$r] = array(
 			'f.ref'=>"Ref*", 'f.fk_financeur'=>"Type de financeur*", 'f.fk_soc'=>"ThirdParty*", 'f.status'=>"Status*", 'f.note_public'=>"NotePublic",
 			'f.note_private'=>"NotePrivate", 'f.montant_dem'=>"Montant demandé", 'f.montant_acc'=>"Montant accepté", 'f.montant_fin'=>"Montant financé",
-			'f.montant_att'=>"Montant en attente", 'f.montant_ref'=>"Montant refusé",'f.fk_sub'=>"ID Subvention",
+			'f.montant_att'=>"Montant en attente", 'f.montant_ref'=>"Montant refusé",'f.fk_sub'=>"ID Subvention*", 'f.date_creation'=>"Date création*",
 		);
 		
 		$import_extrafield_sample = array();
@@ -938,7 +944,8 @@ class modSubventions extends DolibarrModules
 		include DOL_DOCUMENT_ROOT.'/core/extrafieldsinimport.inc.php';
 
 		$this->import_regex_array[$r] = array(
-			'f.status'=>'^[0|1|9]$',
+			'f.status'=>'^[0|1|2|3|9]$',
+			'f.date_creation'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$',
 			'f.montant_dem'=>'^[0-9]+(\\.[0-9]{1,2})?$',
 			'f.montant_acc'=>'^[0-9]+(\\.[0-9]{1,2})?$',
 			'f.montant_fin'=>'^[0-9]+(\\.[0-9]{1,2})?$',
@@ -947,10 +954,10 @@ class modSubventions extends DolibarrModules
 			'f.fk_soc'=>'^[0-9]+$',		
 		);
 		
-		$this->import_examplevalues_array[$r] = array(
-			'f.ref'=>"FIN202501-001", 'f.fk_financeur'=>"FS-SOC", 'f.fk_soc'=>"123", 'f.status'=>"1", 'f.note_public'=>"Note :",
+		$import_sample = array(
+			'f.ref'=>"FIN2501-0001", 'f.fk_financeur'=>"6", 'f.fk_soc'=>"123", 'f.status'=>"1", 'f.note_public'=>"Note :",
 			'f.note_private'=>"Note :", 'f.montant_dem'=>"10000", 'f.montant_acc'=>"70000", 'f.montant_fin'=>"2000", 'f.montant_att'=>"5000",
-			'f.montant_ref'=>"3000",'f.fk_sub'=>"987",
+			'f.montant_ref'=>"3000",'f.fk_sub'=>"987", 'f.date_creation'=>"2025-01-15",
 		);
 		$this->import_examplevalues_array[$r] = array_merge($import_sample, $import_extrafield_sample);
 
@@ -959,19 +966,19 @@ class modSubventions extends DolibarrModules
 		$this->import_convertvalue_array[$r] = array(
 			'f.ref' => array(
 				'rule'=>'getrefifauto',
-				'class'=>(!getDolGlobalString('SUBVENTIONS_FINANCEMENT_ADDON') ? 'mod_subvention_standard' : getDolGlobalString('SUBVENTIONS_FINANCEMENT_ADDON')),
-				'path'=>"/core/modules/subventions/".(!getDolGlobalString('SUBVENTIONS_FINANCEMENT_ADDON') ? 'mod_subvention_standard' : getDolGlobalString('SUBVENTIONS_FINANCEMENT_ADDON')).'.php',
+				'class'=>getDolGlobalString('SUBVENTIONS_FINANCEMENT_ADDON', 'mod_financement_standard'),
+				'path'=>'/custom/subventions/core/modules/subventions/'.getDolGlobalString('SUBVENTIONS_FINANCEMENT_ADDON', 'mod_financement_standard').'.php',
 				'classobject'=>'Financement',
-				'pathobject'=>'/subventions/class/financement.class.php',
+				'pathobject'=>'/custom/subventions/class/financement.class.php',
 			),
-			's.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
+			'f.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
 		);
 
 		$this->import_run_sql_after_array[$r] = array();
 		$r++;
 
 		// Import paiements
-		$this->import_code[$r] = $this->rights_class.'_'.$r;
+		$this->import_code[$r] = $this->rights_class.'_paiement';	// Ce code donne son nom au fichier d'exemple
 		$this->import_label[$r] = 'Paiements';	// Translation key (used only if key ExportDataset_xxx_z not found)
 		$this->import_icon[$r] = 'fa-coins';
 		$this->import_permission[$r] = array(array('subventions', 'subvention', 'import'));
@@ -982,7 +989,7 @@ class modSubventions extends DolibarrModules
 		
 		$this->import_fields_array[$r] = array(
 			'p.ref'=>"Ref*", 'p.montant'=>"Montant*", 'p.fk_soc'=>"ThirdParty", 'p.status'=>"Status", 'p.note_public'=>"NotePublic",
-			'p.note_private'=>"NotePrivate", 'p.datep'=>"Date paiement*", 'p.fk_sub'=>"ID Subvention", 'p.fk_fin'=>"ID Financement",
+			'p.note_private'=>"NotePrivate", 'p.datep'=>"Date paiement*", 'p.fk_sub'=>"ID Subvention", 'p.fk_fin'=>"ID Financement", 'p.date_creation'=>"Date création*",
 		);
 		
 		$import_extrafield_sample = array();
@@ -992,25 +999,26 @@ class modSubventions extends DolibarrModules
 		$this->import_regex_array[$r] = array(
 			'p.montant'=>'^[0-9]+(\\.[0-9]{1,2})?$',
 			'p.status'=>'^[0|1|9]$',
-			'p.datep'=>'^[0-9]+(\\.[0-9]{1,2})?$',
+			'p.datep'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$',
+			'p.date_creation'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$',
 			'p.fk_soc'=>'^[0-9]+$',		
 		);
 		
-		$this->import_examplevalues_array[$r] = array(
-			'p.ref'=>"PAI202508-003", 'p.montant'=>"2000", 'p.fk_soc'=>"123", 'p.status'=>"1", 'p.note_public'=>"Note :",
-			'p.note_private'=>"Note :", 'p.datep'=>"45900", 'p.fk_sub'=>"456", 'p.fk_fin'=>"789",
+		$import_sample = array(
+			'p.ref'=>"PAI2508-0003", 'p.montant'=>"2000", 'p.fk_soc'=>"123", 'p.status'=>"1", 'p.note_public'=>"Note :",
+			'p.note_private'=>"Note :", 'p.datep'=>"2025-08-15", 'p.fk_sub'=>"456", 'p.fk_fin'=>"789", 'p.date_creation'=>"2025-08-15",
 		);
 		$this->import_examplevalues_array[$r] = array_merge($import_sample, $import_extrafield_sample);
 
-		$this->import_updatekeys_array[$r] = array('f.ref'=>'Ref');
+		$this->import_updatekeys_array[$r] = array('p.ref'=>'Ref');
 
 		$this->import_convertvalue_array[$r] = array(
-			'f.ref' => array(
+			'p.ref' => array(
 				'rule'=>'getrefifauto',
-				'class'=>(!getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON') ? 'mod_subvention_standard' : getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON')),
-				'path'=>"/core/modules/subventions/".(!getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON') ? 'mod_subvention_standard' : getDolGlobalString('SUBVENTIONS_SUBVENTION_ADDON')).'.php',
+				'class'=>getDolGlobalString('SUBVENTIONS_PAIEMENT_ADDON', 'mod_paiement_standard'),
+				'path'=>'/custom/subventions/core/modules/subventions/'.getDolGlobalString('SUBVENTIONS_PAIEMENT_ADDON', 'mod_paiement_standard').'.php',
 				'classobject'=>'Paiement',
-				'pathobject'=>'/subventions/class/paiement.class.php',
+				'pathobject'=>'/custom/subventions/class/paiement.class.php',
 			),
 			'p.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
 		);
@@ -1054,6 +1062,12 @@ class modSubventions extends DolibarrModules
 		$this->remove($options);
 
 		$sql = array();
+
+		// Reprise des modèles d'import et d'export enregistrés sous les anciens codes
+		$sql[] = "UPDATE ".MAIN_DB_PREFIX."export_model SET type = 'subventions_complet' WHERE type = 'subventions_0'";
+		$sql[] = "UPDATE ".MAIN_DB_PREFIX."import_model SET type = 'subventions_subvention' WHERE type = 'subventions_0'";
+		$sql[] = "UPDATE ".MAIN_DB_PREFIX."import_model SET type = 'subventions_financement' WHERE type = 'subventions_1'";
+		$sql[] = "UPDATE ".MAIN_DB_PREFIX."import_model SET type = 'subventions_paiement' WHERE type = 'subventions_2'";
 
 		// Document templates
 		$moduledir = dol_sanitizeFileName('subventions');
@@ -1107,9 +1121,30 @@ class modSubventions extends DolibarrModules
 			curl_close($ch);
 		}
 
-		// Mise à jour structurelle pour la v1.3.0 (colonnes comptables & bancaires)
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'c_subventions_financeur', 'accountancy_code_receivable')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'c_subventions_financeur', 'accountancy_code_receivable', array('type' => 'varchar', 'value' => '32', 'null' => 'NULL'), 'accountancy_code');
+		// Filet de sécurité : ajoute les colonnes que les scripts SQL n'auraient pas pu créer
+		$this->addMissingColumns();
+
+		// Insertion des triggers agenda dans llx_c_action_trigger et activation par défaut
+		$this->checkAndInitTriggers();
+
+		return $this->_init($sql, $options);
+	}
+
+	/**
+	 * Ajoute les colonnes manquantes des tables du module
+	 *
+	 * @return void
+	 */
+	private function addMissingColumns()
+	{
+		$nullable = array('null' => 'NULL');
+		$integer = array('type' => 'integer') + $nullable;
+		$date = array('type' => 'date') + $nullable;
+		$flag = array('type' => 'tinyint', 'default' => 0);
+
+		// Dictionnaire des financeurs
+		$added = $this->addColumnIfMissing('c_subventions_financeur', 'accountancy_code_receivable', array('type' => 'varchar', 'value' => '32') + $nullable, 'AFTER accountancy_code');
+		if ($added) {
 			$defaults = array(
 				'SF_AUTRE' => '4410', 'SF_ETAT' => '4411', 'SF_REG' => '4412', 'SF_DEP' => '4413',
 				'SF_COM' => '4414', 'SF_SOC' => '4418', 'SF_EUR' => '4415', 'SF_ASP' => '4416',
@@ -1119,50 +1154,54 @@ class modSubventions extends DolibarrModules
 				$this->db->query("UPDATE ".MAIN_DB_PREFIX."c_subventions_financeur SET accountancy_code_receivable = '".$this->db->escape($code)."' WHERE ref = '".$this->db->escape($ref)."' AND (accountancy_code_receivable IS NULL OR accountancy_code_receivable = '')");
 			}
 		}
+		$this->addColumnIfMissing('c_subventions_financeur', 'use_subledger', array('type' => 'tinyint', 'default' => 1, 'null' => 'NOT NULL'), 'AFTER accountancy_code_receivable');
 
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_financement', 'accounted')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_financement', 'accounted', array('type' => 'tinyint', 'default' => 0, 'null' => 'NOT NULL'));
-		}
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_financement', 'date_engagement')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_financement', 'date_engagement', array('type' => 'date', 'null' => 'NULL'));
-		}
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_financement', 'fk_bookkeeping_receivable')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_financement', 'fk_bookkeeping_receivable', array('type' => 'integer', 'null' => 'NULL'));
-		}
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_financement', 'fk_bookkeeping_product')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_financement', 'fk_bookkeeping_product', array('type' => 'integer', 'null' => 'NULL'));
+		// Financements
+		$this->addColumnIfMissing('subventions_financement', 'accounted', $flag);
+		$this->addColumnIfMissing('subventions_financement', 'date_engagement', $date);
+		$this->addColumnIfMissing('subventions_financement', 'fk_bookkeeping_receivable', $integer);
+		$this->addColumnIfMissing('subventions_financement', 'fk_bookkeeping_product', $integer);
+
+		// Paiements
+		$this->addColumnIfMissing('subventions_paiement', 'fk_bank', $integer);
+		$this->addColumnIfMissing('subventions_paiement', 'fk_account', $integer);
+		$this->addColumnIfMissing('subventions_paiement', 'fk_paiement', $integer);
+		$this->addColumnIfMissing('subventions_paiement', 'num_paiement', array('type' => 'varchar', 'value' => '50') + $nullable);
+		$this->addColumnIfMissing('subventions_paiement', 'accounted', $flag);
+		$this->addColumnIfMissing('subventions_paiement', 'date_engagement', $date);
+		$this->addColumnIfMissing('subventions_paiement', 'fk_bookkeeping_bank', $integer);
+		$this->addColumnIfMissing('subventions_paiement', 'fk_bookkeeping_receivable', $integer);
+
+		// Ventilation pluriannuelle
+		$this->addColumnIfMissing('subventions_subvention_projet', 'annee', $integer);
+		$this->addColumnIfMissing('subventions_subvention_projet', 'nb_mois', $integer);
+		$this->addColumnIfMissing('subventions_subvention_projet', 'entity', array('type' => 'integer', 'default' => 1, 'null' => 'NOT NULL'));
+	}
+
+	/**
+	 * Ajoute une colonne à une table existante si elle n'y figure pas encore
+	 *
+	 * @param  string               $table     Nom de la table, sans préfixe
+	 * @param  string               $field     Nom de la colonne
+	 * @param  array<string,mixed>  $desc      Description de la colonne pour DDLAddField()
+	 * @param  string               $position  Position de la colonne (exemple : AFTER autre_colonne)
+	 * @return bool                            Vrai uniquement si la colonne vient d'être ajoutée
+	 */
+	private function addColumnIfMissing($table, $field, $desc, $position = '')
+	{
+		// DDLDescTable() renvoie un résultat même sans colonne trouvée : seul le nombre de lignes fait foi.
+		// Il renvoie false si la table n'existe pas : il n'y a alors rien à modifier.
+		$resql = $this->db->DDLDescTable(MAIN_DB_PREFIX.$table, $field);
+		if (!$resql || $this->db->num_rows($resql) > 0) {
+			return false;
 		}
 
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_paiement', 'fk_bank')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_paiement', 'fk_bank', array('type' => 'integer', 'null' => 'NULL'));
-		}
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_paiement', 'fk_account')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_paiement', 'fk_account', array('type' => 'integer', 'null' => 'NULL'));
-		}
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_paiement', 'fk_paiement')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_paiement', 'fk_paiement', array('type' => 'integer', 'null' => 'NULL'));
-		}
-		if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_paiement', 'num_paiement')) {
-			$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_paiement', 'num_paiement', array('type' => 'varchar', 'value' => '50', 'null' => 'NULL'));
+		if ($this->db->DDLAddField(MAIN_DB_PREFIX.$table, $field, $desc, $position) < 0) {
+			dol_syslog(get_class($this)."::addColumnIfMissing ".$table.".".$field." : ".$this->db->lasterror(), LOG_ERR);
+			return false;
 		}
 
-		// Mise à jour structurelle pour la ventilation pluriannuelle (table subventions_subvention_projet)
-		if ($this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'rowid')) {
-			if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'annee')) {
-				$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_subvention_projet', 'annee', array('type' => 'integer', 'null' => 'NULL'));
-			}
-			if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'nb_mois')) {
-				$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_subvention_projet', 'nb_mois', array('type' => 'integer', 'null' => 'NULL'));
-			}
-			if (!$this->db->DDLDescTable(MAIN_DB_PREFIX.'subventions_subvention_projet', 'entity')) {
-				$this->db->DDLAddField(MAIN_DB_PREFIX.'subventions_subvention_projet', 'entity', array('type' => 'integer', 'default' => 1, 'null' => 'NOT NULL'));
-			}
-		}
-
-		// Insertion des triggers agenda dans llx_c_action_trigger et activation par défaut
-		$this->checkAndInitTriggers();
-
-		return $this->_init($sql, $options);
+		return true;
 	}
 
 	/**

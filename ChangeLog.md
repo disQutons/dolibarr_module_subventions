@@ -1,4 +1,13 @@
 # CHANGELOG MODULE SUBVENTIONS POUR [DOLIBARR ERP CRM](https://www.dolibarr.org)
+## 1.3.1
+- FIX Modèles de numérotation standards activés par défaut et codes raccourcis (SUB, FIN et PAI), masques de numérotation préremplis dès l'activation du module
+- FIX Import : numérotation automatique (auto), clés des profils financement et paiement, statuts acceptés, format de la date de paiement et date de création obligatoire
+- FIX Ajout automatique à l'activation des colonnes manquantes, qui ne se déclenchait jamais
+- FIX Noms explicites des fichiers d'import et d'export, et exemples de valeurs restaurés pour les financements et les paiements
+- FIX Erreur SQL dans les statistiques par financeurs lorsque la date choisie appartient à la subvention
+- FIX Décalage des colonnes à la modification du dictionnaire des financeurs
+- ADD Choix, par type de financeur, d'utiliser ou non le compte auxiliaire du tiers lors du transfert en comptabilité
+
 ## 1.3
 - ADD #2 Support multi-projets : ventilation d'une subvention sur plusieurs projets distincts
 - ADD #10 Répartition pluriannuelle : ventilation par exercice budgétaire et calcul automatique « Prorata temporis » selon la durée en mois

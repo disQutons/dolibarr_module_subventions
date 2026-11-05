@@ -251,7 +251,12 @@ class SubventionStats extends Stats
 	public function getAllByYear()
 	{
 		$this->date_stat = $this->sanitizeDateStat(getDolGlobalString('SUBVENTIONS_STATISTIC_DATE'));
-		$sql = "SELECT date_format(x.".$this->date_stat.",'%Y') as year, count(*) as nb, sum(x.".$this->montant.") as total, avg(x.".$this->montant.") as avg";
+		// Les dates de statistiques sont portées par la subvention : alias x en mode subvention, y (jointure) en mode financement
+		$datefield = 'x.'.$this->date_stat;
+		if ($this->mode === 'financement') {
+			$datefield = "COALESCE(y.".$this->date_stat.", y.date_creation)";
+		}
+		$sql = "SELECT date_format(".$datefield.",'%Y') as year, count(*) as nb, sum(x.".$this->montant.") as total, avg(x.".$this->montant.") as avg";
 		$sql .= " FROM ".$this->from;
 		$sql .= " WHERE ".$this->where;
 		$sql .= " GROUP BY year";
