@@ -463,7 +463,7 @@ class ActionsSubventions extends CommonHookActions
 						if (!empty($objc->accountancy_code)) $account_product = $objc->accountancy_code;
 					}
 				}
-				$subledger = !empty($soc_static->code_compta_client) ? $soc_static->code_compta_client : '';
+				$subledger = ($this->useThirdpartySubledger($objf->fk_financeur) && !empty($soc_static->code_compta_client)) ? $soc_static->code_compta_client : '';
 				$label = $langs->trans("SubventionEngagement").': '.($sub_static->ref ? $sub_static->ref.' - ' : '').$fin_static->ref.' ('.$soc_static->name.')';
 				$montant = (float) $objf->montant_acc;
 
@@ -508,7 +508,7 @@ class ActionsSubventions extends CommonHookActions
 						'fk_docdet' => $fin_static->id,
 						'thirdparty_code' => $soc_static->code_client,
 						'subledger_account' => $subledger,
-						'subledger_label' => $soc_static->name,
+						'subledger_label' => ($subledger !== '' ? $soc_static->name : ''),
 						'numero_compte' => (string) $account_receivable,
 						'label_compte' => !empty($acc_info_rec['label']) ? $acc_info_rec['label'] : $langs->trans("SubventionReceivableAccount"),
 						'label_operation' => $label,
@@ -647,7 +647,7 @@ class ActionsSubventions extends CommonHookActions
 					}
 				}
 
-				$subledger = !empty($soc_static->code_compta_client) ? $soc_static->code_compta_client : '';
+				$subledger = ($this->useThirdpartySubledger($fin_static->fk_financeur) && !empty($soc_static->code_compta_client)) ? $soc_static->code_compta_client : '';
 				$label = $langs->trans("SubventionPayment").': '.($sub_static->ref ? $sub_static->ref.' - ' : '').$pay_static->ref.($soc_static->name ? ' ('.$soc_static->name.')' : '');
 				$montant = (float) $objp->montant;
 
@@ -717,7 +717,7 @@ class ActionsSubventions extends CommonHookActions
 						'fk_docdet' => $pay_static->id,
 						'thirdparty_code' => $soc_static->code_client,
 						'subledger_account' => $subledger,
-						'subledger_label' => $soc_static->name,
+						'subledger_label' => ($subledger !== '' ? $soc_static->name : ''),
 						'numero_compte' => (string) $account_receivable,
 						'label_compte' => !empty($acc_info_rec['label']) ? $acc_info_rec['label'] : $langs->trans("SubventionReceivableAccount"),
 						'label_operation' => $label,
@@ -758,5 +758,22 @@ class ActionsSubventions extends CommonHookActions
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Indique si le compte auxiliaire du tiers doit être utilisé pour un type de financeur
+	 *
+	 * @param  int  $fk_financeur  Identifiant du type de financeur dans le dictionnaire
+	 * @return bool                Vrai par défaut (type absent, ou module pas encore réactivé après mise à jour)
+	 */
+	private function useThirdpartySubledger($fk_financeur)
+	{
+		if ($fk_financeur > 0) {
+			$resql = $this->db->query("SELECT use_subledger FROM ".MAIN_DB_PREFIX."c_subventions_financeur WHERE rowid = ".((int) $fk_financeur));
+			if ($resql && ($obj = $this->db->fetch_object($resql))) {
+				return !empty($obj->use_subledger);
+			}
+		}
+		return true;
 	}
 }

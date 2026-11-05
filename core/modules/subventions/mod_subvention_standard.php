@@ -41,7 +41,7 @@ class mod_subvention_standard extends ModeleNumRefSubvention
 	/**
 	 * @var string
 	 */
-	public $prefix = 'SUBVENTION';
+	public $prefix = 'SUB';
 
 	/**
 	 * @var string Error code (or message)
@@ -122,11 +122,17 @@ class mod_subvention_standard extends ModeleNumRefSubvention
 	 * 	Return next free value
 	 *
 	 *  @param  Subvention		$object		Object we need next value for
+	 *  @param  Object|null		$objectforimport	Objet transmis par l'import natif lorsque $object est vide
 	 *  @return string|int<-1,0>			Next value if OK, <=0 if KO
 	 */
-	public function getNextValue($object)
+	public function getNextValue($object, $objectforimport = null)
 	{
 		global $db, $conf;
+
+		// L'import natif appelle getNextValue(null, $objet)
+		if (empty($object)) {
+			$object = $objectforimport;
+		}
 
 		// first we get the max value
 		$posindice = strlen($this->prefix) + 6;
@@ -153,7 +159,7 @@ class mod_subvention_standard extends ModeleNumRefSubvention
 		}
 
 		//$date=time();
-		$date = $object->date_creation;
+		$date = !empty($object->date_creation) ? $object->date_creation : dol_now();
 		$yymm = dol_print_date($date, "%y%m");
 
 		if ($max >= (pow(10, 4) - 1)) {

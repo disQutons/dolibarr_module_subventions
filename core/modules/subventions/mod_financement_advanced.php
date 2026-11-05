@@ -125,11 +125,17 @@ class mod_financement_advanced extends ModeleNumRefFinancement
 	 * 	Return next free value
 	 *
 	 *  @param  Financement		$object		Object we need next value for
+	 *  @param  Object|null		$objectforimport	Objet transmis par l'import natif lorsque $object est vide
 	 *  @return string|int<-1,0>			Next value if OK, <=0 if KO
 	 */
-	public function getNextValue($object)
+	public function getNextValue($object, $objectforimport = null)
 	{
 		global $db;
+
+		// L'import natif appelle getNextValue(null, $objet)
+		if (empty($object)) {
+			$object = $objectforimport;
+		}
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
@@ -141,7 +147,7 @@ class mod_financement_advanced extends ModeleNumRefFinancement
 			return 0;
 		}
 
-		$date = $object->date_creation;
+		$date = !empty($object->date_creation) ? $object->date_creation : dol_now();
 
 		$numFinal = get_next_value($db, $mask, 'subventions_financement', 'ref', '', '', $date);
 
