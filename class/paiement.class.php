@@ -136,7 +136,7 @@ class Paiement extends CommonObject
 		"fk_fin" => array("type" => "integer:financement:/custom/subventions/class/financement.class.php", "label" => "Réf financement", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1",),
 		"fk_bank" => array("type" => "integer", "label" => "BankTransaction", "enabled" => "isModEnabled('banque')", 'position' => 52, 'notnull' => 0, "visible" => "0",),
 		"fk_account" => array("type" => "integer:Account:compta/bank/class/account.class.php:1:(t.clos:=:0)", "label" => "BankAccount", "picto" => "bank_account", "enabled" => "isModEnabled('banque')", 'position' => 53, 'notnull' => 0, "visible" => "1",),
-		"fk_paiement" => array("type" => "sellist:c_paiement:libelle:id::active=1", "label" => "PaymentMode", "enabled" => "1", 'position' => 54, 'notnull' => 0, "visible" => "1",),
+		"fk_paiement" => array("type" => "sellist:c_paiement:libelle:id::active=1", "label" => "PaymentMode", "enabled" => "1", 'position' => 54, 'notnull' => -1, "visible" => "1",),
 		"num_paiement" => array("type" => "varchar(50)", "label" => "NumPayment", "enabled" => "1", 'position' => 55, 'notnull' => 0, "visible" => "1",),
 		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"),),
 		"date_engagement" => array("type" => "date", "label" => "EngagementDate", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 61, 'notnull' => 0, "visible" => "0",),
@@ -239,6 +239,7 @@ class Paiement extends CommonObject
 
 		// Translate some data of arrayofkeyval
 		if (is_object($langs)) {
+			$langs->load("bills");
 			foreach ($this->fields as $key => $val) {
 				if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
 					foreach ($val['arrayofkeyval'] as $key2 => $val2) {
@@ -1013,6 +1014,76 @@ class Paiement extends CommonObject
 		// Add your own validation rules here.
 
 		return parent::validateField($fields, $fieldKey, $fieldValue);
+	}
+
+	/**
+	 * Return HTML string to put an input field into a page
+	 *
+	 * @param	?array<string,mixed>	$val			Array of properties for field to show
+	 * @param	string					$key			Key of attribute
+	 * @param	string|string[]			$value			Preselected value to show
+	 * @param	string					$moreparam		To add more parameters on html input tag
+	 * @param	string					$keysuffix		Suffix string to add into name and id of field
+	 * @param	string					$keyprefix		Prefix string to add into name and id of field
+	 * @param	string|int				$morecss		Value for css to define style/length of field
+	 * @param	int<0,1>				$nonewbutton	Force to not show the new button on field that are links to object
+	 * @return	string
+	 */
+	public function showInputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = 0, $nonewbutton = 0)
+	{
+		global $langs, $form;
+
+		if ($key === 'fk_paiement') {
+			if (is_object($langs)) {
+				$langs->load("bills");
+			}
+			if (!is_object($form)) {
+				require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+				$form = new Form($this->db);
+			}
+			$css = $morecss ? (string) $morecss : (!empty($val['css']) ? (string) $val['css'] : 'minwidth200');
+			$noadmininfo = (strpos($keyprefix, 'search_') === 0) ? 1 : 0;
+			return (string) $form->select_types_paiements($value, $keyprefix.$key.$keysuffix, '', 0, 1, $noadmininfo, 0, 1, $css, 1);
+		}
+
+		return parent::showInputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss, $nonewbutton);
+	}
+
+	/**
+	 * Return HTML string to show a field into a page
+	 *
+	 * @param	array<string,mixed>		$val		Array of properties of field to show
+	 * @param	string					$key		Key of attribute
+	 * @param	string|int|null			$value		Preselected value to show
+	 * @param	string					$moreparam	To add more parameters on html tag
+	 * @param	string					$keysuffix	Suffix string to add into name and id of field
+	 * @param	string					$keyprefix	Prefix string to add into name and id of field
+	 * @param	mixed					$morecss	Value for CSS to use
+	 * @return	string
+	 */
+	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
+	{
+		global $langs, $form;
+
+		if ($key === 'fk_paiement') {
+			if (empty($value)) {
+				return '';
+			}
+			if (is_object($langs)) {
+				$langs->load("bills");
+			}
+			if (!is_object($form)) {
+				require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+				$form = new Form($this->db);
+			}
+			$form->load_cache_types_paiements();
+			if (isset($form->cache_types_paiements[(int) $value]['label'])) {
+				return dol_escape_htmltag($form->cache_types_paiements[(int) $value]['label']);
+			}
+			return '';
+		}
+
+		return parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
 	}
 
 	/**
