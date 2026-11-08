@@ -138,7 +138,7 @@ SUBVENTIONS_STATISTIC_COLOR_ORANGE=Pourcentage minimum pour s'afficher en orange
 #
 # core\modules\modSubventions.class.php
 #
-CodeTooltipHelp=
+CodeTooltipHelp=Ce champ contient une référence pour identifier l'enregistrement. Entrez une valeur de votre choix, mais sans caractères spéciaux.
 RightsCreateUpdateFunding=Créer ou mettre à jour les financements
 RightsCreateUpdatePayment=Créer ou mettre à jour les paiements
 RightsCreateUpdateSubsidy=Créer ou mettre à jour les subventions
