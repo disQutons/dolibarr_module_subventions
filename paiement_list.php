@@ -99,7 +99,7 @@ require_once __DIR__.'/class/paiement.class.php';
  */
 
 // Load translation files required by the page
-$langs->loadLangs(array("subventions@subventions", "other"));
+$langs->loadLangs(array("subventions@subventions", "bills", "banks", "other"));
 
 // Get parameters
 $action     = GETPOST('action', 'aZ09') ? GETPOST('action', 'aZ09') : 'view'; // The action 'create'/'add', 'edit'/'update', 'view', ...

@@ -103,7 +103,7 @@ dol_include_once('/subventions/lib/subventions_paiement.lib.php');
  */
 
 // Load translation files required by the page
-$langs->loadLangs(array("subventions@subventions", "other"));
+$langs->loadLangs(array("subventions@subventions", "bills", "banks", "other"));
 
 // Get parameters
 $id = GETPOSTINT('id');
