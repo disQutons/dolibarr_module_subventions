@@ -884,7 +884,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         		print '<td class="right"><span class="amount">'.$obj->montant_ref.'</span></td>';
 				if (getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy'))) {
 					if (!empty($obj->accounted)) {
-						$ledgerurl = DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($obj->ref);
+						$ledgerurl = function_exists('getSubventionsLedgerUrl') ? getSubventionsLedgerUrl('financement', $financement) : DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($obj->ref);
 						print '<td class="center"><a href="'.$ledgerurl.'" title="'.$langs->trans("ViewInLedger").'"><span class="badge badge-status4 badge-status" title="'.dol_print_date($obj->date_engagement, 'day').'"><i class="fa fa-check"></i> '.$langs->trans("Accounted").'</span></a></td>';
 					} else {
 						print '<td class="center"><span class="badge badge-status0 badge-status">'.$langs->trans("NotAccounted").'</span></td>';
@@ -1002,7 +1002,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         		print '<td class="right"><span class="amount">'.$obj->montant.'</span></td>';
 				if (getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy'))) {
 					if (!empty($obj->accounted)) {
-						$ledgerurl = DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($obj->ref);
+						$ledgerurl = function_exists('getSubventionsLedgerUrl') ? getSubventionsLedgerUrl('paiement', $paiement) : DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($obj->ref);
 						print '<td class="center"><a href="'.$ledgerurl.'" title="'.$langs->trans("ViewInLedger").'"><span class="badge badge-status4 badge-status" title="'.dol_print_date($obj->date_engagement, 'day').'"><i class="fa fa-check"></i> '.$langs->trans("Accounted").'</span></a></td>';
 					} else {
 						print '<td class="center"><span class="badge badge-status0 badge-status">'.$langs->trans("NotAccounted").'</span></td>';

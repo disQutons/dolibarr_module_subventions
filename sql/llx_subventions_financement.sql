@@ -39,8 +39,6 @@ CREATE TABLE llx_subventions_financement(
 	fk_financeur integer NOT NULL,
 	accounted tinyint DEFAULT 0,
 	date_engagement date DEFAULT NULL,
-	fk_bookkeeping_receivable integer DEFAULT NULL,
-	fk_bookkeeping_product integer DEFAULT NULL,
 	entity integer DEFAULT 1 NOT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

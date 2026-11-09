@@ -721,7 +721,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				if (empty($object->accounted) && !empty($object->montant_acc) && $object->montant_acc > 0) {
 					print dolGetButtonAction('', $langs->trans('AccountancyTransferJournal'), 'default', $url_transfer, '', $permissiontoadd);
 				} elseif (!empty($object->accounted)) {
-					print dolGetButtonAction('', $langs->trans('ViewInLedger'), 'default', DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref), '', 1);
+					$url_ledger = function_exists('getSubventionsLedgerUrl') ? getSubventionsLedgerUrl('financement', $object) : DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref);
+					print dolGetButtonAction('', $langs->trans('ViewInLedger'), 'default', $url_ledger, '', 1);
 				}
 			}
 

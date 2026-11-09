@@ -574,10 +574,285 @@ if (!function_exists('syncSubventionsAccountedStatus')) {
 				$object->accounted = $is_accounted;
 				$db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET accounted = ".$is_accounted." WHERE rowid = ".((int) $object->id));
 			}
+			if (empty($is_accounted) && !empty($object->fk_bank) && isModEnabled('banque') && function_exists('migrateSubventionsBankPaymentsToVarious')) {
+				migrateSubventionsBankPaymentsToVarious($db, (int) $object->id);
+			}
 			return $is_accounted;
 		}
 
 		return 0;
+	}
+}
+
+if (!function_exists('migrateSubventionsBankPaymentsToVarious')) {
+	/**
+	 * Migrate legacy subvention bank payments (llx_bank + company link) to Dolibarr PaymentVarious
+	 *
+	 * @param  DoliDB $db          Database handler
+	 * @param  int    $paiement_id Optional Paiement ID to restrict migration to a single record
+	 * @return int                 Number of migrated bank lines if >=0, <0 if KO
+	 */
+	function migrateSubventionsBankPaymentsToVarious($db, $paiement_id = 0)
+	{
+		global $conf, $langs, $user;
+
+		if (!isModEnabled('banque')) {
+			return 0;
+		}
+
+		$has_use_subledger = false;
+		$resdesc = $db->DDLDescTable(MAIN_DB_PREFIX.'c_subventions_financeur', 'use_subledger');
+		if ($resdesc && $db->num_rows($resdesc) > 0) {
+			$has_use_subledger = true;
+		}
+
+		$sql = "SELECT p.rowid as p_id, p.ref as p_ref, p.datep as p_datep, p.montant as p_montant,";
+		$sql .= " p.fk_sub, p.fk_fin, p.fk_soc as p_fk_soc, p.fk_bank, p.fk_account, p.fk_paiement, p.num_paiement,";
+		$sql .= " p.fk_user_creat as p_fk_user_creat, p.entity as p_entity,";
+		$sql .= " b.dateo as b_dateo, b.datev as b_datev, b.amount as b_amount, b.fk_type as b_fk_type,";
+		$sql .= " b.num_chq as b_num_chq, b.label as b_label, b.numero_compte as b_numero_compte,";
+		$sql .= " ba.courant as ba_courant, ba.entity as ba_entity,";
+		$sql .= " sub.ref as sub_ref, sub.fk_project as sub_fk_project,";
+		$sql .= " fin.fk_soc as fin_fk_soc, fin.fk_financeur,";
+		$sql .= " cf.accountancy_code_receivable, cf.accountancy_code";
+		if ($has_use_subledger) {
+			$sql .= ", cf.use_subledger";
+		}
+		$sql .= ", soc.nom as soc_name, soc.code_compta as code_compta_client";
+		$sql .= " FROM ".MAIN_DB_PREFIX."subventions_paiement as p";
+		$sql .= " INNER JOIN ".MAIN_DB_PREFIX."bank as b ON b.rowid = p.fk_bank";
+		$sql .= " INNER JOIN ".MAIN_DB_PREFIX."bank_account as ba ON ba.rowid = b.fk_account";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."subventions_subvention as sub ON sub.rowid = p.fk_sub";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."subventions_financement as fin ON fin.rowid = p.fk_fin";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_subventions_financeur as cf ON cf.rowid = fin.fk_financeur";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as soc ON soc.rowid = (CASE WHEN p.fk_soc > 0 THEN p.fk_soc ELSE fin.fk_soc END)";
+		$sql .= " WHERE p.fk_bank IS NOT NULL AND p.fk_bank > 0";
+		$sql .= " AND (p.accounted IS NULL OR p.accounted = 0)";
+		if ($paiement_id > 0) {
+			$sql .= " AND p.rowid = ".((int) $paiement_id);
+		}
+		$sql .= " AND NOT EXISTS (";
+		$sql .= "   SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping as ab";
+		$sql .= "   WHERE (ab.doc_type = 'subvention_paiement' AND ab.fk_doc = p.rowid)";
+		$sql .= "      OR (ab.doc_type = 'bank' AND ab.fk_doc = b.rowid)";
+		$sql .= " )";
+		$sql .= " AND (";
+		$sql .= "   NOT EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."bank_url as bu WHERE bu.fk_bank = p.fk_bank AND bu.type = 'payment_various')";
+		$sql .= "   OR EXISTS (SELECT 1 FROM ".MAIN_DB_PREFIX."bank_url as bu2 WHERE bu2.fk_bank = p.fk_bank AND bu2.type = 'company')";
+		$sql .= " )";
+
+		$resql = $db->query($sql);
+		if (!$resql) {
+			dol_syslog(__FUNCTION__." SQL error: ".$db->lasterror(), LOG_ERR);
+			return -1;
+		}
+
+		$num = $db->num_rows($resql);
+		if ($num == 0) {
+			$db->free($resql);
+			return 0;
+		}
+
+		require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+		$accstatic = new Account($db);
+		if (is_object($langs)) {
+			$langs->load('subventions@subventions');
+		}
+
+		$rows = array();
+		while ($obj = $db->fetch_object($resql)) {
+			$rows[] = $obj;
+		}
+		$db->free($resql);
+
+		$migrated = 0;
+		$now = dol_now();
+
+		foreach ($rows as $obj) {
+			$db->begin();
+			$error = 0;
+
+			$fk_bank = (int) $obj->fk_bank;
+			$pv_id = 0;
+
+			// Reuse existing llx_payment_various record if already created for this bank line
+			$sqlcheckpv = "SELECT rowid FROM ".MAIN_DB_PREFIX."payment_various WHERE fk_bank = ".$fk_bank." ORDER BY rowid ASC".$db->plimit(1);
+			$rescheckpv = $db->query($sqlcheckpv);
+			if ($rescheckpv && ($objpv = $db->fetch_object($rescheckpv))) {
+				$pv_id = (int) $objpv->rowid;
+			} elseif (!$rescheckpv) {
+				$error++;
+			}
+
+			if (!$error && $pv_id <= 0) {
+				// Resolve payment mode ID in c_paiement
+				$fk_typepayment = 0;
+				if ((int) $obj->fk_paiement > 0) {
+					$sqlpt = "SELECT id FROM ".MAIN_DB_PREFIX."c_paiement WHERE id = ".((int) $obj->fk_paiement);
+					$respt = $db->query($sqlpt);
+					if ($respt && ($objpt = $db->fetch_object($respt))) {
+						$fk_typepayment = (int) $objpt->id;
+					}
+				}
+				if ($fk_typepayment <= 0 && !empty($obj->b_fk_type)) {
+					$sqlpt = "SELECT id FROM ".MAIN_DB_PREFIX."c_paiement WHERE code = '".$db->escape($obj->b_fk_type)."' AND entity IN (".getEntity('c_paiement').") ORDER BY active DESC, id ASC".$db->plimit(1);
+					$respt = $db->query($sqlpt);
+					if ($respt && ($objpt = $db->fetch_object($respt))) {
+						$fk_typepayment = (int) $objpt->id;
+					}
+				}
+				if ($fk_typepayment <= 0) {
+					$fallbackcode = ((int) $obj->ba_courant === Account::TYPE_CASH) ? 'LIQ' : 'VIR';
+					$sqlpt = "SELECT id FROM ".MAIN_DB_PREFIX."c_paiement WHERE code = '".$db->escape($fallbackcode)."' AND entity IN (".getEntity('c_paiement').") ORDER BY active DESC, id ASC".$db->plimit(1);
+					$respt = $db->query($sqlpt);
+					if ($respt && ($objpt = $db->fetch_object($respt))) {
+						$fk_typepayment = (int) $objpt->id;
+					}
+				}
+				if ($fk_typepayment <= 0) {
+					$sqlpt = "SELECT id FROM ".MAIN_DB_PREFIX."c_paiement WHERE active = 1 AND entity IN (".getEntity('c_paiement').") ORDER BY id ASC".$db->plimit(1);
+					$respt = $db->query($sqlpt);
+					if ($respt && ($objpt = $db->fetch_object($respt))) {
+						$fk_typepayment = (int) $objpt->id;
+					}
+				}
+
+				// Resolve accountancy code and subledger account
+				$accountancy_code = '';
+				if (!empty($obj->accountancy_code_receivable)) {
+					$accountancy_code = $obj->accountancy_code_receivable;
+				} elseif (!empty($obj->accountancy_code)) {
+					$accountancy_code = $obj->accountancy_code;
+				} elseif (!empty($obj->b_numero_compte)) {
+					$accountancy_code = $obj->b_numero_compte;
+				} else {
+					$accountancy_code = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT', '441000');
+				}
+
+				$use_subledger = true;
+				if ($has_use_subledger && !is_null($obj->use_subledger)) {
+					$use_subledger = !empty($obj->use_subledger);
+				}
+				$subledger_account = ($use_subledger && !empty($obj->code_compta_client)) ? $obj->code_compta_client : '';
+
+				$datep = !empty($obj->b_dateo) ? $db->jdate($obj->b_dateo) : $db->jdate($obj->p_datep);
+				$datev = !empty($obj->b_datev) ? $db->jdate($obj->b_datev) : $datep;
+				$raw_amount = ((float) $obj->b_amount != 0) ? (float) $obj->b_amount : (float) $obj->p_montant;
+				$sens = ($raw_amount < 0) ? 0 : 1;
+				$amount = abs($raw_amount);
+				$num_payment = !empty($obj->b_num_chq) ? $obj->b_num_chq : (string) $obj->num_paiement;
+				$label = !empty($obj->b_label) ? $obj->b_label : ($langs->transnoentitiesnoconv("SubventionPayment").': '.($obj->sub_ref ? $obj->sub_ref.' - ' : '').$obj->p_ref.($obj->soc_name ? ' ('.$obj->soc_name.')' : ''));
+				$fk_project = !empty($obj->sub_fk_project) ? (int) $obj->sub_fk_project : 0;
+				$fk_user_author = !empty($obj->p_fk_user_creat) ? (int) $obj->p_fk_user_creat : ((is_object($user) && !empty($user->id)) ? (int) $user->id : 1);
+				$entity = !empty($obj->ba_entity) ? (int) $obj->ba_entity : (!empty($obj->p_entity) ? (int) $obj->p_entity : (int) $conf->entity);
+
+				$sqlins = "INSERT INTO ".MAIN_DB_PREFIX."payment_various (";
+				$sqlins .= "datep, datev, sens, amount, fk_typepayment, num_payment, label, accountancy_code, subledger_account, fk_projet, fk_user_author, datec, fk_bank, entity";
+				$sqlins .= ") VALUES (";
+				$sqlins .= "'".$db->idate($datep)."'";
+				$sqlins .= ", '".$db->idate($datev)."'";
+				$sqlins .= ", ".((int) $sens);
+				$sqlins .= ", ".price2num($amount);
+				$sqlins .= ", ".((int) $fk_typepayment);
+				$sqlins .= ", '".$db->escape($num_payment)."'";
+				$sqlins .= ", '".$db->escape($label)."'";
+				$sqlins .= ", '".$db->escape($accountancy_code)."'";
+				$sqlins .= ", '".$db->escape($subledger_account)."'";
+				$sqlins .= ", ".($fk_project > 0 ? $fk_project : 0);
+				$sqlins .= ", ".((int) $fk_user_author);
+				$sqlins .= ", '".$db->idate($now)."'";
+				$sqlins .= ", ".((int) $fk_bank);
+				$sqlins .= ", ".((int) $entity);
+				$sqlins .= ")";
+
+				if ($db->query($sqlins)) {
+					$pv_id = (int) $db->last_insert_id(MAIN_DB_PREFIX."payment_various");
+				} else {
+					dol_syslog(__FUNCTION__." insert llx_payment_various error: ".$db->lasterror(), LOG_ERR);
+					$error++;
+				}
+			}
+
+			// Ensure payment_various link exists in llx_bank_url
+			if (!$error && $pv_id > 0) {
+				$url_pv = DOL_URL_ROOT.'/compta/bank/various_payment/card.php?id=';
+				if ($accstatic->add_url_line($fk_bank, $pv_id, $url_pv, '(VariousPayment)', 'payment_various') < 0) {
+					dol_syslog(__FUNCTION__." add_url_line payment_various error: ".$accstatic->error, LOG_ERR);
+					$error++;
+				}
+			}
+
+			// Ensure payment_subvention link exists in llx_bank_url
+			if (!$error) {
+				$url_sub = dol_buildpath('/subventions/paiement_card.php', 1).'?id=';
+				if ($accstatic->add_url_line($fk_bank, (int) $obj->p_id, $url_sub, '(paiement)', 'payment_subvention') < 0) {
+					dol_syslog(__FUNCTION__." add_url_line payment_subvention error: ".$accstatic->error, LOG_ERR);
+					$error++;
+				}
+			}
+
+			// Remove legacy company link that breaks Dolibarr bankjournal.php
+			if (!$error) {
+				$sqldel = "DELETE FROM ".MAIN_DB_PREFIX."bank_url WHERE fk_bank = ".((int) $fk_bank)." AND type = 'company'";
+				if (!$db->query($sqldel)) {
+					dol_syslog(__FUNCTION__." delete company link error: ".$db->lasterror(), LOG_ERR);
+					$error++;
+				}
+			}
+
+			if (!$error) {
+				$db->commit();
+				$migrated++;
+			} else {
+				$db->rollback();
+			}
+		}
+
+		return $migrated;
+	}
+}
+
+if (!function_exists('getSubventionsLedgerUrl')) {
+	/**
+	 * Get URL to Dolibarr general ledger filtered on the bookkeeping entry of a financement or paiement
+	 *
+	 * @param  string                    $type   'financement' or 'paiement'
+	 * @param  CommonObject|object|null  $object Financement or Paiement object
+	 * @return string                            URL to bookkeeping list
+	 */
+	function getSubventionsLedgerUrl($type = 'financement', $object = null)
+	{
+		global $db, $conf;
+
+		$ref = (!empty($object) && !empty($object->ref)) ? $object->ref : '';
+		$url = DOL_URL_ROOT.'/accountancy/bookkeeping/list.php';
+
+		if (!empty($object) && !empty($object->id)) {
+			$sql = "SELECT ab.piece_num FROM ".MAIN_DB_PREFIX."accounting_bookkeeping as ab";
+			$sql .= " WHERE ab.entity = ".((int) $conf->entity);
+			if ($type == 'paiement') {
+				$sql .= " AND ((ab.doc_type = 'subvention_paiement' AND ab.fk_doc = ".((int) $object->id).")";
+				if (!empty($object->fk_bank)) {
+					$sql .= " OR (ab.doc_type = 'bank' AND ab.fk_doc = ".((int) $object->fk_bank).")";
+				}
+				$sql .= ")";
+			} else {
+				$sql .= " AND ab.doc_type IN ('subvention', 'subvention_financement') AND ab.fk_doc = ".((int) $object->id);
+			}
+			$sql .= " ORDER BY ab.piece_num DESC";
+			$sql .= $db->plimit(1);
+
+			$resql = $db->query($sql);
+			if ($resql && ($obj = $db->fetch_object($resql)) && !empty($obj->piece_num)) {
+				return $url.'?search_mvt_num='.((int) $obj->piece_num);
+			}
+		}
+
+		if (!empty($ref)) {
+			return $url.'?search_doc_ref='.urlencode($ref);
+		}
+
+		return $url;
 	}
 }
 

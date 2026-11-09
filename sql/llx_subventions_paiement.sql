@@ -38,8 +38,6 @@ CREATE TABLE llx_subventions_paiement(
 	num_paiement varchar(50),
 	accounted tinyint DEFAULT 0,
 	date_engagement date DEFAULT NULL,
-	fk_bookkeeping_bank integer DEFAULT NULL,
-	fk_bookkeeping_receivable integer DEFAULT NULL,
 	status integer DEFAULT 1 NOT NULL,
 	entity integer DEFAULT 1 NOT NULL
 	-- END MODULEBUILDER FIELDS

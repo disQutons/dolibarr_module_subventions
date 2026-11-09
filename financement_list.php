@@ -856,7 +856,7 @@ while ($i < $imaxinloop) {
 					}
 				} elseif ($key == 'accounted') {
 					if (!empty($object->accounted)) {
-						$ledgerurl = DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref);
+						$ledgerurl = function_exists('getSubventionsLedgerUrl') ? getSubventionsLedgerUrl('financement', $object) : DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref);
 						print '<a href="'.$ledgerurl.'" title="'.$langs->trans("ViewInLedger").'">'.yn(1, 1).' <span class="fa fa-book-open paddingleft"></span></a>';
 					} else {
 						if (getDolGlobalInt('SUBVENTIONS_ACCOUNTANCY_ENABLED') && (isModEnabled('accounting') || isModEnabled('accountancy')) && function_exists('getSubventionsTransferJournalUrl')) {

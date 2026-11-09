@@ -1124,6 +1124,12 @@ class modSubventions extends DolibarrModules
 		// Filet de sécurité : ajoute les colonnes que les scripts SQL n'auraient pas pu créer
 		$this->addMissingColumns();
 
+		// Migration des écritures bancaires de paiement existantes vers PaymentVarious (évite l'erreur compte de tiers inconnu en comptabilité)
+		dol_include_once('/subventions/lib/subventions.lib.php');
+		if (function_exists('migrateSubventionsBankPaymentsToVarious')) {
+			migrateSubventionsBankPaymentsToVarious($this->db);
+		}
+
 		// Insertion des triggers agenda dans llx_c_action_trigger et activation par défaut
 		$this->checkAndInitTriggers();
 
@@ -1159,8 +1165,6 @@ class modSubventions extends DolibarrModules
 		// Financements
 		$this->addColumnIfMissing('subventions_financement', 'accounted', $flag);
 		$this->addColumnIfMissing('subventions_financement', 'date_engagement', $date);
-		$this->addColumnIfMissing('subventions_financement', 'fk_bookkeeping_receivable', $integer);
-		$this->addColumnIfMissing('subventions_financement', 'fk_bookkeeping_product', $integer);
 
 		// Paiements
 		$this->addColumnIfMissing('subventions_paiement', 'fk_bank', $integer);
@@ -1169,8 +1173,6 @@ class modSubventions extends DolibarrModules
 		$this->addColumnIfMissing('subventions_paiement', 'num_paiement', array('type' => 'varchar', 'value' => '50') + $nullable);
 		$this->addColumnIfMissing('subventions_paiement', 'accounted', $flag);
 		$this->addColumnIfMissing('subventions_paiement', 'date_engagement', $date);
-		$this->addColumnIfMissing('subventions_paiement', 'fk_bookkeeping_bank', $integer);
-		$this->addColumnIfMissing('subventions_paiement', 'fk_bookkeeping_receivable', $integer);
 
 		// Ventilation pluriannuelle
 		$this->addColumnIfMissing('subventions_subvention_projet', 'annee', $integer);

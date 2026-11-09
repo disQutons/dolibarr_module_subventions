@@ -211,19 +211,6 @@ if (empty($reshook)) {
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
 	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
 
-	// Create bank line if payment was added or updated with a bank account and does not have a bank line yet
-	if (in_array(GETPOST('action', 'aZ09'), array('add', 'update')) && !empty($object->id) && empty($object->fk_bank)) {
-		$accountid = GETPOSTINT('fk_account');
-		$paiement_type = GETPOSTINT('fk_paiement');
-		$num_paiement = GETPOST('num_paiement', 'alphanohtml');
-		if ($accountid > 0 && isModEnabled('banque')) {
-			$res_bank = $object->addPaymentToBank($user, $accountid, $paiement_type, '', $num_paiement);
-			if ($res_bank < 0) {
-				setEventMessages($object->error, $object->errors, 'warnings');
-			}
-		}
-	}
-
 	// Actions when linking object each other
 	include DOL_DOCUMENT_ROOT.'/core/actions_dellink.inc.php';
 
@@ -666,7 +653,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				if (empty($object->accounted) && !empty($object->montant) && $object->montant > 0) {
 					print dolGetButtonAction('', $langs->trans('AccountancyTransferJournal'), 'default', $url_transfer, '', $permissiontoadd);
 				} elseif (!empty($object->accounted)) {
-					print dolGetButtonAction('', $langs->trans('ViewInLedger'), 'default', DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref), '', 1);
+					$url_ledger = function_exists('getSubventionsLedgerUrl') ? getSubventionsLedgerUrl('paiement', $object) : DOL_URL_ROOT.'/accountancy/bookkeeping/list.php?search_doc_ref='.urlencode($object->ref);
+					print dolGetButtonAction('', $langs->trans('ViewInLedger'), 'default', $url_ledger, '', 1);
 				}
 			}
 
