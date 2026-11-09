@@ -345,7 +345,7 @@ class modSubventions extends DolibarrModules
 		$this->dictionaries = array(
 		 'langs' => 'subventions@subventions',
 		 // List of tables we want to see into dictionary editor
-		 'tabname' => array(MAIN_DB_PREFIX."c_subventions_financeur"),
+		 'tabname' => array("c_subventions_financeur"),
 		 // Label of tables
 		 'tablib' => array("Subventions : Financeurs principaux et comptabilité"),
 		 // Request to select fields
@@ -363,7 +363,7 @@ class modSubventions extends DolibarrModules
 		 // Condition to show each dictionary
 		 'tabcond' => array(isModEnabled('subventions')),
 		 // Tooltip for every fields of dictionaries: DO NOT PUT AN EMPTY ARRAY
-		 'tabhelp' => array(array('code' => $langs->trans('CodeTooltipHelp'), 'accountancy_code' => $langs->trans('AccountancyCodeProductHelp'), 'accountancy_code_receivable' => $langs->trans('AccountancyCodeReceivableHelp'), 'use_subledger' => $langs->trans('UseSubledgerHelp'))),
+		 'tabhelp' => array(array('ref' => $langs->trans('CodeTooltipHelp'), 'accountancy_code' => $langs->trans('AccountancyCodeProductHelp'), 'accountancy_code_receivable' => $langs->trans('AccountancyCodeReceivableHelp'), 'use_subledger' => $langs->trans('UseSubledgerHelp'))),
 		 );
 		/* END MODULEBUILDER DICTIONARIES */
 

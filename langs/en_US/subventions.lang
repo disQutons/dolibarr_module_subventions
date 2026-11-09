@@ -310,3 +310,47 @@ PAIEMENT_VALIDATEInDolibarr=Subsidy payment %s validated
 PAIEMENT_MODIFYInDolibarr=Subsidy payment %s modified
 PAIEMENT_DELETEInDolibarr=Subsidy payment %s deleted
 
+#
+# Field tooltips / Help texts
+#
+SubventionRefHelp=Unique subsidy reference (automatically generated according to numbering model)
+SubventionLabelHelp=Name or title of the subsidy file / project
+SubventionThirdPartyHelp=Third party requesting or carrying the subsidy application
+SubventionProjectHelp=Dolibarr project to which this subsidy application is linked
+SubventionMontantDemHelp=Total amount requested from all funding bodies for this project
+SubventionMontantAccHelp=Total amount granted or notified by funders
+SubventionMontantFinHelp=Cumulative amount of payments actually received to date
+SubventionMontantAttHelp=Remaining balance to be received on granted amounts (Granted - Financed)
+SubventionMontantRefHelp=Total amount of requests that were rejected by funders
+DateStartProjectHelp=Start date of the subsidized project execution period
+DateEndProjectHelp=End date of the subsidized project execution period
+DateExpectedProjectHelp=Expected or estimated deadline for funders response
+DateReportProjectHelp=Contractual deadline for submitting the financial report and activity review
+SubventionDescriptionHelp=Detailed description of actions and objectives of the subsidized project
+SubventionEvaluationHelp=Evaluation criteria, deliverables and impact indicators expected for reporting
+SubventionStatusHelp=Subsidy lifecycle: Draft, Validated, Accepted, Financed, Evaluated, Closed, Refused or Canceled
+
+FundingRefHelp=Unique funding reference
+FundingSubventionRefHelp=Parent subsidy file to which this funding request is attached
+FundingThirdPartyHelp=Funding third party (public or private entity) solicited for this funding
+FundingTypeHelp=Category or type of funder (e.g. State, Region...). Configurable in dictionaries
+FundingMontantDemHelp=Amount requested from this specific funder
+FundingMontantAccHelp=Amount officially granted by this funder (following decision or board)
+FundingMontantFinHelp=Cumulative amount of payments received from this funder
+FundingMontantAttHelp=Amount remaining to be received from this funder (Granted - Financed)
+FundingMontantRefHelp=Amount rejected by this funder
+FundingStatusHelp=Instruction status: Draft, Submitted, Granted or Refused
+DateEngagementHelp=Date of official notification, grant decree or signed grant agreement
+FundingAccountedHelp=Indicates whether the accounting commitment has been transferred to the transfer journal (OD journal)
+
+PaymentRefHelp=Unique reference for the payment installment
+PaymentSubventionRefHelp=Parent subsidy file linked to this payment
+PaymentFinancementRefHelp=Specific funding line to which this installment is allocated
+PaymentAmountHelp=Amount of installment or balance received
+PaymentDateHelp=Effective bank deposit date of funds
+PaymentThirdPartyHelp=Third party issuing the payment (funding entity)
+PaymentAccountHelp=Your organization's bank account credited with the installment
+PaymentModeHelp=Payment method used (e.g. Wire transfer, Check, etc.)
+PaymentAccountedHelp=Indicates whether the bank payment has been transferred to the accounting transfer journal (Bank journal)
+
+

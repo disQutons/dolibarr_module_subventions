@@ -127,7 +127,7 @@ SUBVENTIONS_STATISTIC_COLOR_ORANGE=Pourcentage minimum pour s'afficher en orange
 #
 # core\modules\modSubventions.class.php
 #
-CodeTooltipHelp=
+CodeTooltipHelp=Ce champ contient une référence pour identifier l'enregistrement. Entrez une valeur de votre choix, mais sans caractères spéciaux.
 RightsCreateUpdateFunding=Créer ou mettre à jour les financements
 RightsCreateUpdatePayment=Créer ou mettre à jour les paiements
 RightsCreateUpdateSubsidy=Créer ou mettre à jour les subventions
@@ -324,4 +324,48 @@ PAIEMENT_CREATEInDolibarr=Paiement de subvention %s créé
 PAIEMENT_VALIDATEInDolibarr=Paiement de subvention %s validé
 PAIEMENT_MODIFYInDolibarr=Paiement de subvention %s modifié
 PAIEMENT_DELETEInDolibarr=Paiement de subvention %s supprimé
+
+#
+# Field tooltips / Infobulles d'aide
+#
+SubventionRefHelp=Référence unique de la subvention (générée automatiquement selon le modèle de numérotation)
+SubventionLabelHelp=Nom ou intitulé du dossier de subvention / projet
+SubventionThirdPartyHelp=Tiers demandeur ou porteur de la demande de subvention
+SubventionProjectHelp=Projet Dolibarr auquel ce dossier de subvention est associé
+SubventionMontantDemHelp=Montant total sollicité auprès de l'ensemble des financeurs pour ce projet
+SubventionMontantAccHelp=Montant total accordé ou notifié par les financeurs
+SubventionMontantFinHelp=Montant cumulé des versements effectivement perçus à ce jour
+SubventionMontantAttHelp=Solde restant à percevoir sur les montants accordés (Accordé - Financé)
+SubventionMontantRefHelp=Montant total des demandes ayant fait l'objet d'un refus de financement
+DateStartProjectHelp=Date de début de la période d'exécution du projet subventionné
+DateEndProjectHelp=Date de fin de la période d'exécution du projet subventionné
+DateExpectedProjectHelp=Date prévisionnelle ou limite attendue pour la réponse des financeurs
+DateReportProjectHelp=Date limite contractuelle pour le dépôt du compte-rendu financier et du bilan d'activité
+SubventionDescriptionHelp=Description détaillée des actions et objectifs du projet subventionné
+SubventionEvaluationHelp=Critères d'évaluation, livrables et indicateurs d'impact attendus pour le bilan
+SubventionStatusHelp=Statut du dossier : Brouillon, Validé, Accordé, Financé, Évalué, Clôturé, Refusé ou Annulé
+
+FundingRefHelp=Référence unique de la demande de financement
+FundingSubventionRefHelp=Dossier de subvention parent auquel se rattache cette demande de financement
+FundingThirdPartyHelp=Tiers financeur (collectivité, organisme public ou privé) sollicité pour ce financement
+FundingTypeHelp=Catégorie ou type de financeur (ex: État, Région, Département...). Configurable dans les dictionnaires
+FundingMontantDemHelp=Montant sollicité auprès de ce financeur particulier
+FundingMontantAccHelp=Montant officiellement accordé par ce financeur (suite à décision ou commission)
+FundingMontantFinHelp=Montant cumulé des versements effectivement perçus de ce financeur
+FundingMontantAttHelp=Montant restant à percevoir auprès de ce financeur (Accordé - Financé)
+FundingMontantRefHelp=Montant ayant fait l'objet d'un refus de la part de ce financeur
+FundingStatusHelp=Statut d'instruction : Brouillon, Déposé, Accordé ou Refusé
+DateEngagementHelp=Date de notification officielle, arrêté attributif ou convention de subvention signée
+FundingAccountedHelp=Indique si l'engagement comptable a été transféré dans le journal de transfert (Journal OD)
+
+PaymentRefHelp=Référence unique du paiement ou versement
+PaymentSubventionRefHelp=Dossier de subvention concerné par ce versement
+PaymentFinancementRefHelp=Ligne de financement sur laquelle ce versement est imputé
+PaymentAmountHelp=Montant de l'acompte ou du solde encaissé
+PaymentDateHelp=Date de l'encaissement bancaire effectif des fonds
+PaymentThirdPartyHelp=Tiers émetteur du versement (organisme financeur)
+PaymentAccountHelp=Compte financier de votre organisation sur lequel le versement est crédité
+PaymentModeHelp=Mode de règlement utilisé (ex : Virement, Chèque, etc.)
+PaymentAccountedHelp=Indique si le versement a été transféré dans le journal de transfert comptable (Journal de Banque)
+
 
