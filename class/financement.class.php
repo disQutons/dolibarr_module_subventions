@@ -134,18 +134,16 @@ class Financement extends CommonObject
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
 		"model_pdf" => array("type" => "varchar(255)", "label" => "Model pdf", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
-		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "2", "noteditable" => "1", "default" => "0", "index" => "1", "help" => "FundingStatusHelp", "arrayofkeyval" => array("0" => "Draft", "1" => "STATUS_VALIDATED", "2" => "STATUS_ACCEPTED", "3" => "STATUS_REFUSED"), "validate" => "1",),
-		"montant_dem" => array("type" => "price", "label" => "Montant demandé", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantDemHelp", "validate" => "1",),
-		"montant_acc" => array("type" => "price", "label" => "Montant accepté", "enabled" => "1", 'position' => 42, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantAccHelp", "validate" => "1",),
-		"montant_fin" => array("type" => "price", "label" => "Montant financé", "enabled" => "1", 'position' => 44, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantFinHelp", "validate" => "1",),
-		"montant_att" => array("type" => "price", "label" => "Montant en attente", "enabled" => "1", 'position' => 46, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantAttHelp", "validate" => "1",),
-		"montant_ref" => array("type" => "price", "label" => "Montant refusé", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "1", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantRefHelp", "validate" => "1",),
-		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('subventions')", 'position' => 25, 'notnull' => 1, "visible" => "1", "help" => "FundingSubventionRefHelp",),
-		"fk_financeur" => array("type" => "integer", "label" => "Type de financeur", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "FundingTypeHelp",),
-		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"), "help" => "FundingAccountedHelp",),
-		"date_engagement" => array("type" => "date", "label" => "DateEngagement", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "5", "help" => "DateEngagementHelp",),
-		"fk_bookkeeping_receivable" => array("type" => "integer", "label" => "BookkeepingReceivable", "enabled" => "1", 'position' => 62, 'notnull' => 0, "visible" => "0",),
-		"fk_bookkeeping_product" => array("type" => "integer", "label" => "BookkeepingProduct", "enabled" => "1", 'position' => 63, 'notnull' => 0, "visible" => "0",),
+		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "2", "noteditable" => "1", "default" => "0", "index" => "1", "arrayofkeyval" => array("0" => "Draft", "1" => "STATUS_VALIDATED", "2" => "STATUS_ACCEPTED", "3" => "STATUS_REFUSED"), "validate" => "1",),
+		"montant_dem" => array("type" => "price", "label" => "Montant demandé", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant demandé", "validate" => "1",),
+		"montant_acc" => array("type" => "price", "label" => "Montant accepté", "enabled" => "1", 'position' => 42, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant accepté", "validate" => "1",),
+		"montant_fin" => array("type" => "price", "label" => "Montant financé", "enabled" => "1", 'position' => 44, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant avec des financements reçus", "validate" => "1",),
+		"montant_att" => array("type" => "price", "label" => "Montant en attente", "enabled" => "1", 'position' => 46, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant en attente des financements", "validate" => "1",),
+		"montant_ref" => array("type" => "price", "label" => "Montant refusé", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "1", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant refusé", "validate" => "1",),
+		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('subventions')", 'position' => 25, 'notnull' => 1, "visible" => "1",),
+		"fk_financeur" => array("type" => "integer", "label" => "Type de financeur", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "La liste des financeurs peut être modifié dans les dictionnaires.",),
+		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"),),
+		"date_engagement" => array("type" => "date", "label" => "DateEngagement", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "5",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
@@ -170,8 +168,6 @@ class Financement extends CommonObject
 	public $fk_financeur;
 	public $accounted;
 	public $date_engagement;
-	public $fk_bookkeeping_receivable;
-	public $fk_bookkeeping_product;
 	public $sub_label;
 	public $entity;
 	// END MODULEBUILDER PROPERTIES
@@ -1388,144 +1384,6 @@ class Financement extends CommonObject
 		dol_syslog(__METHOD__." end", LOG_INFO);
 
 		return $error;
-	}
-
-	/**
-	 * Record accounting engagement in Dolibarr General Ledger (BookKeeping)
-	 *
-	 * @param  User   $user                User creating the entry
-	 * @param  int    $date_engagement     Date timestamp of engagement
-	 * @param  string $journal             Journal code (e.g. 'OD')
-	 * @param  string $account_receivable  Account code for receivable (e.g. '441100')
-	 * @param  string $account_product     Account code for product (e.g. '740100')
-	 * @param  string $label               Label for entry
-	 * @param  string $subledger_account   Subledger account (auxiliary account for thirdparty)
-	 * @return int                         >0 if OK, <0 if KO
-	 */
-	public function bookkeep($user, $date_engagement, $journal, $account_receivable, $account_product, $label = '', $subledger_account = '')
-	{
-		global $conf, $langs;
-
-		if (empty($this->montant_acc) || $this->montant_acc <= 0) {
-			$this->error = $langs->trans("ErrorNoGrantedAmountToBookkeep");
-			return -1;
-		}
-
-		if (!isModEnabled('accounting') && !isModEnabled('accountancy')) {
-			$this->error = $langs->trans("ErrorAccountancyModuleNotActive");
-			return -1;
-		}
-
-		require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
-		require_once DOL_DOCUMENT_ROOT.'/accountancy/class/bookkeeping.class.php';
-		require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
-		dol_include_once('/subventions/class/subvention.class.php');
-
-		$subvention = new Subvention($this->db);
-		if ($this->fk_sub > 0) {
-			$subvention->fetch($this->fk_sub);
-		}
-
-		$thirdparty = new Societe($this->db);
-		if ($this->fk_soc > 0) {
-			$thirdparty->fetch($this->fk_soc);
-		}
-
-		$journal_label = 'Journal '.$journal;
-		$sqlj = "SELECT label FROM ".MAIN_DB_PREFIX."accounting_journal WHERE code = '".$this->db->escape($journal)."' AND entity = ".((int) $conf->entity);
-		$resj = $this->db->query($sqlj);
-		if ($resj && ($objj = $this->db->fetch_object($resj))) {
-			$journal_label = $objj->label;
-		}
-
-		if (empty($label)) {
-			$label = $langs->trans("SubventionEngagement").': '.($subvention->ref ? $subvention->ref.' - ' : '').$this->ref.' ('.$thirdparty->name.')';
-		}
-
-		$this->db->begin();
-
-		// Line 1: Débit 441x (Créance)
-		$bk1 = new BookKeeping($this->db);
-		$bk1->doc_date = $date_engagement;
-		$bk1->doc_type = 'subvention_financement';
-		$bk1->doc_ref = ($subvention->ref ? $subvention->ref.' / ' : '').$this->ref;
-		$bk1->fk_doc = $this->id;
-		$bk1->fk_docdet = $this->id;
-		$bk1->thirdparty_code = !empty($thirdparty->code_client) ? $thirdparty->code_client : (!empty($thirdparty->code_compta_client) ? $thirdparty->code_compta_client : '');
-		$bk1->subledger_account = !empty($subledger_account) ? $subledger_account : (!empty($thirdparty->code_compta_client) ? $thirdparty->code_compta_client : '');
-		$bk1->subledger_label = $thirdparty->name;
-		$bk1->numero_compte = $account_receivable;
-		$bk1->label_compte = $langs->trans("SubventionReceivableAccount");
-		$bk1->label_operation = $label;
-		$bk1->sens = 'D';
-		$bk1->debit = (float) $this->montant_acc;
-		$bk1->credit = 0;
-		$bk1->montant = (float) $this->montant_acc;
-		$bk1->code_journal = $journal;
-		$bk1->journal_label = $journal_label;
-		$bk1->fk_user_author = $user->id;
-		$bk1->entity = $conf->entity;
-
-		$res1 = $bk1->create($user);
-		if ($res1 < 0) {
-			$this->error = $bk1->error;
-			$this->errors = $bk1->errors;
-			$this->db->rollback();
-			return -1;
-		}
-
-		// Line 2: Crédit 74xx (Produit)
-		$bk2 = new BookKeeping($this->db);
-		$bk2->doc_date = $date_engagement;
-		$bk2->doc_type = 'subvention_financement';
-		$bk2->doc_ref = ($subvention->ref ? $subvention->ref.' / ' : '').$this->ref;
-		$bk2->fk_doc = $this->id;
-		$bk2->fk_docdet = $this->id;
-		$bk2->thirdparty_code = !empty($thirdparty->code_client) ? $thirdparty->code_client : '';
-		$bk2->subledger_account = '';
-		$bk2->subledger_label = '';
-		$bk2->numero_compte = $account_product;
-		$bk2->label_compte = $langs->trans("SubventionProductAccount");
-		$bk2->label_operation = $label;
-		$bk2->sens = 'C';
-		$bk2->debit = 0;
-		$bk2->credit = (float) $this->montant_acc;
-		$bk2->montant = (float) $this->montant_acc;
-		$bk2->code_journal = $journal;
-		$bk2->journal_label = $journal_label;
-		$bk2->piece_num = $bk1->piece_num;
-		$bk2->fk_user_author = $user->id;
-		$bk2->entity = $conf->entity;
-
-		$res2 = $bk2->create($user);
-		if ($res2 < 0) {
-			$this->error = $bk2->error;
-			$this->errors = $bk2->errors;
-			$this->db->rollback();
-			return -1;
-		}
-
-		$this->accounted = 1;
-		$this->date_engagement = $date_engagement;
-		$this->fk_bookkeeping_receivable = $bk1->id;
-		$this->fk_bookkeeping_product = $bk2->id;
-
-		$sql = "UPDATE ".MAIN_DB_PREFIX."subventions_financement SET ";
-		$sql .= "accounted = 1, ";
-		$sql .= "date_engagement = '".$this->db->idate($date_engagement)."', ";
-		$sql .= "fk_bookkeeping_receivable = ".((int) $bk1->id).", ";
-		$sql .= "fk_bookkeeping_product = ".((int) $bk2->id)." ";
-		$sql .= "WHERE rowid = ".((int) $this->id);
-
-		$resql = $this->db->query($sql);
-		if (!$resql) {
-			$this->error = $this->db->lasterror();
-			$this->db->rollback();
-			return -1;
-		}
-
-		$this->db->commit();
-		return 1;
 	}
 }
 

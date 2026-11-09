@@ -140,8 +140,6 @@ class Paiement extends CommonObject
 		"num_paiement" => array("type" => "varchar(50)", "label" => "NumPayment", "enabled" => "1", 'position' => 55, 'notnull' => 0, "visible" => "1", "help" => "PaymentNumberHelp",),
 		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"), "help" => "PaymentAccountedHelp",),
 		"date_engagement" => array("type" => "date", "label" => "EngagementDate", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 61, 'notnull' => 0, "visible" => "0",),
-		"fk_bookkeeping_bank" => array("type" => "integer", "label" => "BookkeepingBank", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 62, 'notnull' => 0, "visible" => "0",),
-		"fk_bookkeeping_receivable" => array("type" => "integer", "label" => "BookkeepingReceivable", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 63, 'notnull' => 0, "visible" => "0",),
 		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon", "1" => "Valid&eacute;", "9" => "Annul&eacute;"), "validate" => "1",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
@@ -166,8 +164,6 @@ class Paiement extends CommonObject
 	public $num_paiement;
 	public $accounted = 0;
 	public $date_engagement;
-	public $fk_bookkeeping_bank;
-	public $fk_bookkeeping_receivable;
 	public $sub_label;
 	public $status;
 	public $entity;
@@ -259,22 +255,48 @@ class Paiement extends CommonObject
 	 */
 	public function create(User $user, $notrigger = 0)
 	{
+		$txlevel = $this->db->transaction_opened;
+		$this->db->begin();
+
 		$resultcreate = $this->createCommon($user, $notrigger);
+		if ($resultcreate <= 0) {
+			while ($this->db->transaction_opened > $txlevel) {
+				$this->db->rollback();
+			}
+			return $resultcreate;
+		}
 
-		if ($resultcreate > 0) {
-			// fetch to retrieve some fields (ie date_creation for masked ref)
-			$this->fetch($this->id);
-			$resultvalidate = $this->validate($user, $notrigger);
+		// fetch to retrieve some fields (ie date_creation for masked ref)
+		$this->fetch($this->id);
+		$resultvalidate = $this->validate($user, $notrigger);
+		if ($resultvalidate < 0) {
+			while ($this->db->transaction_opened > $txlevel) {
+				$this->db->rollback();
+			}
+			return -1;
+		}
 
-			// Mise à jour des montants des financements liés
-			$resultmaj = majMontantsFinancementSubvention($this);
+		// Mise à jour des montants des financements liés
+		$resultmaj = majMontantsFinancementSubvention($this);
+		if ($resultmaj < 0) {
+			while ($this->db->transaction_opened > $txlevel) {
+				$this->db->rollback();
+			}
+			return -1;
+		}
 
-			// Automatically create bank transaction if bank account was selected
-			if (!empty($this->fk_account) && $this->fk_account > 0 && empty($this->fk_bank) && isModEnabled('banque')) {
-				$this->addPaymentToBank($user, $this->fk_account, $this->fk_paiement, '', $this->num_paiement);
+		// Automatically create bank transaction if bank account was selected
+		if (!empty($this->fk_account) && $this->fk_account > 0 && empty($this->fk_bank) && isModEnabled('banque') && (float) $this->montant > 0) {
+			$resbank = $this->addPaymentToBank($user, $this->fk_account, $this->fk_paiement, '', $this->num_paiement);
+			if ($resbank < 0) {
+				while ($this->db->transaction_opened > $txlevel) {
+					$this->db->rollback();
+				}
+				return -1;
 			}
 		}
 
+		$this->db->commit();
 		return $resultcreate;
 	}
 
@@ -397,11 +419,50 @@ class Paiement extends CommonObject
 	 */
 	public function update(User $user, $notrigger = 0)
 	{
+		$oldobj = new self($this->db);
+		$hasold = ($this->id > 0 && $oldobj->fetch($this->id) > 0);
+
+		$txlevel = $this->db->transaction_opened;
+		$this->db->begin();
+
 		$result = $this->updateCommon($user, $notrigger);
-		
+		if ($result < 0) {
+			while ($this->db->transaction_opened > $txlevel) {
+				$this->db->rollback();
+			}
+			return -1;
+		}
+
 		// mise à jour des montants des financements liés
 		$resultmaj = majMontantsFinancementSubvention($this);
+		if ($resultmaj < 0) {
+			while ($this->db->transaction_opened > $txlevel) {
+				$this->db->rollback();
+			}
+			return -1;
+		}
 
+		// Sync bank line and PaymentVarious if payment is not already accounted
+		if (isModEnabled('banque')) {
+			$is_accounted = !empty($this->accounted);
+			if (!$is_accounted && $hasold && !empty($oldobj->accounted)) {
+				$is_accounted = true;
+			}
+			if (!$is_accounted && $this->hasBookkeepingEntries($hasold ? (int) $oldobj->fk_bank : 0)) {
+				$is_accounted = true;
+			}
+			if (!$is_accounted) {
+				$resbank = $this->syncBankPaymentOnUpdate($user, $hasold ? $oldobj : null);
+				if ($resbank < 0) {
+					while ($this->db->transaction_opened > $txlevel) {
+						$this->db->rollback();
+					}
+					return -1;
+				}
+			}
+		}
+
+		$this->db->commit();
 		return $result;
 	}
 
@@ -416,28 +477,81 @@ class Paiement extends CommonObject
 	{
 		global $langs;
 
-		if (!empty($this->accounted)) {
+		$langs->load('subventions@subventions');
+
+		if (!empty($this->accounted) || $this->hasBookkeepingEntries()) {
 			$this->error = $langs->trans("ErrorCannotDeleteAccountedObject");
 			return -1;
 		}
 
-		$result = $this->deleteCommon($user, $notrigger);
-		//return $this->deleteCommon($user, $notrigger, 1);
+		$fk_bank = !empty($this->fk_bank) ? (int) $this->fk_bank : 0;
 
-		if ($result > 0 && !empty($this->fk_bank) && isModEnabled('banque')) {
+		$txlevel = $this->db->transaction_opened;
+		$this->db->begin();
+
+		if ($fk_bank > 0 && isModEnabled('banque')) {
 			require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 			$accline = new AccountLine($this->db);
-			$resfetch = $accline->fetch($this->fk_bank);
-			if ($resfetch == 0) {
-				$accline->id = $accline->rowid = $this->fk_bank;
+			$resfetch = $accline->fetch($fk_bank);
+			if ($resfetch < 0) {
+				$this->error = $accline->error;
+				$this->errors = $accline->errors;
+				while ($this->db->transaction_opened > $txlevel) {
+					$this->db->rollback();
+				}
+				return -1;
 			}
-			$accline->delete_urls($user);
-			$accline->delete($user);
+			if ($resfetch > 0 && !empty($accline->rappro)) {
+				$langs->loadLangs(array('errors', 'banks'));
+				$this->error = $langs->trans('ErrorDeleteNotPossibleLineIsConsolidated');
+				while ($this->db->transaction_opened > $txlevel) {
+					$this->db->rollback();
+				}
+				return -1;
+			}
+
+			if ($this->deleteLinkedPaymentVarious($user, $fk_bank) < 0) {
+				while ($this->db->transaction_opened > $txlevel) {
+					$this->db->rollback();
+				}
+				return -1;
+			}
+
+			if ($resfetch > 0) {
+				$resdelbank = $accline->delete($user);
+				if ($resdelbank < 0) {
+					$this->error = $accline->error;
+					$this->errors = $accline->errors;
+					while ($this->db->transaction_opened > $txlevel) {
+						$this->db->rollback();
+					}
+					return -1;
+				}
+			} else {
+				$accline->id = $fk_bank;
+				$accline->rowid = $fk_bank;
+				$accline->delete_urls($user);
+			}
+		}
+
+		$result = $this->deleteCommon($user, $notrigger);
+		if ($result <= 0) {
+			while ($this->db->transaction_opened > $txlevel) {
+				$this->db->rollback();
+			}
+			return $result;
 		}
 
 		// mise à jour des montants des financements liés
 		$resultmaj = majMontantsFinancementSubvention($this);
+		if ($resultmaj < 0) {
+			while ($this->db->transaction_opened > $txlevel) {
+				$this->db->rollback();
+			}
+			return -1;
+		}
 
+		$this->db->commit();
 		return $result;
 	}
 
@@ -1138,7 +1252,7 @@ class Paiement extends CommonObject
 	}
 
 	/**
-	 * Add payment to Dolibarr bank account (llx_bank)
+	 * Add payment to Dolibarr bank account via PaymentVarious (llx_payment_various + llx_bank)
 	 *
 	 * @param  User   $user             User making the action
 	 * @param  int    $accountid        Bank account ID (llx_bank_account)
@@ -1146,7 +1260,7 @@ class Paiement extends CommonObject
 	 * @param  string $label            Label for bank transaction
 	 * @param  string $num_paiement     Cheque/transfer reference number
 	 * @param  string $accountancy_code Receivable accountancy code (e.g. 4411)
-	 * @return int                      >0 if OK, <0 if KO
+	 * @return int                      Bank line ID >0 if OK, 0 if skipped (no bank/zero amount), <0 if KO
 	 */
 	public function addPaymentToBank($user, $accountid, $paiement_type = 0, $label = '', $num_paiement = '', $accountancy_code = '')
 	{
@@ -1161,58 +1275,12 @@ class Paiement extends CommonObject
 			return -1;
 		}
 
+		if ((float) $this->montant <= 0) {
+			return 0;
+		}
+
 		require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
-		require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
-		dol_include_once('/subventions/class/subvention.class.php');
-		dol_include_once('/subventions/class/financement.class.php');
-
-		$subvention = new Subvention($this->db);
-		if ($this->fk_sub > 0) {
-			$subvention->fetch($this->fk_sub);
-		}
-
-		$financement = new Financement($this->db);
-		if ($this->fk_fin > 0) {
-			$financement->fetch($this->fk_fin);
-		}
-
-		$thirdparty = new Societe($this->db);
-		$socid = $this->fk_soc > 0 ? $this->fk_soc : ($financement->fk_soc > 0 ? $financement->fk_soc : 0);
-		if ($socid > 0) {
-			$thirdparty->fetch($socid);
-		}
-
-		// Find receivable accountancy code if not specified
-		if (empty($accountancy_code)) {
-			if ($financement->fk_financeur > 0) {
-				$sqlf = "SELECT accountancy_code_receivable, accountancy_code FROM ".MAIN_DB_PREFIX."c_subventions_financeur WHERE rowid = ".((int) $financement->fk_financeur);
-				$resf = $this->db->query($sqlf);
-				if ($resf && ($objf = $this->db->fetch_object($resf))) {
-					$accountancy_code = !empty($objf->accountancy_code_receivable) ? $objf->accountancy_code_receivable : $objf->accountancy_code;
-				}
-			}
-			if (empty($accountancy_code)) {
-				$accountancy_code = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT', '441000');
-			}
-		}
-
-		// Resolve payment mode code
-		$paymentmode_code = 'VIR';
-		if (!empty($paiement_type)) {
-			if (is_numeric($paiement_type)) {
-				$sqlm = "SELECT code FROM ".MAIN_DB_PREFIX."c_paiement WHERE id = ".((int) $paiement_type);
-				$resm = $this->db->query($sqlm);
-				if ($resm && ($objm = $this->db->fetch_object($resm))) {
-					$paymentmode_code = $objm->code;
-				}
-			} else {
-				$paymentmode_code = (string) $paiement_type;
-			}
-		}
-
-		if (empty($label)) {
-			$label = $langs->trans("SubventionPayment").': '.($subvention->ref ? $subvention->ref.' - ' : '').$this->ref.($thirdparty->name ? ' ('.$thirdparty->name.')' : '');
-		}
+		require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/paymentvarious.class.php';
 
 		$acc = new Account($this->db);
 		$result = $acc->fetch($accountid);
@@ -1221,83 +1289,158 @@ class Paiement extends CommonObject
 			return -1;
 		}
 
-		// Insert payment into llx_bank
-		$bank_line_id = $acc->addline(
-			$this->datep,
-			$paymentmode_code,
-			$label,
-			(float) $this->montant,
-			$num_paiement,
-			0,
-			$user,
-			$thirdparty->name,
-			'',
-			$accountancy_code
-		);
-
-		if ($bank_line_id > 0) {
-			$this->fk_bank = $bank_line_id;
-			$this->fk_account = $accountid;
-			$this->fk_paiement = is_numeric($paiement_type) ? (int) $paiement_type : 0;
-			$this->num_paiement = $num_paiement;
-
-			$sql = "UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET ";
-			$sql .= "fk_bank = ".((int) $bank_line_id).", ";
-			$sql .= "fk_account = ".((int) $accountid).", ";
-			$sql .= "fk_paiement = ".((int) $this->fk_paiement).", ";
-			$sql .= "num_paiement = '".$this->db->escape($num_paiement)."' ";
-			$sql .= "WHERE rowid = ".((int) $this->id);
-			$this->db->query($sql);
-
-			// Add link to subvention payment in bank_url
-			$url_paiement = dol_buildpath('/subventions/paiement_card.php', 1).'?id=';
-			$acc->add_url_line($bank_line_id, $this->id, $url_paiement, '(paiement)', 'payment_subvention');
-
-			// Add link to company in bank_url if thirdparty exists
-			if ($socid > 0) {
-				$url_soc = DOL_URL_ROOT.'/societe/card.php?socid=';
-				$acc->add_url_line($bank_line_id, $socid, $url_soc, $thirdparty->name, 'company');
-			}
-
-			return $bank_line_id;
-		} else {
-			$this->error = $acc->error;
-			$this->errors = $acc->errors;
+		$acctinfo = $this->resolveAccountingInfo($accountancy_code, $label);
+		$ptype = $this->resolvePaymentTypeId($paiement_type, $acc);
+		if ($ptype['id'] <= 0) {
+			$this->error = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("PaymentMode"));
 			return -1;
 		}
+
+		$pv = new PaymentVarious($this->db);
+		$pv->datep = $this->datep;
+		$pv->datev = $this->datep;
+		$pv->sens = 1;
+		$pv->amount = abs((float) $this->montant);
+		$pv->type_payment = $ptype['id'];
+		$pv->num_payment = (string) $num_paiement;
+		$pv->label = $acctinfo['label'];
+		$pv->note = '';
+		$pv->accountancy_code = $acctinfo['accountancy_code'];
+		$pv->subledger_account = $acctinfo['subledger_account'];
+		$pv->fk_project = $acctinfo['fk_project'];
+		$pv->fk_account = (int) $accountid;
+		$pv->chqemetteur = !empty($acctinfo['thirdparty']->name) ? $acctinfo['thirdparty']->name : '';
+		$pv->chqbank = '';
+
+		$pv_id = $pv->create($user);
+		if ($pv_id <= 0) {
+			$this->error = $pv->error;
+			$this->errors = $pv->errors;
+			return -1;
+		}
+
+		// Reload PaymentVarious to get fk_bank (PaymentVarious::create() updates fk_bank via SQL only)
+		$pv->fetch($pv_id);
+		$bank_line_id = (int) $pv->fk_bank;
+		if ($bank_line_id <= 0) {
+			$this->error = !empty($pv->error) ? $pv->error : 'Failed to retrieve bank transaction ID from PaymentVarious';
+			return -1;
+		}
+
+		$this->fk_bank = $bank_line_id;
+		$this->fk_account = (int) $accountid;
+		if (is_numeric($paiement_type) && (int) $paiement_type > 0) {
+			$this->fk_paiement = (int) $paiement_type;
+		}
+		$this->num_paiement = (string) $num_paiement;
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET ";
+		$sql .= "fk_bank = ".((int) $bank_line_id).", ";
+		$sql .= "fk_account = ".((int) $accountid).", ";
+		$sql .= "fk_paiement = ".(!empty($this->fk_paiement) ? ((int) $this->fk_paiement) : "NULL").", ";
+		$sql .= "num_paiement = '".$this->db->escape((string) $num_paiement)."' ";
+		$sql .= "WHERE rowid = ".((int) $this->id);
+		if (!$this->db->query($sql)) {
+			$this->error = $this->db->lasterror();
+			return -1;
+		}
+
+		// Add link to subvention payment in llx_bank_url (never add 'company' link, which breaks Dolibarr bankjournal.php)
+		$url_paiement = dol_buildpath('/subventions/paiement_card.php', 1).'?id=';
+		if ($acc->add_url_line($bank_line_id, $this->id, $url_paiement, '(paiement)', 'payment_subvention') < 0) {
+			$this->error = $acc->error;
+			return -1;
+		}
+
+		return $bank_line_id;
 	}
 
 	/**
-	 * Record accounting engagement in Dolibarr General Ledger (BookKeeping)
+	 * Check if this payment or its linked bank transaction has entries in accounting_bookkeeping
 	 *
-	 * @param  User   $user                User making the action
-	 * @param  int    $date_engagement     Timestamp date of engagement
-	 * @param  string $journal             Journal code (e.g. 'OD')
-	 * @param  string $account_bank        Bank / treasury account (e.g. '512000') - Debit
-	 * @param  string $account_receivable  Receivable account (e.g. '441000') - Credit
-	 * @param  string $label               Operation label
-	 * @param  string $subledger_account   Subledger account code (tiers)
-	 * @return int                         >0 if OK, <0 if KO
+	 * @param  int  $fk_bank Optional bank line ID fallback
+	 * @return bool
 	 */
-	public function bookkeep($user, $date_engagement, $journal = '', $account_bank = '', $account_receivable = '', $label = '', $subledger_account = '')
+	private function hasBookkeepingEntries($fk_bank = 0)
 	{
-		global $conf, $langs;
+		$bankid = !empty($this->fk_bank) ? (int) $this->fk_bank : (int) $fk_bank;
+		$sql = "SELECT 1 FROM ".MAIN_DB_PREFIX."accounting_bookkeeping";
+		$sql .= " WHERE (doc_type = 'subvention_paiement' AND fk_doc = ".((int) $this->id).")";
+		if ($bankid > 0) {
+			$sql .= " OR (doc_type = 'bank' AND fk_doc = ".$bankid.")";
+		}
+		$sql .= $this->db->plimit(1);
 
-		if (empty($this->montant) || $this->montant <= 0) {
-			$this->error = $langs->trans("ErrorNoAmountToBookkeep");
+		$resql = $this->db->query($sql);
+		if ($resql && $this->db->num_rows($resql) > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Delete all PaymentVarious records linked to a bank line
+	 *
+	 * @param  User $user    User making the action
+	 * @param  int  $fk_bank Bank line ID
+	 * @return int           >=0 if OK, <0 if KO
+	 */
+	private function deleteLinkedPaymentVarious(User $user, $fk_bank)
+	{
+		if (empty($fk_bank) || $fk_bank <= 0) {
+			return 0;
+		}
+
+		require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/paymentvarious.class.php';
+
+		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."payment_various WHERE fk_bank = ".((int) $fk_bank);
+		$resql = $this->db->query($sql);
+		if (!$resql) {
+			$this->error = $this->db->lasterror();
 			return -1;
 		}
 
-		if (!isModEnabled('accounting') && !isModEnabled('accountancy')) {
-			$this->error = $langs->trans("ErrorAccountancyModuleNotActive");
-			return -1;
+		$ids = array();
+		while ($obj = $this->db->fetch_object($resql)) {
+			$ids[] = (int) $obj->rowid;
+		}
+		$this->db->free($resql);
+
+		foreach ($ids as $pvid) {
+			$pv = new PaymentVarious($this->db);
+			$resfetch = $pv->fetch($pvid);
+			if ($resfetch > 0) {
+				if ($pv->delete($user) < 0) {
+					$this->error = $pv->error;
+					$this->errors = $pv->errors;
+					return -1;
+				}
+			} elseif ($resfetch < 0) {
+				$this->error = $pv->error;
+				$this->errors = $pv->errors;
+				return -1;
+			}
 		}
 
-		require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
-		require_once DOL_DOCUMENT_ROOT.'/accountancy/class/bookkeeping.class.php';
+		return count($ids);
+	}
+
+	/**
+	 * Resolve accountancy code, subledger account, label and linked objects for bank / PaymentVarious operations
+	 *
+	 * @param  string               $accountancy_code Optional forced general accountancy code
+	 * @param  string               $label            Optional forced label
+	 * @return array<string,mixed>
+	 */
+	private function resolveAccountingInfo($accountancy_code = '', $label = '')
+	{
+		global $langs;
+
 		require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 		dol_include_once('/subventions/class/subvention.class.php');
 		dol_include_once('/subventions/class/financement.class.php');
+
+		$langs->load('subventions@subventions');
 
 		$subvention = new Subvention($this->db);
 		if ($this->fk_sub > 0) {
@@ -1310,153 +1453,336 @@ class Paiement extends CommonObject
 		}
 
 		$thirdparty = new Societe($this->db);
-		$socid = $this->fk_soc > 0 ? $this->fk_soc : ($financement->fk_soc > 0 ? $financement->fk_soc : 0);
+		$socid = ($this->fk_soc > 0) ? (int) $this->fk_soc : (($financement->fk_soc > 0) ? (int) $financement->fk_soc : 0);
 		if ($socid > 0) {
 			$thirdparty->fetch($socid);
 		}
 
-		// Fallback for journal (prefer bank account's journal, then payment journal setting, then OD)
-		if (empty($journal)) {
-			$bank_journal = '';
-			if (!empty($this->fk_account)) {
-				require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
-				$acc_tmp = new Account($this->db);
-				if ($acc_tmp->fetch($this->fk_account) > 0 && !empty($acc_tmp->fk_accountancy_journal)) {
-					$sqlj_acc = "SELECT code FROM ".MAIN_DB_PREFIX."accounting_journal WHERE rowid = ".((int) $acc_tmp->fk_accountancy_journal);
-					$resj_acc = $this->db->query($sqlj_acc);
-					if ($resj_acc && ($objj_acc = $this->db->fetch_object($resj_acc))) {
-						$bank_journal = $objj_acc->code;
-					}
+		$use_subledger = true;
+		if ($financement->fk_financeur > 0) {
+			$sqlf = "SELECT accountancy_code_receivable, accountancy_code FROM ".MAIN_DB_PREFIX."c_subventions_financeur WHERE rowid = ".((int) $financement->fk_financeur);
+			$resf = $this->db->query($sqlf);
+			if ($resf && ($objf = $this->db->fetch_object($resf))) {
+				if (empty($accountancy_code)) {
+					$accountancy_code = !empty($objf->accountancy_code_receivable) ? $objf->accountancy_code_receivable : $objf->accountancy_code;
 				}
 			}
-			$journal = !empty($bank_journal) ? $bank_journal : getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT', 'BQ');
-			if (empty($journal)) {
-				$journal = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_JOURNAL', 'OD');
+
+			$resdesc = $this->db->DDLDescTable(MAIN_DB_PREFIX.'c_subventions_financeur', 'use_subledger');
+			if ($resdesc && $this->db->num_rows($resdesc) > 0) {
+				$sqls = "SELECT use_subledger FROM ".MAIN_DB_PREFIX."c_subventions_financeur WHERE rowid = ".((int) $financement->fk_financeur);
+				$ress = $this->db->query($sqls);
+				if ($ress && ($objs = $this->db->fetch_object($ress))) {
+					$use_subledger = !empty($objs->use_subledger);
+				}
 			}
 		}
 
-		// Fallback for bank account (Class 5)
-		if (empty($account_bank)) {
-			if (!empty($this->fk_account)) {
-				require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
-				$acc_tmp = new Account($this->db);
-				if ($acc_tmp->fetch($this->fk_account) > 0 && !empty($acc_tmp->account_number)) {
-					$account_bank = $acc_tmp->account_number;
-				}
-			}
-			if (empty($account_bank)) {
-				$account_bank = '512000';
-			}
+		if (empty($accountancy_code)) {
+			$accountancy_code = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT', '441000');
 		}
 
-		// Fallback for receivable account (Class 4)
-		if (empty($account_receivable)) {
-			if ($financement->fk_financeur > 0) {
-				$sqlf = "SELECT accountancy_code_receivable, accountancy_code FROM ".MAIN_DB_PREFIX."c_subventions_financeur WHERE rowid = ".((int) $financement->fk_financeur);
-				$resf = $this->db->query($sqlf);
-				if ($resf && ($objf = $this->db->fetch_object($resf))) {
-					$account_receivable = !empty($objf->accountancy_code_receivable) ? $objf->accountancy_code_receivable : $objf->accountancy_code;
-				}
-			}
-			if (empty($account_receivable)) {
-				$account_receivable = getDolGlobalString('SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT', '441000');
-			}
-		}
-
-		$journal_label = 'Journal '.$journal;
-		$sqlj = "SELECT label FROM ".MAIN_DB_PREFIX."accounting_journal WHERE code = '".$this->db->escape($journal)."' AND entity = ".((int) $conf->entity);
-		$resj = $this->db->query($sqlj);
-		if ($resj && ($objj = $this->db->fetch_object($resj))) {
-			$journal_label = $objj->label;
-		}
+		$subledger_account = ($use_subledger && !empty($thirdparty->code_compta_client)) ? $thirdparty->code_compta_client : '';
 
 		if (empty($label)) {
-			$label = $langs->trans("SubventionPayment").': '.($subvention->ref ? $subvention->ref.' - ' : '').$this->ref.($thirdparty->name ? ' ('.$thirdparty->name.')' : '');
+			$label = $langs->transnoentitiesnoconv("SubventionPayment").': '.($subvention->ref ? $subvention->ref.' - ' : '').$this->ref.($thirdparty->name ? ' ('.$thirdparty->name.')' : '');
 		}
 
-		$this->db->begin();
+		return array(
+			'subvention' => $subvention,
+			'financement' => $financement,
+			'thirdparty' => $thirdparty,
+			'socid' => $socid,
+			'fk_project' => !empty($subvention->fk_project) ? (int) $subvention->fk_project : 0,
+			'accountancy_code' => (string) $accountancy_code,
+			'subledger_account' => (string) $subledger_account,
+			'label' => $label,
+		);
+	}
 
-		// Line 1: Débit 512x (Trésorerie / Banque)
-		$bk1 = new BookKeeping($this->db);
-		$bk1->doc_date = $date_engagement;
-		$bk1->doc_type = 'subvention_paiement';
-		$bk1->doc_ref = ($subvention->ref ? $subvention->ref.' / ' : '').$this->ref;
-		$bk1->fk_doc = $this->id;
-		$bk1->fk_docdet = $this->id;
-		$bk1->thirdparty_code = !empty($thirdparty->code_client) ? $thirdparty->code_client : '';
-		$bk1->subledger_account = '';
-		$bk1->subledger_label = '';
-		$bk1->numero_compte = $account_bank;
-		$bk1->label_compte = $langs->trans("SubventionBankAccount");
-		$bk1->label_operation = $label;
-		$bk1->sens = 'D';
-		$bk1->debit = (float) $this->montant;
-		$bk1->credit = 0;
-		$bk1->montant = (float) $this->montant;
-		$bk1->code_journal = $journal;
-		$bk1->journal_label = $journal_label;
-		$bk1->fk_user_author = $user->id;
-		$bk1->entity = $conf->entity;
+	/**
+	 * Resolve payment type ID and code in llx_c_paiement for PaymentVarious and llx_bank
+	 *
+	 * @param  int|string   $paiement_type Payment type ID or code from c_paiement
+	 * @param  Account|null $acc           Target bank account (used for default cash vs bank fallback)
+	 * @return array{id:int,code:string}
+	 */
+	private function resolvePaymentTypeId($paiement_type, $acc = null)
+	{
+		$id = 0;
+		$code = '';
 
-		$res1 = $bk1->create($user);
-		if ($res1 < 0) {
-			$this->error = $bk1->error;
-			$this->errors = $bk1->errors;
-			$this->db->rollback();
+		if (!empty($paiement_type)) {
+			if (is_numeric($paiement_type) && (int) $paiement_type > 0) {
+				$sql = "SELECT id, code FROM ".MAIN_DB_PREFIX."c_paiement WHERE id = ".((int) $paiement_type);
+				$resql = $this->db->query($sql);
+				if ($resql && ($obj = $this->db->fetch_object($resql))) {
+					$id = (int) $obj->id;
+					$code = (string) $obj->code;
+				}
+			} elseif (!is_numeric($paiement_type)) {
+				$sql = "SELECT id, code FROM ".MAIN_DB_PREFIX."c_paiement WHERE code = '".$this->db->escape((string) $paiement_type)."' AND entity IN (".getEntity('c_paiement').") ORDER BY active DESC, id ASC".$this->db->plimit(1);
+				$resql = $this->db->query($sql);
+				if ($resql && ($obj = $this->db->fetch_object($resql))) {
+					$id = (int) $obj->id;
+					$code = (string) $obj->code;
+				}
+			}
+		}
+
+		// Default fallback when payment mode is not selected or not found
+		if ($id <= 0) {
+			$default_code = (is_object($acc) && (int) $acc->type === Account::TYPE_CASH) ? 'LIQ' : 'VIR';
+			$sql = "SELECT id, code FROM ".MAIN_DB_PREFIX."c_paiement WHERE code = '".$this->db->escape($default_code)."' AND entity IN (".getEntity('c_paiement').") ORDER BY active DESC, id ASC".$this->db->plimit(1);
+			$resql = $this->db->query($sql);
+			if ($resql && ($obj = $this->db->fetch_object($resql))) {
+				$id = (int) $obj->id;
+				$code = (string) $obj->code;
+			}
+		}
+
+		// Ultimate fallback: first active entry in c_paiement
+		if ($id <= 0) {
+			$sql = "SELECT id, code FROM ".MAIN_DB_PREFIX."c_paiement WHERE active = 1 AND entity IN (".getEntity('c_paiement').") ORDER BY id ASC".$this->db->plimit(1);
+			$resql = $this->db->query($sql);
+			if ($resql && ($obj = $this->db->fetch_object($resql))) {
+				$id = (int) $obj->id;
+				$code = (string) $obj->code;
+			}
+		}
+
+		return array('id' => $id, 'code' => $code);
+	}
+
+	/**
+	 * Synchronize bank line and PaymentVarious when updating a payment
+	 *
+	 * @param  User          $user   User modifying the payment
+	 * @param  Paiement|null $oldobj Payment state prior to update
+	 * @return int                   >=0 if OK, <0 if KO
+	 */
+	private function syncBankPaymentOnUpdate(User $user, $oldobj = null)
+	{
+		global $conf, $langs;
+
+		if (!isModEnabled('banque')) {
+			return 0;
+		}
+
+		require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+		require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/paymentvarious.class.php';
+
+		$fk_bank = !empty($this->fk_bank) ? (int) $this->fk_bank : (($oldobj && !empty($oldobj->fk_bank)) ? (int) $oldobj->fk_bank : 0);
+
+		// Case 1: No existing bank line
+		if ($fk_bank <= 0) {
+			if ((int) $this->fk_account > 0 && (float) $this->montant > 0) {
+				$resbank = $this->addPaymentToBank($user, (int) $this->fk_account, $this->fk_paiement, '', (string) $this->num_paiement);
+				return ($resbank < 0) ? -1 : 1;
+			}
+			return 0;
+		}
+
+		// Case 2: Existing bank line
+		$accline = new AccountLine($this->db);
+		$resacc = $accline->fetch($fk_bank);
+		if ($resacc < 0) {
+			$this->error = $accline->error;
+			$this->errors = $accline->errors;
 			return -1;
 		}
 
-		// Line 2: Crédit 441x (Créance de subvention)
-		$bk2 = new BookKeeping($this->db);
-		$bk2->doc_date = $date_engagement;
-		$bk2->doc_type = 'subvention_paiement';
-		$bk2->doc_ref = ($subvention->ref ? $subvention->ref.' / ' : '').$this->ref;
-		$bk2->fk_doc = $this->id;
-		$bk2->fk_docdet = $this->id;
-		$bk2->thirdparty_code = !empty($thirdparty->code_client) ? $thirdparty->code_client : (!empty($thirdparty->code_compta_client) ? $thirdparty->code_compta_client : '');
-		$bk2->subledger_account = !empty($subledger_account) ? $subledger_account : (!empty($thirdparty->code_compta_client) ? $thirdparty->code_compta_client : '');
-		$bk2->subledger_label = $thirdparty->name;
-		$bk2->numero_compte = $account_receivable;
-		$bk2->label_compte = $langs->trans("SubventionReceivableAccount");
-		$bk2->label_operation = $label;
-		$bk2->sens = 'C';
-		$bk2->debit = 0;
-		$bk2->credit = (float) $this->montant;
-		$bk2->montant = (float) $this->montant;
-		$bk2->code_journal = $journal;
-		$bk2->journal_label = $journal_label;
-		$bk2->piece_num = $bk1->piece_num;
-		$bk2->fk_user_author = $user->id;
-		$bk2->entity = $conf->entity;
+		// Bank line was manually deleted in Dolibarr: clean up and recreate if still needed
+		if ($resacc == 0) {
+			if ($this->deleteLinkedPaymentVarious($user, $fk_bank) < 0) {
+				return -1;
+			}
+			$accline->id = $fk_bank;
+			$accline->rowid = $fk_bank;
+			$accline->delete_urls($user);
 
-		$res2 = $bk2->create($user);
-		if ($res2 < 0) {
-			$this->error = $bk2->error;
-			$this->errors = $bk2->errors;
-			$this->db->rollback();
+			if (!$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET fk_bank = NULL WHERE rowid = ".((int) $this->id))) {
+				$this->error = $this->db->lasterror();
+				return -1;
+			}
+			$this->fk_bank = 0;
+
+			if ((int) $this->fk_account > 0 && (float) $this->montant > 0) {
+				$resbank = $this->addPaymentToBank($user, (int) $this->fk_account, $this->fk_paiement, '', (string) $this->num_paiement);
+				return ($resbank < 0) ? -1 : 1;
+			}
+			return 0;
+		}
+
+		// Do not alter already reconciled bank lines
+		if (!empty($accline->rappro)) {
+			return 0;
+		}
+
+		// Subcase 2a: bank account removed or amount <= 0 -> remove bank line & PaymentVarious
+		if ((int) $this->fk_account <= 0 || (float) $this->montant <= 0) {
+			if ($this->deleteLinkedPaymentVarious($user, $fk_bank) < 0) {
+				return -1;
+			}
+			if ($accline->delete($user) < 0) {
+				$this->error = $accline->error;
+				$this->errors = $accline->errors;
+				return -1;
+			}
+			if (!$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET fk_bank = NULL WHERE rowid = ".((int) $this->id))) {
+				$this->error = $this->db->lasterror();
+				return -1;
+			}
+			$this->fk_bank = 0;
+			return 1;
+		}
+
+		// Subcase 2b: bank account changed -> delete old bank line + PaymentVarious and recreate on new account
+		if ((int) $accline->fk_account !== (int) $this->fk_account) {
+			if ($this->deleteLinkedPaymentVarious($user, $fk_bank) < 0) {
+				return -1;
+			}
+			if ($accline->delete($user) < 0) {
+				$this->error = $accline->error;
+				$this->errors = $accline->errors;
+				return -1;
+			}
+			if (!$this->db->query("UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET fk_bank = NULL WHERE rowid = ".((int) $this->id))) {
+				$this->error = $this->db->lasterror();
+				return -1;
+			}
+			$this->fk_bank = 0;
+
+			$resbank = $this->addPaymentToBank($user, (int) $this->fk_account, $this->fk_paiement, '', (string) $this->num_paiement);
+			return ($resbank < 0) ? -1 : 1;
+		}
+
+		// Subcase 2c: same bank account -> migrate legacy row if needed, then synchronize PaymentVarious and AccountLine
+		if (function_exists('migrateSubventionsBankPaymentsToVarious')) {
+			migrateSubventionsBankPaymentsToVarious($this->db, (int) $this->id);
+		}
+
+		$acc = new Account($this->db);
+		if ($acc->fetch((int) $this->fk_account) <= 0) {
+			$this->error = $langs->trans("ErrorBankAccountNotFound");
 			return -1;
 		}
 
-		$this->accounted = 1;
-		$this->date_engagement = $date_engagement;
-		$this->fk_bookkeeping_bank = $bk1->id;
-		$this->fk_bookkeeping_receivable = $bk2->id;
+		$acctinfo = $this->resolveAccountingInfo();
+		$ptype = $this->resolvePaymentTypeId($this->fk_paiement, $acc);
+		if ($ptype['id'] <= 0 || empty($ptype['code'])) {
+			$this->error = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("PaymentMode"));
+			return -1;
+		}
 
-		$sql = "UPDATE ".MAIN_DB_PREFIX."subventions_paiement SET ";
-		$sql .= "accounted = 1, ";
-		$sql .= "date_engagement = '".$this->db->idate($date_engagement)."', ";
-		$sql .= "fk_bookkeeping_bank = ".((int) $bk1->id).", ";
-		$sql .= "fk_bookkeeping_receivable = ".((int) $bk2->id)." ";
-		$sql .= "WHERE rowid = ".((int) $this->id);
+		if ((int) $acc->type === Account::TYPE_CASH && $ptype['code'] !== 'LIQ') {
+			$this->error = 'ErrorCashAccountAcceptsOnlyCashMoney';
+			return -1;
+		}
 
-		$resql = $this->db->query($sql);
-		if (!$resql) {
+		$sqlpv = "SELECT rowid FROM ".MAIN_DB_PREFIX."payment_various WHERE fk_bank = ".$fk_bank." ORDER BY rowid ASC".$this->db->plimit(1);
+		$respv = $this->db->query($sqlpv);
+		if (!$respv) {
 			$this->error = $this->db->lasterror();
-			$this->db->rollback();
+			return -1;
+		}
+		$objpv = $this->db->fetch_object($respv);
+
+		$pv = new PaymentVarious($this->db);
+		if ($objpv && $pv->fetch((int) $objpv->rowid) > 0) {
+			$pv->datep = $this->datep;
+			$pv->datev = $this->datep;
+			$pv->sens = 1;
+			$pv->amount = abs((float) $this->montant);
+			$pv->type_payment = $ptype['id'];
+			$pv->num_payment = (string) $this->num_paiement;
+			$pv->label = $acctinfo['label'];
+			$pv->accountancy_code = $acctinfo['accountancy_code'];
+			$pv->subledger_account = $acctinfo['subledger_account'];
+			$pv->fk_project = $acctinfo['fk_project'];
+			$pv->fk_bank = $fk_bank;
+			$pv->fk_user_modif = (int) $user->id;
+
+			if ($pv->update($user) < 0) {
+				$this->error = $pv->error;
+				$this->errors = $pv->errors;
+				return -1;
+			}
+			$pv_id = (int) $pv->id;
+		} else {
+			$now = dol_now();
+			$entity = !empty($this->entity) ? (int) $this->entity : (int) $conf->entity;
+			$sqlins = "INSERT INTO ".MAIN_DB_PREFIX."payment_various (";
+			$sqlins .= "datep, datev, sens, amount, fk_typepayment, num_payment, label, accountancy_code, subledger_account, fk_projet, fk_user_author, datec, fk_bank, entity";
+			$sqlins .= ") VALUES (";
+			$sqlins .= "'".$this->db->idate($this->datep)."'";
+			$sqlins .= ", '".$this->db->idate($this->datep)."'";
+			$sqlins .= ", 1";
+			$sqlins .= ", ".price2num(abs((float) $this->montant));
+			$sqlins .= ", ".((int) $ptype['id']);
+			$sqlins .= ", '".$this->db->escape((string) $this->num_paiement)."'";
+			$sqlins .= ", '".$this->db->escape($acctinfo['label'])."'";
+			$sqlins .= ", '".$this->db->escape($acctinfo['accountancy_code'])."'";
+			$sqlins .= ", '".$this->db->escape($acctinfo['subledger_account'])."'";
+			$sqlins .= ", ".($acctinfo['fk_project'] > 0 ? (int) $acctinfo['fk_project'] : 0);
+			$sqlins .= ", ".((int) $user->id);
+			$sqlins .= ", '".$this->db->idate($now)."'";
+			$sqlins .= ", ".((int) $fk_bank);
+			$sqlins .= ", ".((int) $entity);
+			$sqlins .= ")";
+			if (!$this->db->query($sqlins)) {
+				$this->error = $this->db->lasterror();
+				return -1;
+			}
+			$pv_id = (int) $this->db->last_insert_id(MAIN_DB_PREFIX."payment_various");
+		}
+
+		// Sync AccountLine (llx_bank)
+		$accline->dateo = $this->datep;
+		$accline->datev = $this->datep;
+		$accline->amount = abs((float) $this->montant);
+		$accline->label = $acctinfo['label'];
+		if ($accline->update($user) < 0) {
+			$this->error = $accline->error;
+			$this->errors = $accline->errors;
+			return -1;
+		}
+		if ($accline->updateLabel() < 0) {
+			$this->error = $accline->error;
+			$this->errors = $accline->errors;
 			return -1;
 		}
 
-		$this->db->commit();
+		// AccountLine::update() does not update fk_type, num_chq or emetteur
+		$emetteur = !empty($acctinfo['thirdparty']->name) ? $acctinfo['thirdparty']->name : '';
+		$sqlbank = "UPDATE ".MAIN_DB_PREFIX."bank SET ";
+		$sqlbank .= "fk_type = '".$this->db->escape($ptype['code'])."', ";
+		$sqlbank .= "num_chq = '".$this->db->escape((string) $this->num_paiement)."', ";
+		$sqlbank .= "emetteur = '".$this->db->escape($emetteur)."' ";
+		$sqlbank .= "WHERE rowid = ".((int) $fk_bank);
+		if (!$this->db->query($sqlbank)) {
+			$this->error = $this->db->lasterror();
+			return -1;
+		}
+
+		// Ensure bank_url links are consistent
+		if ($pv_id > 0) {
+			$url_pv = DOL_URL_ROOT.'/compta/bank/various_payment/card.php?id=';
+			if ($acc->add_url_line($fk_bank, $pv_id, $url_pv, '(VariousPayment)', 'payment_various') < 0) {
+				$this->error = $acc->error;
+				return -1;
+			}
+		}
+		$url_paiement = dol_buildpath('/subventions/paiement_card.php', 1).'?id=';
+		if ($acc->add_url_line($fk_bank, $this->id, $url_paiement, '(paiement)', 'payment_subvention') < 0) {
+			$this->error = $acc->error;
+			return -1;
+		}
+		if (!$this->db->query("DELETE FROM ".MAIN_DB_PREFIX."bank_url WHERE fk_bank = ".((int) $fk_bank)." AND type = 'company'")) {
+			$this->error = $this->db->lasterror();
+			return -1;
+		}
+
 		return 1;
 	}
 }

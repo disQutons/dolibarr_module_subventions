@@ -32,8 +32,6 @@ UPDATE llx_c_subventions_financeur SET accountancy_code_receivable = '4419' WHER
 -- Table llx_subventions_financement
 ALTER TABLE llx_subventions_financement ADD COLUMN accounted tinyint DEFAULT 0;
 ALTER TABLE llx_subventions_financement ADD COLUMN date_engagement date DEFAULT NULL;
-ALTER TABLE llx_subventions_financement ADD COLUMN fk_bookkeeping_receivable integer DEFAULT NULL;
-ALTER TABLE llx_subventions_financement ADD COLUMN fk_bookkeeping_product integer DEFAULT NULL;
 
 -- Table llx_subventions_paiement
 ALTER TABLE llx_subventions_paiement ADD COLUMN fk_bank integer DEFAULT NULL;
@@ -42,8 +40,6 @@ ALTER TABLE llx_subventions_paiement ADD COLUMN fk_paiement integer DEFAULT NULL
 ALTER TABLE llx_subventions_paiement ADD COLUMN num_paiement varchar(50) DEFAULT NULL;
 ALTER TABLE llx_subventions_paiement ADD COLUMN accounted tinyint DEFAULT 0;
 ALTER TABLE llx_subventions_paiement ADD COLUMN date_engagement date DEFAULT NULL;
-ALTER TABLE llx_subventions_paiement ADD COLUMN fk_bookkeeping_bank integer DEFAULT NULL;
-ALTER TABLE llx_subventions_paiement ADD COLUMN fk_bookkeeping_receivable integer DEFAULT NULL;
 
 -- Create multi-project & multi-year allocation table
 CREATE TABLE IF NOT EXISTS llx_subventions_subvention_projet(
