@@ -1,12 +1,20 @@
 # CHANGELOG MODULE SUBVENTIONS POUR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 ## 1.3.1
-- FIX Modèles de numérotation standards activés par défaut et codes raccourcis (SUB, FIN et PAI), masques de numérotation préremplis dès l'activation du module
+- FIX #33 Modèles de numérotation standards activés par défaut et codes raccourcis (SUB, FIN et PAI), masques de numérotation préremplis dès l'activation du module
+- FIX #34 Noms explicites des fichiers d'import et d'export, et exemples de valeurs restaurés pour les financements et les paiements
 - FIX Import : numérotation automatique (auto), clés des profils financement et paiement, statuts acceptés, format de la date de paiement et date de création obligatoire
 - FIX Ajout automatique à l'activation des colonnes manquantes, qui ne se déclenchait jamais
-- FIX Noms explicites des fichiers d'import et d'export, et exemples de valeurs restaurés pour les financements et les paiements
 - FIX Erreur SQL dans les statistiques par financeurs lorsque la date choisie appartient à la subvention
 - FIX Décalage des colonnes à la modification du dictionnaire des financeurs
+- FIX #50 Correction de la liste des champs éditables du dictionnaire des financeurs
+- FIX #56 Affichage des infobulles d'en-tête du dictionnaire des financeurs
+- FIX #46 Suppression des appels à la fonction inexistante dol_delcache() dans les triggers
+- FIX #54 Traduction des modes de règlement dans la fiche et la liste des paiements via le sélecteur natif Dolibarr
+- FIX #13 Harmonisation et enrichissement des infobulles d'aide (tooltips) sur les subventions, financements et paiements en français et en anglais
+- FIX #53 #51 Utilisation de PaymentVarious pour le transfert comptable des paiements sans tiers auxiliaire, évitant l'erreur de tiers inconnu et la duplication du crédit 441x, et nettoyage des colonnes/méthodes obsolètes
 - ADD Choix, par type de financeur, d'utiliser ou non le compte auxiliaire du tiers lors du transfert en comptabilité
+
+https://github.com/disQutons/dolibarr_module_subventions/releases/tag/v1.3.1
 
 ## 1.3
 - ADD #2 Support multi-projets : ventilation d'une subvention sur plusieurs projets distincts
