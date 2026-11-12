@@ -40,7 +40,7 @@ class InterfaceSubventionsTriggers extends DolibarrTriggers
 		$this->name = preg_replace('/^Interface/i', '', get_class($this));
 		$this->family = "subventions";
 		$this->description = "Triggers of Subventions module for Agenda event recording and workflow";
-		$this->version = '1.3.0';
+		$this->version = '1.3.1';
 		$this->picto = 'subvention@subventions';
 	}
 
