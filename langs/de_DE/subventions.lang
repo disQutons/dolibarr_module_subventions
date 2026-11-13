@@ -1,10 +1,14 @@
-ModuleSubventionsName=Zuschüsse
-ListSubventionsAssociatedProject=Liste der mit dem Projekt verbundenen Subventionen
-AddSubvention=Zuschuss hinzufügen
+# Translation file
+ModuleSubventionsName=Förderungen
+ModuleSubventionsDesc=Verfolgung von Förderungen, Finanzierungen und Auszahlungen
+SubventionsDescription=Verfolgung von Förderungen, Finanzierungen und Auszahlungen
+ListSubventionsAssociatedProject=Liste der mit dem Projekt verbundenen Förderungen
+AddSubvention=Förderung hinzufügen
 #
 # financement_list.php
 #
 Fundings=Finanzierungen
+
 #
 # subvention_card.php
 #
@@ -13,22 +17,38 @@ Cloture=Abschließen
 Evaluate=Bewerten
 Financed=Finanziert
 Evaluated=Bericht eingereicht
-ListOfFundingAssociatedWithTheGrant=Liste der Finanzierungen des Zuschusses
-ListOfPaymentsAssociatedWithTheGrant=Liste der Zahlungen des Zuschusses
+ListOfFundingAssociatedWithTheGrant=Liste der Finanzierungen der Förderung
+ListOfPaymentsAssociatedWithTheGrant=Liste der Auszahlungen der Förderung
 AddAFunding=Finanzierung hinzufügen
-AddAPayment=Zahlung hinzufügen
-OthersSubsidys=Andere Zuschüsse
+AddAPayment=Auszahlung hinzufügen
+OthersSubsidys=Andere Förderungen
 Pending=Ausstehend
 ReferenceFunding=Finanzierungsreferenz
-ReferencePayment=Zahlungsreferenz
+ReferencePayment=Auszahlungsreferenz
 Requested=Beantragt
 SetFromEvaluate=Aktion nicht abgeschlossen
 SetToEvaluate=Bericht einzureichen
-ConfirmActionRefuse=Möchten Sie diesen Zuschuss wirklich ablehnen? (alle zugehörigen Finanzierungen werden auf 0 gesetzt)
+ConfirmActionRefuse=Möchten Sie diese Förderung wirklich ablehnen? (alle zugehörigen Finanzierungen werden auf 0 gesetzt)
+ConfirmCancelSubvention=Möchten Sie diese Förderung wirklich stornieren?
+ConfirmArchiveSubvention=Möchten Sie diese Förderung wirklich archivieren?
+ConfirmReopenSubvention=Möchten Sie diese Förderung wirklich wiedereröffnen und auf den Entwurfsstatus zurücksetzen?
+CancelSubvention=Förderung stornieren
+SubventionRefusedSuccess=Die Förderung wurde als abgelehnt markiert
+SubventionCanceledSuccess=Die Förderung wurde erfolgreich storniert
+SubventionArchivedSuccess=Die Förderung wurde erfolgreich archiviert
+SubventionReopenedSuccess=Die Förderung wurde wiedereröffnet und auf den Entwurfsstatus zurückgesetzt
+ErrorCannotCancelSubsidyWithPayments=Eine Förderung, für die bereits Auszahlungen eingegangen sind, kann nicht storniert werden
+ErrorCannotArchiveNonClosedSubsidy=Nur eine abgeschlossene, abgelehnte oder stornierte Förderung kann archiviert werden
+Archived=Archiviert
+Canceled=Storniert
+Archive=Archivieren
+Reopen=Wiedereröffnen
+
 #
 # subvention_list.php
 #
-Subsidys=Zuschüsse
+Subsidys=Förderungen
+
 #
 # admin\setup.php
 #
@@ -36,68 +56,118 @@ AmountRequested=Beantragter Betrag
 AmountAccepted=Angenommener Betrag
 AmountFinanced=Finanzierter Betrag
 AmountPending=Ausstehender Betrag
-AmountRefused=Abgelehntter Betrag
+AmountRefused=Abgelehnter Betrag
 Path=Pfad
-SubsidysSetupPage=Zuschuss-Konfiguration
-SubsidysDict=Die Liste der Förderer befindet sich in der Wörterbuchverwaltung.
-# TODO SubsidysDict=Die Liste der Förderer und die dazugehörigen Konten befinden sich in der Wörterbuchverwaltung.
-# TODO AccountancyModule=Buchhaltungsmodul
+SubsidysSetupPage=Förderungs-Konfiguration
+SubsidysDict=Die Liste der Förderer und die dazugehörigen Konten befinden sich in der Wörterbuchverwaltung.
+AccountancyModule=Buchhaltungsmodul
+AccountancyCodeProductHelp=Ertragskonto (z. B. 740x - Betriebliche Zuwendungen/Förderungen)
+AccountancyCodeReceivableHelp=Forderungskonto (z. B. 441x - Zu erhaltende Förderungen)
+AccoutancyCodeProduct=Buchungskonto Ertrag (740x)
+Accountancy_code_receivable=Buchungskonto Forderung (441x)
+AccountancyCodeReceivable=Buchungskonto Forderung (441x)
+accountancy_code_receivable=Buchungskonto Forderung (441x)
+Use_subledger=Personenkonto / Nebenbuchkonto
+UseSubledgerHelp=1 eingeben, um das Debitoren-/Kreditorenkonto des Dritten bei der Buchungsübertragung zu verwenden, 0 für direkte Buchung auf das Sachkonto (z. B. 441x)
+SUBVENTIONS_ACCOUNTANCY_ENABLED=Buchhaltungsintegration für Förderungen aktivieren
+SUBVENTIONS_ACCOUNTANCY_JOURNAL=Standard-Journal für Förderungsverpflichtungen (OD)
+SUBVENTIONS_ACCOUNTANCY_JOURNAL_HELP=Standardmäßig verwendetes Buchungsjournal bei der Übertragung von Verpflichtungen in das Transferjournal
+SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT=Standard-Journal für Auszahlungen von Förderungen (Bank / Kasse)
+SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT_HELP=Standardmäßig verwendetes Buchungsjournal bei der Übertragung von Auszahlungen in das Transferjournal
+SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT=Standard-Forderungskonto (Soll 441x)
+SUBVENTIONS_ACCOUNTANCY_CODE_PRODUCT_DEFAULT=Standard-Ertragskonto (Haben 74xx)
+AccountancyTransferJournal=Buchhaltungs-Transferjournal
+TransferJournal=Transferjournal
+ViewInLedger=Im Hauptbuch anzeigen
+ErrorCannotDeleteAccountedObject=Ein bereits im Hauptbuch gebuchter Datensatz kann nicht gelöscht werden
+ErrorCannotReopenAccountedFinancement=Eine bereits im Hauptbuch gebuchte Finanzierung kann nicht wiedereröffnet werden
+FinancementAccepted=Finanzierung erfolgreich bewilligt
+FinancementRefused=Finanzierung als abgelehnt markiert
+FinancementReopened=Finanzierung wieder auf Status Eingereicht gesetzt
+DeposeFinancement=Einreichen
+GrantFinancement=Bewilligen
+RefuseFinancement=Ablehnen
+ReopenFinancement=Wieder auf Eingereicht setzen
+ConfirmAcceptFinancement=Bestätigen Sie die Bewilligung dieser Finanzierung?
+ConfirmRefuseFinancement=Bestätigen Sie die Ablehnung dieser Finanzierung?
+ConfirmReopenFinancement=Möchten Sie diese Finanzierung wirklich wieder auf den Status Eingereicht setzen?
+DateNotificationRefus=Datum des Ablehnungsbescheids
+Accounted=Gebucht
+NotAccounted=Nicht gebucht
+DateEngagement=Verpflichtungsdatum
+EngagementDate=Verpflichtungsdatum
+SubventionEngagement=Förderungsverpflichtung
+SubventionPayment=Förderungszahlung
+SubventionReceivableAccount=Zu erhaltende Förderungen
+SubventionProductAccount=Erträge aus Förderungen
+SubledgerAccount=Personenkonto / Nebenbuch
+BankTransactionLine=Bankbuchung
+ShowBankTransaction=Bankbuchung anzeigen
+SubventionBankAccount=Bank / Kasse
+ErrorBankAccountNotFound=Bankkonto nicht gefunden
+PaymentMode=Zahlungsart
+NumPayment=Transaktions-/Schecknummer
+PaymentNumberHelp=Schecknummer, Überweisungsreferenz oder Transaktions-ID
 ProjectModule=Projektmodul
 StatisticsModule=Statistikmodul
-SUBVENTIONS_PROJECT=Zuschüsse zur Projektübersicht hinzufügen
+SUBVENTIONS_PROJECT=Förderungen zur Projektübersicht hinzufügen
 SUBVENTIONS_PROJECT_MONTANT_HT=Betrag als "Nettobetrag" anzeigen
 SUBVENTIONS_PROJECT_MONTANT_TTC=Betrag als "Bruttobetrag" anzeigen
 SUBVENTIONS_STATISTIC_DATE=Datum zur Berechnung der Statistiken
-SubventionsSetup=Zuschuss-Konfiguration
-CreationDate=Erstellungsdatum des Zuschusses
+SubventionsSetup=Förderungs-Konfiguration
+CreationDate=Erstellungsdatum der Förderung
 EspectingDate=Erwartetes Abgabedatum
 BeginProjectDate=Projektbeginn
 EndProjectDate=Projektende
-EvaluationDate=Bewertungsdatum des Zuschusses
+EvaluationDate=Bewertungsdatum
 Recalcul=Netto- und Bruttobeträge neu berechnen
 SUBVENTIONS_STATISTIC_COLOR_GREEN=Mindestprozentsatz für die Anzeige in Grün (sonst Orange)
 SUBVENTIONS_STATISTIC_COLOR_ORANGE=Mindestprozentsatz für die Anzeige in Orange (sonst Rot)
+
 #
 # core\modules\modSubventions.class.php
 #
 CodeTooltipHelp=
 RightsCreateUpdateFunding=Finanzierungen erstellen oder aktualisieren
-RightsCreateUpdatePayment=Zahlungen erstellen oder aktualisieren
-RightsCreateUpdateSubsidy=Zuschüsse erstellen oder aktualisieren
+RightsCreateUpdatePayment=Auszahlungen erstellen oder aktualisieren
+RightsCreateUpdateSubsidy=Förderungen erstellen oder aktualisieren
 RightsDeleteFunding=Finanzierungen löschen
-RightsDeletePayment=Zahlungen löschen
-RightsDeleteSubsidy=Zuschüsse löschen
-RightsExportSubsidyFundingAndPayment=
-RightsImportSubsidyFundingAndPayment=
+RightsDeletePayment=Auszahlungen löschen
+RightsDeleteSubsidy=Förderungen löschen
+RightsExportSubsidyFundingAndPayment=Förderungen, Finanzierungen und Auszahlungen exportieren
+RightsImportSubsidyFundingAndPayment=Förderungen, Finanzierungen und Auszahlungen importieren
 RightsReadFunding=Finanzierungen lesen
-RightsReadPayment=Zahlungen lesen
-RightsReadSubsidy=Zuschüsse lesen
-RightsExportSubsidyFundingAndPayment=Zuschüsse, Finanzierungen und Zahlungen exportieren
-RightsImportSubsidyFundingAndPayment=Zuschüsse, Finanzierungen und Zahlungen importieren
+RightsReadPayment=Auszahlungen lesen
+RightsReadSubsidy=Förderungen lesen
+RightsExportSubsidyFundingAndPayment=Förderungen, Finanzierungen und Auszahlungen exportieren
+RightsImportSubsidyFundingAndPayment=Förderungen, Finanzierungen und Auszahlungen importieren
+
 #
 # lib\subventions.lib.php
 #
 AttributsSuppAddFunding=Zusätzliche Finanzierungsattribute
-AttributsSuppPayment=Zusätzliche Zahlungsattribute
-AttributsSuppSubsidy=Zusätzliche Zuschussattribute
+AttributsSuppPayment=Zusätzliche Auszahlungsattribute
+AttributsSuppSubsidy=Zusätzliche Förderungsattribute
+
 #
 # index.php
 #
-DraftSubsidy=Nicht eingereichte Zuschüsse
+DraftSubsidy=Nicht eingereichte Förderungen
 PendingSubsidy=Ausstehende Finanzierungen
-NoSubsidy=Kein Zuschuss
-LatestModifiedMySubsidy=Zuletzt geänderte Zuschüsse
-LatestCreatedMySubsidy=Zuletzt erstellte Zuschüsse
+NoSubsidy=Keine Förderung
+LatestModifiedMySubsidy=Zuletzt geänderte Förderungen
+LatestCreatedMySubsidy=Zuletzt erstellte Förderungen
+
 #
 # subventions_statitics.php
 #
-SubsidysStatistics=Statistiken zu Zuschüssen, Finanzierungen und Zahlungen
-NbOfSubsidys=Anzahl der Zuschüsse
-NbOfSubsidysByMonth=Anzahl der Zuschüsse pro Monat
-NumberOfSubsidys=Anzahl der Zuschüsse
-NumberOfSubsidysByMonth=Anzahl der Zuschüsse pro Monat
-AmountOfSubsidys=Betrag der Zuschüsse
-AmountOfSubsidysByMonth=Betrag der Zuschüsse pro Monat
+SubsidysStatistics=Statistiken zu Förderungen, Finanzierungen und Auszahlungen
+NbOfSubsidys=Anzahl der Förderungen
+NbOfSubsidysByMonth=Anzahl der Förderungen pro Monat
+NumberOfSubsidys=Anzahl der Förderungen
+NumberOfSubsidysByMonth=Anzahl der Förderungen pro Monat
+AmountOfSubsidys=Betrag der Förderungen
+AmountOfSubsidysByMonth=Betrag der Förderungen pro Monat
 NbOfFundings=Anzahl der Finanzierungen
 NbOfFundingsByMonth=Anzahl der Finanzierungen pro Monat
 NumberOfFundings=Anzahl der Finanzierungen
@@ -112,8 +182,9 @@ STATUS_FINANCED=Finanziert
 STATUS_EVALUATED=Bericht eingereicht
 STATUS_CLOTURED=Abgeschlossen
 STATUS_REFUSED=Abgelehnt
+STATUS_ARCHIVED=Archiviert
 STATUS_CANCELED=Storniert
-FundingSourceType=Förderer
+FundingSourceType=Finanzierertyp
 ByFundingSource=Nach Förderern
 ByComparison=Betragsvergleich
 NbRequest=Anzahl der Anträge
@@ -123,25 +194,238 @@ AmountFin=Finanzierter Betrag
 LastRequest=Letzter Antrag
 AllYears=Alle
 FundingSourceGroup=Förderergruppe
+
+
 #
 # Common Translations
 #
 AddFunding=Finanzierung hinzufügen
 ClassNotFound=Klasse nicht gefunden
 DeleteFunding=Finanzierung löschen
-DeleteGrant=Zuschuss löschen
+DeleteGrant=Förderung löschen
 Funding=Finanzierung
 FundingSource=Förderer
-Payment=Zahlung
-Payments=Zahlungen
-Grant=Zuschuss
+Payment=Auszahlung
+Payments=Auszahlungen
+Grant=Förderung
 Refuse=Ablehnen
 ShowFunding=Finanzierungen anzeigen
-ShowPayment=Zahlungen anzeigen
-ShowSubsidy=Zuschüsse anzeigen
-Subsidy=Zuschuss
-SubsidysArea=Verfolgung von Zuschüssen, Finanzierungen und Zahlungen
-SubsidysSetup=Zuschuss-Konfiguration
-BackToSub=Zurück zur Zuschüsse
+ShowPayment=Auszahlungen anzeigen
+ShowSubsidy=Förderungen anzeigen
+Subsidy=Subvention
+SubsidysArea=Verfolgung von Förderungen, Finanzierungen und Auszahlungen
+SubsidysSetup=Subventionen-Konfiguration
+BackToSub=Zurück zu den Förderungen
 XXX=
 bytes=Bytes
+
+#
+# Project ventilation (multi-projects)
+#
+ProjectVentilation=Projektverteilung
+ListOfFundedProjects=Liste der geförderten Projekte
+AddProjectVentilation=Verteilung hinzufügen
+AllocatedAmount=Verteilter Betrag
+AllocatedPercentage=Prozentsatz
+TotalVentilated=Gesamt verteilt
+RemainingToAllocate=Noch zu verteilen
+VentilationExceedsTotal=Der verteilte Gesamtbetrag übersteigt den bewilligten Betrag
+VentilationIncomplete=Die Verteilung ist unvollständig
+ConfirmDeleteVentilation=Möchten Sie diese Verteilung wirklich löschen?
+SubventionsAllocated=Förderungen (verteilt)
+ListSubventionsAllocatedProject=Liste der auf dieses Projekt verteilten Förderungen
+ProjectAlreadyAllocated=Dieses Projekt ist für diese Förderung bereits zugeteilt
+VentilationOf=Verteilung von
+NoProjectVentilation=Keine Projektverteilung vorhanden
+
+# Multi-year repartition
+AutoYearAllocation=Automatische mehrjährige Verteilung
+AutoYearAllocationShort=Zeitanteilig (Prorata temporis)
+ConfirmAutoYearAllocation=Bestätigen Sie die automatische zeitanteilige Verteilung nach Projektmonaten für das ausgewählte Projekt? (bestehende Verteilungen dieses Projekts werden ersetzt)
+AutoYearAllocationSuccess=Mehrjährige Verteilung erfolgreich über %s Geschäftsjahr(e) berechnet
+DurationMonths=Dauer (Monate)
+NumberOfMonths=Anzahl der Monate
+NbOfMonths=Anz. Monate
+Months=Monate
+NumberOfYears=Anzahl der Geschäftsjahre
+Years=Geschäftsjahre
+Year=Jahr
+Project=Projekt
+ErrorMissingProjectDates=Projektbeginn und Projektende müssen in der Förderung angegeben sein
+ErrorStartDateGreaterThanEndDate=Das Projektbeginndatum muss vor dem Projektendedatum liegen
+ErrorAmountRequired=Ein bewilligter oder beantragter Betrag größer als 0 ist erforderlich
+ErrorTotalMonthsZero=Die berechnete Projektdauer beträgt null Monate
+
+#
+# Agenda automatic actions and triggers
+#
+Notify_SUBVENTION_CREATE=Erstellung einer Förderung
+Notify_SUBVENTION_VALIDATE=Einreichung einer Förderung
+Notify_SUBVENTION_MODIFY=Änderung einer Förderung
+Notify_SUBVENTION_ACCEPT=Bewilligung einer Förderung
+Notify_SUBVENTION_REFUSE=Ablehnung einer Förderung
+Notify_SUBVENTION_FINANCED=Vollständige Finanzierung einer Förderung
+Notify_SUBVENTION_EVALUATE=Einreichung des Abschlussberichts einer Förderung
+Notify_SUBVENTION_CLOTURE=Abschluss einer Förderung
+Notify_SUBVENTION_CANCEL=Stornierung einer Förderung
+Notify_SUBVENTION_ARCHIVE=Archivierung einer Förderung
+Notify_SUBVENTION_UNVALIDATE=Zurücksetzung einer Förderung auf Entwurf
+Notify_SUBVENTION_REOPEN=Wiedereröffnung einer Förderung
+Notify_SUBVENTION_DELETE=Löschung einer Förderung
+Notify_SUBVENTION_VENTILATION_CREATE=Projektverteilung erstellt
+Notify_SUBVENTION_VENTILATION_MODIFY=Projektverteilung geändert
+Notify_SUBVENTION_VENTILATION_DELETE=Projektverteilung gelöscht
+Notify_SUBVENTION_VENTILATION_AUTOREPARTITION=Automatische mehrjährige Verteilung generiert
+
+SUBVENTION_CREATEInDolibarr=Förderung %s erstellt
+SUBVENTION_VALIDATEInDolibarr=Förderung %s eingereicht
+SUBVENTION_MODIFYInDolibarr=Förderung %s geändert
+SUBVENTION_ACCEPTInDolibarr=Förderung %s bewilligt
+SUBVENTION_REFUSEInDolibarr=Förderung %s abgelehnt
+SUBVENTION_FINANCEDInDolibarr=Förderung %s vollständig finanziert
+SUBVENTION_EVALUATEInDolibarr=Förderung %s: Abschlussbericht eingereicht
+SUBVENTION_CLOTUREInDolibarr=Förderung %s abgeschlossen
+SUBVENTION_CANCELInDolibarr=Förderung %s storniert
+SUBVENTION_ARCHIVEInDolibarr=Förderung %s archiviert
+SUBVENTION_UNVALIDATEInDolibarr=Förderung %s auf Entwurf zurückgesetzt
+SUBVENTION_REOPENInDolibarr=Förderung %s wiedereröffnet
+SUBVENTION_DELETEInDolibarr=Förderung %s gelöscht
+SUBVENTION_VENTILATION_CREATEInDolibarr=Projektverteilung erstellt für %s
+SUBVENTION_VENTILATION_MODIFYInDolibarr=Projektverteilung geändert für %s
+SUBVENTION_VENTILATION_DELETEInDolibarr=Projektverteilung gelöscht für %s
+SUBVENTION_VENTILATION_AUTOREPARTITIONInDolibarr=Automatische mehrjährige Verteilung für %s
+
+Notify_FINANCEMENT_CREATE=Erstellung eines Finanzierungsantrags
+Notify_FINANCEMENT_VALIDATE=Einreichung eines Finanzierungsantrags
+Notify_FINANCEMENT_MODIFY=Änderung einer Finanzierung
+Notify_FINANCEMENT_ACCEPT=Bewilligung einer Finanzierung
+Notify_FINANCEMENT_REFUSE=Ablehnung einer Finanzierung
+Notify_FINANCEMENT_CANCEL=Stornierung einer Finanzierung
+Notify_FINANCEMENT_UNVALIDATE=Zurücksetzung einer Finanzierung auf Entwurf
+Notify_FINANCEMENT_REOPEN=Wiedereröffnung einer Finanzierung
+Notify_FINANCEMENT_DELETE=Löschung einer Finanzierung
+
+FINANCEMENT_CREATEInDolibarr=Finanzierungsantrag %s erstellt
+FINANCEMENT_VALIDATEInDolibarr=Finanzierungsantrag %s eingereicht
+FINANCEMENT_MODIFYInDolibarr=Finanzierung %s geändert
+FINANCEMENT_ACCEPTInDolibarr=Finanzierung %s bewilligt
+FINANCEMENT_REFUSEInDolibarr=Finanzierung %s abgelehnt
+FINANCEMENT_CANCELInDolibarr=Finanzierung %s storniert
+FINANCEMENT_UNVALIDATEInDolibarr=Finanzierung %s auf Entwurf zurückgesetzt
+FINANCEMENT_REOPENInDolibarr=Finanzierung %s wiedereröffnet
+FINANCEMENT_DELETEInDolibarr=Finanzierung %s gelöscht
+
+Notify_PAIEMENT_CREATE=Erstellung einer Auszahlung
+Notify_PAIEMENT_VALIDATE=Validierung einer Auszahlung
+Notify_PAIEMENT_MODIFY=Änderung einer Auszahlung
+Notify_PAIEMENT_DELETE=Löschung einer Auszahlung
+
+PAIEMENT_CREATEInDolibarr=Auszahlung %s erstellt
+PAIEMENT_VALIDATEInDolibarr=Auszahlung %s validiert
+PAIEMENT_MODIFYInDolibarr=Auszahlung %s geändert
+PAIEMENT_DELETEInDolibarr=Auszahlung %s gelöscht
+
+#
+# Field tooltips / Infobulles d'aide
+#
+SubventionRefHelp=Eindeutige Referenz der Förderung (automatisch gemäß Nummerierungsvorlage generiert)
+SubventionLabelHelp=Name oder Bezeichnung der Förderakte / des Projekts
+SubventionThirdPartyHelp=Antragstellender oder durchführender Dritter (Ihre Organisation oder begünstigte Struktur)
+SubventionProjectHelp=Dolibarr-Projekt, dem diese Förderakte zugeordnet ist
+SubventionMontantDemHelp=Gesamter bei allen Förderern für dieses Projekt beantragter Betrag
+SubventionMontantAccHelp=Von den Förderern insgesamt bewilligter oder zugesagter Betrag
+SubventionMontantFinHelp=Bislang tatsächlich eingegangener kumulierter Auszahlungsbetrag
+SubventionMontantAttHelp=Noch ausstehender Restbetrag der bewilligten Mittel (Bewilligt - Ausgezahlt)
+SubventionMontantRefHelp=Gesamtbetrag der von den Förderern abgelehnten Anträge
+DateStartProjectHelp=Beginn des Durchführungszeitraums des geförderten Projekts
+DateEndProjectHelp=Ende des Durchführungszeitraums des geförderten Projekts
+DateExpectedProjectHelp=Voraussichtliches Datum oder Frist für die Entscheidung der Förderer
+DateReportProjectHelp=Vertragliche Frist für die Einreichung des Verwendungsnachweises und des Tätigkeitsberichts
+SubventionDescriptionHelp=Detaillierte Beschreibung der Maßnahmen und Ziele des geförderten Projekts
+SubventionEvaluationHelp=Bewertungskriterien, erwartete Ergebnisse und Wirkungsindikatoren für den Abschlussbericht
+SubventionStatusHelp=Status der Akte: Entwurf, Eingereicht, Bewilligt, Finanziert, Bericht eingereicht, Abgeschlossen, Abgelehnt oder Storniert
+
+FundingRefHelp=Eindeutige Referenz des Finanzierungsantrags
+FundingSubventionRefHelp=Übergeordnete Förderakte, zu der dieser Finanzierungsantrag gehört
+FundingThirdPartyHelp=Fördernde Stelle (Behörde, öffentliche oder private Einrichtung), bei der die Mittel beantragt wurden
+FundingTypeHelp=Kategorie oder Art des Förderers (z. B. Staat, Region, Landkreis...). Konfigurierbar in den Wörterbüchern
+FundingMontantDemHelp=Bei diesem spezifischen Förderer beantragter Betrag
+FundingMontantAccHelp=Von diesem Förderer offiziell bewilligter Betrag (gemäß Bescheid oder Beschluss)
+FundingMontantFinHelp=Von diesem Förderer tatsächlich eingegangener kumulierter Betrag
+FundingMontantAttHelp=Bei diesem Förderer noch ausstehender Betrag (Bewilligt - Ausgezahlt)
+FundingMontantRefHelp=Von diesem Förderer abgelehnter Betrag
+FundingStatusHelp=Bearbeitungsstatus: Entwurf, Eingereicht, Bewilligt oder Abgelehnt
+DateEngagementHelp=Datum des Bewilligungsbescheids, der Zusage oder des unterzeichneten Fördervertrags
+FundingAccountedHelp=Gibt an, ob die Verpflichtung in das Buchhaltungs-Transferjournal (OD-Journal) übertragen wurde
+
+PaymentRefHelp=Eindeutige Referenz der Auszahlung oder Rate
+PaymentSubventionRefHelp=Von dieser Zahlung betroffene Förderakte
+PaymentFinancementRefHelp=Spezieller Finanzierungsanteil, auf den diese Auszahlung verbucht wird
+PaymentAmountHelp=Betrag der erhaltenen Abschlags- oder Restzahlung
+PaymentDateHelp=Tatsächliches Wertstellungsdatum des Geldeingangs auf dem Bankkonto
+PaymentThirdPartyHelp=Zahlender Dritter (fördernde Stelle)
+PaymentAccountHelp=Bankkonto Ihrer Organisation, auf dem die Zahlung gutgeschrieben wird
+PaymentModeHelp=Verwendete Zahlungsart (z. B. Überweisung, Scheck usw.)
+PaymentAccountedHelp=Gibt an, ob die Bankbuchung in das Buchhaltungs-Transferjournal (Bank-Journal) übertragen wurde
+
+
+
+#
+# Extra German translations (from PR #32)
+#
+NbOfPaiements=Anzahl der Auszahlungen
+AmountOfPaiements=Betrag der Auszahlungen
+OpenAmount=Offenes Volumen
+PaiementReceipt=Auszahlungsnachweis
+DashboardKPIs=Kennzahlen im Überblick
+DocumentsModule=Dokumente
+SUBVENTIONS_ENABLE_DOC_SUBVENTION=Dokumente/PDF für Förderungen aktivieren
+SUBVENTIONS_ENABLE_DOC_FINANCEMENT=Dokumente/PDF für Finanzierungen aktivieren
+SUBVENTIONS_ENABLE_DOC_PAIEMENT=Dokumente/PDF für Auszahlungen aktivieren
+DocsDisabled=Dokumentenfunktion ist deaktiviert
+FinancementReceipt=Finanzierungsnachweis
+AmountAverage=Durchschnittlicher Betrag
+AmountTotal=Gesamtbetrag
+PercentAcc=% acc
+PercentFin=% fin
+NewSubvention=Neue Förderung
+NewFunding=Neue Finanzierung
+NewPayment=Neue Auszahlung
+DeletePayment=Auszahlung löschen
+Financement=Finanzierung
+Paiement=Auszahlung
+Subvention=Förderung
+Creation=Erstellt
+MenuSubvention=Förderung
+MenuNewSubvention=Neue Förderung
+MenuListSubventions=Liste der Förderungen
+MenuDraftSubvention=Nicht eingereicht
+MenuValidatedSubvention=Eingereicht
+MenuAcceptedSubvention=Angenommen
+MenuEvaluatedSubvention=Bilanz zu erstellen
+MenuCloturedSubvention=Abgeschlossen
+MenuRefusedSubvention=Abgelehnt
+MenuStatistics=Statistiken
+MenuFunding=Finanzierungen
+MenuNewFunding=Neue Finanzierung
+MenuListFundings=Liste der Finanzierungen
+MenuPayment=Auszahlungen
+MenuNewPayment=Neue Auszahlung
+MenuListPayments=Liste der Auszahlungen
+ProjectName=Projektname
+EvaluationCriteria=Bewertungskriterien
+Amount=Betrag
+DatePayment=Auszahlungsdatum
+ReferenceSubvention=Förderungsreferenz
+FundingSourceListCanBeModifiedInDictionary=Die Liste der Finanzierer kann im Wörterbuch geändert werden
+DictionaryFinanceursLabel=Förderungen: Hauptfinanzierer und Buchhaltung
+FinanceurAutre=Sonstige
+FinanceurEtat=Staat
+FinanceurRegion=Region
+FinanceurDepartement=Bezirk
+FinanceurCommune=Gemeinde
+FinanceurOrganismesSociaux=Sozialversicherungsträger (z. B. CAF)
+FinanceurFondsEuropeens=EU-Fonds (ESF, EFRE, usw.)
+FinanceurASP=Agentur für Arbeit und Zahlung (geforderte Beschäftigung)
+FinanceurAutresEtablissementsPublics=Sonstige öffentliche Einrichtungen
+FinanceurAidesPrivees=Private Förderungen (Stiftungen)

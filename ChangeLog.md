@@ -13,6 +13,7 @@
 - FIX #13 Harmonisation et enrichissement des infobulles d'aide (tooltips) sur les subventions, financements et paiements en français et en anglais
 - FIX #53 #51 Utilisation de PaymentVarious pour le transfert comptable des paiements sans tiers auxiliaire, évitant l'erreur de tiers inconnu et la duplication du crédit 441x, et nettoyage des colonnes/méthodes obsolètes
 - ADD Choix, par type de financeur, d'utiliser ou non le compte auxiliaire du tiers lors du transfert en comptabilité
+- ADD Traduction complète en allemand (de_DE) reprenant et complétant la PR #32
 
 https://github.com/disQutons/dolibarr_module_subventions/releases/tag/v1.3.1
 
