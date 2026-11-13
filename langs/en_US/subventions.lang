@@ -1,4 +1,6 @@
 ModuleSubventionsName=Grants
+ModuleSubventionsDesc=Tracking of grants, fundings, and payments
+SubventionsDescription=Tracking of grants, fundings, and payments
 ListSubventionsAssociatedProject=List of Grants related to the project
 AddSubvention=Add a grant
 #
@@ -57,9 +59,12 @@ SubsidysDict=The list of funders and associated accounts is available in diction
 AccountancyModule=Accounting Module
 AccountancyCodeProductHelp=Product account (e.g. 740x - Operating subsidies)
 AccountancyCodeReceivableHelp=Receivable account (e.g. 441x - Subsidies receivable)
+AccoutancyCodeProduct=Product accounting code (740x)
 Accountancy_code_receivable=Receivable account code (441x)
 AccountancyCodeReceivable=Receivable account code (441x)
 accountancy_code_receivable=Receivable account code (441x)
+Use_subledger=Third-party subledger account
+UseSubledgerHelp=Enter 1 to use the third-party auxiliary account during transfer to accounting, 0 not to use one (direct entry to the receivable account, e.g. 441x)
 SUBVENTIONS_ACCOUNTANCY_ENABLED=Enable grants accounting integration
 SUBVENTIONS_ACCOUNTANCY_JOURNAL=Default journal for grant commitments (OD)
 SUBVENTIONS_ACCOUNTANCY_JOURNAL_HELP=Default accounting journal used when transferring grant commitments into the transfer journal
@@ -352,5 +357,66 @@ PaymentThirdPartyHelp=Third party issuing the payment (funding entity)
 PaymentAccountHelp=Your organization's bank account credited with the installment
 PaymentModeHelp=Payment method used (e.g. Wire transfer, Check, etc.)
 PaymentAccountedHelp=Indicates whether the bank payment has been transferred to the accounting transfer journal (Bank journal)
+
+#
+# Extra translations (menus, dictionary, docs, dashboard from PR #32)
+#
+NbOfPaiements=Number of payments
+AmountOfPaiements=Amount of payments
+OpenAmount=Open amount
+PaiementReceipt=Payment receipt
+DashboardKPIs=Key figures at a glance
+DocumentsModule=Documents
+SUBVENTIONS_ENABLE_DOC_SUBVENTION=Enable documents/PDF for grants
+SUBVENTIONS_ENABLE_DOC_FINANCEMENT=Enable documents/PDF for fundings
+SUBVENTIONS_ENABLE_DOC_PAIEMENT=Enable documents/PDF for payments
+DocsDisabled=Documents feature is disabled
+FinancementReceipt=Funding receipt
+AmountAverage=Average amount
+AmountTotal=Total amount
+PercentAcc=% acc
+PercentFin=% fin
+NewSubvention=New grant
+NewFunding=New funding
+NewPayment=New payment
+DeletePayment=Delete payment
+Financement=Funding
+Paiement=Payment
+Subvention=Grant
+Creation=Created
+MenuSubvention=Grant
+MenuNewSubvention=New grant
+MenuListSubventions=List of grants
+MenuDraftSubvention=Draft
+MenuValidatedSubvention=Submitted
+MenuAcceptedSubvention=Accepted
+MenuEvaluatedSubvention=Report to submit
+MenuCloturedSubvention=Closed
+MenuRefusedSubvention=Refused
+MenuStatistics=Statistics
+MenuFunding=Fundings
+MenuNewFunding=New funding
+MenuListFundings=List of fundings
+MenuPayment=Payments
+MenuNewPayment=New payment
+MenuListPayments=List of payments
+ProjectName=Project name
+EvaluationCriteria=Evaluation criteria
+Amount=Amount
+DatePayment=Payment date
+ReferenceSubvention=Grant reference
+FundingSourceListCanBeModifiedInDictionary=The list of funders can be modified in the dictionary
+DictionaryFinanceursLabel=Grants: Main funders and accounting
+FinanceurAutre=Other
+FinanceurEtat=State
+FinanceurRegion=Region
+FinanceurDepartement=Department
+FinanceurCommune=Municipality
+FinanceurOrganismesSociaux=Social organizations (e.g. CAF)
+FinanceurFondsEuropeens=European funds (ESF, ERDF, etc.)
+FinanceurASP=Agency for Services and Payment (subsidized employment)
+FinanceurAutresEtablissementsPublics=Other public institutions
+FinanceurAidesPrivees=Private aid (foundations)
+
 
 
