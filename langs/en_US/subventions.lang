@@ -122,7 +122,7 @@ SUBVENTIONS_STATISTIC_COLOR_ORANGE=Minimum percentage to display in orange (othe
 #
 # core\modules\modSubventions.class.php
 #
-CodeTooltipHelp=
+CodeTooltipHelp=This field contains a reference to identify the record. Enter a value of your choice, without special characters.
 RightsCreateUpdateFunding=Create or update fundings
 RightsCreateUpdatePayment=Create or update payments
 RightsCreateUpdateSubsidy=Create or update grants

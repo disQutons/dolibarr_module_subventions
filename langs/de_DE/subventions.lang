@@ -127,7 +127,7 @@ SUBVENTIONS_STATISTIC_COLOR_ORANGE=Mindestprozentsatz für die Anzeige in Orange
 #
 # core\modules\modSubventions.class.php
 #
-CodeTooltipHelp=
+CodeTooltipHelp=Dieses Feld enthält eine Referenz zur Identifizierung des Datensatzes. Geben Sie einen beliebigen Wert ohne Sonderzeichen ein.
 RightsCreateUpdateFunding=Finanzierungen erstellen oder aktualisieren
 RightsCreateUpdatePayment=Auszahlungen erstellen oder aktualisieren
 RightsCreateUpdateSubsidy=Förderungen erstellen oder aktualisieren
