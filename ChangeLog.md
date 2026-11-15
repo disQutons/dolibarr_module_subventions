@@ -14,7 +14,7 @@
 - FIX #53 #51 Utilisation de PaymentVarious pour le transfert comptable des paiements sans tiers auxiliaire, évitant l'erreur de tiers inconnu et la duplication du crédit 441x, et nettoyage des colonnes/méthodes obsolètes
 - ADD Choix, par type de financeur, d'utiliser ou non le compte auxiliaire du tiers lors du transfert en comptabilité
 - ADD Traduction complète en allemand (de_DE) reprenant et complétant la PR #32
-- FIX Synchronisation et complétion à 100 % des fichiers de langue anglais (en_US), espagnol (es_ES) et italien (it_IT) avec parité complète sur toutes les chaînes fonctionnelles, menus, dictionnaires et infobulles d'aide
+- FIX Synchronisation et complétion à 100 % des 5 fichiers de langue (fr_FR, en_US, de_DE, es_ES et it_IT) à parité stricte (365 clés chacun : chaînes fonctionnelles, menus, dictionnaires et infobulles d'aide)
 
 https://github.com/disQutons/dolibarr_module_subventions/releases/tag/v1.3.1
 
