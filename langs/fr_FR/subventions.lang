@@ -368,4 +368,83 @@ PaymentAccountHelp=Compte financier de votre organisation sur lequel le versemen
 PaymentModeHelp=Mode de règlement utilisé (ex : Virement, Chèque, etc.)
 PaymentAccountedHelp=Indique si le versement a été transféré dans le journal de transfert comptable (Journal de Banque)
 
+#
+# Extra French translations (menus, dictionary, docs, dashboard from PR #32)
+#
+NbOfPaiements=Nombre de paiements
+AmountOfPaiements=Montant des paiements
+OpenAmount=Montant ouvert
+PaiementReceipt=Justificatif de paiement
+DashboardKPIs=Chiffres clés
+DocumentsModule=Documents
+SUBVENTIONS_ENABLE_DOC_SUBVENTION=Activer documents/PDF pour les subventions
+SUBVENTIONS_ENABLE_DOC_FINANCEMENT=Activer documents/PDF pour les financements
+SUBVENTIONS_ENABLE_DOC_PAIEMENT=Activer documents/PDF pour les paiements
+DocsDisabled=Fonction documents désactivée
+FinancementReceipt=Justificatif de financement
+AmountAverage=Montant moyen
+AmountTotal=Montant total
+PercentAcc=% acc.
+PercentFin=% fin.
+NewSubvention=Nouvelle subvention
+NewFunding=Nouveau financement
+NewPayment=Nouveau paiement
+DeletePayment=Supprimer paiement
+Financement=Financement
+Paiement=Paiement
+Subvention=Subvention
+Creation=Créé
+MenuSubvention=Subvention
+MenuNewSubvention=Nouvelle subvention
+MenuListSubventions=Liste des subventions
+MenuDraftSubvention=Non déposées
+MenuValidatedSubvention=Attente de réponse
+MenuAcceptedSubvention=Attente de financement
+MenuEvaluatedSubvention=Bilan à déposer
+MenuCloturedSubvention=Clôturé
+MenuRefusedSubvention=Refusé
+MenuStatistics=Statistiques
+MenuFunding=Financements
+MenuNewFunding=Nouveau financement
+MenuListFundings=Liste des financements
+MenuPayment=Paiements
+MenuNewPayment=Nouveau paiement
+MenuListPayments=Liste des paiements
+ProjectName=Nom du projet
+EvaluationCriteria=Critères d'évaluation
+Amount=Montant
+DatePayment=Date paiement
+ReferenceSubvention=Réf subvention
+FundingSourceListCanBeModifiedInDictionary=La liste des financeurs peut être modifiée dans les dictionnaires
+DictionaryFinanceursLabel=Subventions : Financeurs principaux et comptabilité
+FinanceurAutre=Autre
+FinanceurEtat=État
+FinanceurRegion=Région
+FinanceurDepartement=Département
+FinanceurCommune=Commune
+FinanceurOrganismesSociaux=Organismes sociaux (CAF, etc.)
+FinanceurFondsEuropeens=Fonds européens (FSE, FEDER, etc.)
+FinanceurASP=L'agence de services et de paiement (emplois aidés)
+FinanceurAutresEtablissementsPublics=Autres établissements publics
+FinanceurAidesPrivees=Aides privées (fondation)
+
+#
+# Complete UI & Export/Import/PDF coverage
+#
+Subventions=Subventions
+Financements=Financements
+Paiements=Paiements
+Unlink=Dissocier
+VariousOperations=Opérations diverses
+ErrorNumberingModuleNotSetup=Le module de numérotation pour %s n'est pas configuré
+PdfTitle=Dossier de subvention
+PercentBetween0And100=% entre 0 et 100
+ExportSubventionsDataset=Subventions, financements et paiements
+ProjectLabel=Projet (libellé)
+FundingSourceTypeLabel=Type de financeur (libellé)
+SubventionId=ID Subvention
+FinancementId=ID Financement
+
+
+
 

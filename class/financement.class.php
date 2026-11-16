@@ -133,17 +133,17 @@ class Financement extends CommonObject
 		"fk_user_modif" => array("type" => "integer:User:user/class/user.class.php", "label" => "UserModif", "picto" => "user", "enabled" => "1", 'position' => 511, 'notnull' => -1, "visible" => "-2", "csslist" => "tdoverflowmax150",),
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
-		"model_pdf" => array("type" => "varchar(255)", "label" => "Model pdf", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
-		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "2", "noteditable" => "1", "default" => "0", "index" => "1", "arrayofkeyval" => array("0" => "Draft", "1" => "STATUS_VALIDATED", "2" => "STATUS_ACCEPTED", "3" => "STATUS_REFUSED"), "validate" => "1",),
-		"montant_dem" => array("type" => "price", "label" => "Montant demandé", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant demandé", "validate" => "1",),
-		"montant_acc" => array("type" => "price", "label" => "Montant accepté", "enabled" => "1", 'position' => 42, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant accepté", "validate" => "1",),
-		"montant_fin" => array("type" => "price", "label" => "Montant financé", "enabled" => "1", 'position' => 44, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant avec des financements reçus", "validate" => "1",),
-		"montant_att" => array("type" => "price", "label" => "Montant en attente", "enabled" => "1", 'position' => 46, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant en attente des financements", "validate" => "1",),
-		"montant_ref" => array("type" => "price", "label" => "Montant refusé", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "1", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "Montant refusé", "validate" => "1",),
-		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('subventions')", 'position' => 25, 'notnull' => 1, "visible" => "1",),
-		"fk_financeur" => array("type" => "integer", "label" => "Type de financeur", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "La liste des financeurs peut être modifié dans les dictionnaires.",),
-		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"),),
-		"date_engagement" => array("type" => "date", "label" => "DateEngagement", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "5",),
+		"model_pdf" => array("type" => "varchar(255)", "label" => "Model", "enabled" => "1", 'position' => 1010, 'notnull' => -1, "visible" => "0",),
+		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "2", "noteditable" => "1", "default" => "0", "index" => "1", "help" => "FundingStatusHelp", "arrayofkeyval" => array("0" => "STATUS_DRAFT", "1" => "STATUS_VALIDATED", "2" => "STATUS_ACCEPTED", "3" => "STATUS_REFUSED"), "validate" => "1",),
+		"montant_dem" => array("type" => "price", "label" => "AmountRequested", "enabled" => "1", 'position' => 40, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantDemHelp", "validate" => "1",),
+		"montant_acc" => array("type" => "price", "label" => "AmountAccepted", "enabled" => "1", 'position' => 42, 'notnull' => 0, "visible" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantAccHelp", "validate" => "1",),
+		"montant_fin" => array("type" => "price", "label" => "AmountFinanced", "enabled" => "1", 'position' => 44, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantFinHelp", "validate" => "1",),
+		"montant_att" => array("type" => "price", "label" => "AmountPending", "enabled" => "1", 'position' => 46, 'notnull' => 0, "visible" => "4", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantAttHelp", "validate" => "1",),
+		"montant_ref" => array("type" => "price", "label" => "AmountRefused", "enabled" => "1", 'position' => 48, 'notnull' => 0, "visible" => "1", "noteditable" => "1", "default" => "null", "isameasure" => "1", "help" => "FundingMontantRefHelp", "validate" => "1",),
+		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "ReferenceSubvention", "picto" => "fa-hand-holding-heart", "enabled" => "isModEnabled('subventions')", 'position' => 25, 'notnull' => 1, "visible" => "1", "help" => "FundingSubventionRefHelp",),
+		"fk_financeur" => array("type" => "integer", "label" => "FundingSourceType", "enabled" => "1", 'position' => 35, 'notnull' => 1, "visible" => "-1", "foreignkey" => "0", "help" => "FundingTypeHelp",),
+		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"), "help" => "FundingAccountedHelp",),
+		"date_engagement" => array("type" => "date", "label" => "DateEngagement", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "5", "help" => "DateEngagementHelp",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
@@ -238,6 +238,7 @@ class Financement extends CommonObject
 
 		// Translate some data of arrayofkeyval
 		if (is_object($langs)) {
+			$langs->load("subventions@subventions");
 			foreach ($this->fields as $key => $val) {
 				if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
 					foreach ($val['arrayofkeyval'] as $key2 => $val2) {
@@ -265,7 +266,7 @@ class Financement extends CommonObject
                 while ($i < $num)
                 {
                     $obj = $db->fetch_object($resql);
-                    $arrayofkeyval[$obj->rowid] = $obj->label;
+                    $arrayofkeyval[$obj->rowid] = subventionsTranslateFinanceurLabel($obj->ref, $obj->label, $langs);
                     $i = $i +1;
                 }
                 $this->fields['fk_financeur']['arrayofkeyval'] = $arrayofkeyval;
@@ -1188,6 +1189,7 @@ class Financement extends CommonObject
 	 */
 	public function getFundingSources()
 	{
+		global $langs;
 
 		// Récupération des données de ma liste de financeurs
 		$sql = 'SELECT c.rowid, c.ref, c.label, c.active, c.position';
@@ -1196,18 +1198,18 @@ class Financement extends CommonObject
         $sql.= ' ORDER BY c.position ASC, c.label ASC';
         
         $resql = $this->db->query($sql);
+        $arrayofkeyval = array();
         
         if ($resql)
         {
             $num = $this->db->num_rows($resql);
             if ($num > 0)
             {
-                $arrayofkeyval = array();
                 $i = 0;
                 while ($i < $num)
                 {
                     $obj = $this->db->fetch_object($resql);
-                    $arrayofkeyval[$obj->rowid] = $obj->label;
+                    $arrayofkeyval[$obj->rowid] = subventionsTranslateFinanceurLabel($obj->ref, $obj->label, $langs);
                     $i = $i +1;
                 }
                 $this->fields['fk_financeur']['arrayofkeyval'] = $arrayofkeyval;
