@@ -418,5 +418,23 @@ FinanceurASP=Agency for Services and Payment (subsidized employment)
 FinanceurAutresEtablissementsPublics=Other public institutions
 FinanceurAidesPrivees=Private aid (foundations)
 
+#
+# Complete UI & Export/Import/PDF coverage
+#
+Subventions=Grants
+Financements=Fundings
+Paiements=Payments
+Unlink=Unlink
+VariousOperations=Various operations
+ErrorNumberingModuleNotSetup=Numbering module for %s is not configured
+PdfTitle=Grant file
+PercentBetween0And100=% between 0 and 100
+ExportSubventionsDataset=Grants, fundings, and payments
+ProjectLabel=Project (label)
+FundingSourceTypeLabel=Funding source type (label)
+SubventionId=Grant ID
+FinancementId=Funding ID
+
+
 
 

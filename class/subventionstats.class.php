@@ -273,16 +273,18 @@ class SubventionStats extends Stats
 	 */
 	public function getStatsFundingSource($sumary, $year = 0)
 	{
+		global $langs;
+
 		$this->date_stat = $this->sanitizeDateStat(getDolGlobalString('SUBVENTIONS_STATISTIC_DATE'));
 		if ($sumary){
-			$sql = "SELECT MAX(x.fk_soc) as fk_soc, COUNT(x.ref) AS nb, SUM(x.montant_dem) as montant_dem, SUM(x.montant_acc) as montant_acc, SUM(x.montant_fin) as montant_fin, MAX(COALESCE(y.".$this->date_stat.", y.date_creation)) as date, x.fk_financeur, s.label as nom";
+			$sql = "SELECT MAX(x.fk_soc) as fk_soc, COUNT(x.ref) AS nb, SUM(x.montant_dem) as montant_dem, SUM(x.montant_acc) as montant_acc, SUM(x.montant_fin) as montant_fin, MAX(COALESCE(y.".$this->date_stat.", y.date_creation)) as date, x.fk_financeur, s.ref as financeur_ref, s.label as nom";
 			$sql .= " FROM ".$this->from;
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_subventions_financeur as s ON s.rowid = x.fk_financeur";
 			$sql .= " WHERE ".$this->where;
 			if ($year > 0) {
 				$sql .= " AND ".dolSqlDateFilter('y.'.$this->date_stat, 0, 0, (int) $year, 1);
 			}
-			$sql .= " GROUP BY x.fk_financeur, s.label, s.position";
+			$sql .= " GROUP BY x.fk_financeur, s.ref, s.label, s.position";
 			$sql .= $this->db->order('s.position', 'ASC');
 		}
 		else {
@@ -304,6 +306,10 @@ class SubventionStats extends Stats
 			$data = array();
 			while ($i < $num) {
 				$obj = $this->db->fetch_object($resql);
+				$nom = $obj->nom;
+				if ($sumary && function_exists('subventionsTranslateFinanceurLabel')) {
+					$nom = subventionsTranslateFinanceurLabel(isset($obj->financeur_ref) ? $obj->financeur_ref : '', $nom, $langs);
+				}
 				$data[] = array(
 					'fk_soc' => $obj->fk_soc,
 					'nb' => $obj->nb,
@@ -311,7 +317,7 @@ class SubventionStats extends Stats
 					'montant_acc' => $obj->montant_acc,
 					'montant_fin' => $obj->montant_fin,
 					'date_creation' => $obj->date,
-					'nom' => $obj->nom,
+					'nom' => $nom,
 					'fk_financeur' => isset($obj->fk_financeur) ? $obj->fk_financeur : 0
 				);
 				$i++;

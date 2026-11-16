@@ -429,3 +429,21 @@ DeletePayment=Eliminar pago
 Financement=Financiamiento
 Paiement=Pago
 Subvention=Subvención
+
+#
+# Complete UI & Export/Import/PDF coverage
+#
+Subventions=Subvenciones
+Financements=Financiamientos
+Paiements=Pagos
+Unlink=Desvincular
+VariousOperations=Operaciones diversas
+ErrorNumberingModuleNotSetup=El módulo de numeración para %s no está configurado
+PdfTitle=Expediente de subvención
+PercentBetween0And100=% entre 0 y 100
+ExportSubventionsDataset=Subvenciones, financiamientos y pagos
+ProjectLabel=Proyecto (etiqueta)
+FundingSourceTypeLabel=Tipo de financiador (etiqueta)
+SubventionId=ID Subvención
+FinancementId=ID Financiamiento
+

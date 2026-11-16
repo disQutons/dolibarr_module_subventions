@@ -428,5 +428,23 @@ FinanceurASP=L'agence de services et de paiement (emplois aidés)
 FinanceurAutresEtablissementsPublics=Autres établissements publics
 FinanceurAidesPrivees=Aides privées (fondation)
 
+#
+# Complete UI & Export/Import/PDF coverage
+#
+Subventions=Subventions
+Financements=Financements
+Paiements=Paiements
+Unlink=Dissocier
+VariousOperations=Opérations diverses
+ErrorNumberingModuleNotSetup=Le module de numérotation pour %s n'est pas configuré
+PdfTitle=Dossier de subvention
+PercentBetween0And100=% entre 0 et 100
+ExportSubventionsDataset=Subventions, financements et paiements
+ProjectLabel=Projet (libellé)
+FundingSourceTypeLabel=Type de financeur (libellé)
+SubventionId=ID Subvention
+FinancementId=ID Financement
+
+
 
 

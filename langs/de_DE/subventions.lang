@@ -429,3 +429,21 @@ FinanceurFondsEuropeens=EU-Fonds (ESF, EFRE, usw.)
 FinanceurASP=Agentur für Arbeit und Zahlung (geforderte Beschäftigung)
 FinanceurAutresEtablissementsPublics=Sonstige öffentliche Einrichtungen
 FinanceurAidesPrivees=Private Förderungen (Stiftungen)
+
+#
+# Complete UI & Export/Import/PDF coverage
+#
+Subventions=Förderungen
+Financements=Finanzierungen
+Paiements=Auszahlungen
+Unlink=Verknüpfung aufheben
+VariousOperations=Verschiedene Vorgänge
+ErrorNumberingModuleNotSetup=Das Nummernkreis-Modul für %s ist nicht konfiguriert
+PdfTitle=Förderakte
+PercentBetween0And100=% zwischen 0 und 100
+ExportSubventionsDataset=Förderungen, Finanzierungen und Auszahlungen
+ProjectLabel=Projekt (Bezeichnung)
+FundingSourceTypeLabel=Art des Förderers (Bezeichnung)
+SubventionId=Förderungs-ID
+FinancementId=Finanzierungs-ID
+

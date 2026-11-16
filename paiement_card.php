@@ -300,13 +300,13 @@ jQuery(document).ready(function() {
                     if (data.success) {
                         jQuery('#fk_fin').html(data.options);
                     } else {
-                        console.error('Erreur : ', data.error);
-                        jQuery('#fk_fin').html('<option value="0">Erreur</option>');
+                        console.error('Error: ', data.error);
+                        jQuery('#fk_fin').html('<option value="0"><?php echo dol_escape_js($langs->transnoentitiesnoconv("Error")); ?></option>');
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Erreur AJAX : ', error);
-                    jQuery('#fk_fin').html('<option value="0">Erreur AJAX</option>');
+                    console.error('AJAX error: ', error);
+                    jQuery('#fk_fin').html('<option value="0"><?php echo dol_escape_js($langs->transnoentitiesnoconv("Error")); ?> AJAX</option>');
                 }
             });
         }
