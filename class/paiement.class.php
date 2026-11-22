@@ -1147,16 +1147,50 @@ class Paiement extends CommonObject
 	{
 		global $langs, $form;
 
-		if ($key === 'fk_paiement') {
-			if (is_object($langs)) {
-				$langs->load("bills");
+		if (in_array($key, array('fk_account', 'fk_paiement'), true)) {
+			if (!empty($this->fields[$key])) {
+				$val = $this->fields[$key];
 			}
 			if (!is_object($form)) {
 				require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 				$form = new Form($this->db);
 			}
+			$isSearch = (strpos((string) $keyprefix, 'search_') === 0);
 			$css = $morecss ? (string) $morecss : (!empty($val['css']) ? (string) $val['css'] : 'minwidth200');
-			$noadmininfo = (strpos($keyprefix, 'search_') === 0) ? 1 : 0;
+
+			if ($key === 'fk_account') {
+				$showNewButton = (!$isSearch && empty($val['disabled']) && empty($nonewbutton) && (!GETPOSTISSET('backtopage') || strpos(GETPOST('backtopage'), $_SERVER['PHP_SELF']) === 0));
+				if (!$isSearch) {
+					if ($showNewButton) {
+						$css .= (!empty($val['picto']) ? ' widthcentpercentminusxx' : ' widthcentpercentminusx');
+					} elseif (!empty($val['picto'])) {
+						$css .= ' widthcentpercentminusx';
+					}
+				}
+				$moreattrib = trim((string) $moreparam.(!empty($val['disabled']) ? ' disabled="disabled"' : ''));
+				$status = $isSearch ? 2 : 0;
+				$showcurrency = isModEnabled('multicurrency') ? 1 : 0;
+
+				$out = (string) $form->select_comptes((string) $value, $keyprefix.$key.$keysuffix, $status, '', 1, $moreattrib, $showcurrency, $css, 1);
+
+				if ($showNewButton) {
+					$paramforthenewlink = '';
+					$paramforthenewlink .= (GETPOSTISSET('action') ? '&action='.GETPOST('action', 'aZ09') : '');
+					$paramforthenewlink .= (GETPOSTISSET('id') ? '&id='.GETPOSTINT('id') : '');
+					$paramforthenewlink .= (GETPOSTISSET('origin') ? '&origin='.GETPOST('origin', 'aZ09') : '');
+					$paramforthenewlink .= (GETPOSTISSET('originid') ? '&originid='.GETPOSTINT('originid') : '');
+					$paramforthenewlink .= '&fk_account=--IDFORBACKTOPAGE--';
+					$backtopageUrl = $_SERVER['PHP_SELF'].'?'.ltrim($paramforthenewlink, '&');
+					$out .= '<a class="butActionNew" title="'.$langs->trans("New").'" href="'.dol_buildpath('/compta/bank/card.php', 1).'?action=create&backtopage='.urlencode($backtopageUrl).'"><span class="fa fa-plus-circle valignmiddle"></span></a>';
+				}
+
+				return $out;
+			}
+
+			if (is_object($langs)) {
+				$langs->load("bills");
+			}
+			$noadmininfo = $isSearch ? 1 : 0;
 			return (string) $form->select_types_paiements($value, $keyprefix.$key.$keysuffix, '', 0, 1, $noadmininfo, 0, 1, $css, 1);
 		}
 
@@ -1178,6 +1212,18 @@ class Paiement extends CommonObject
 	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
 	{
 		global $langs, $form;
+
+		if ($key === 'fk_account') {
+			if (empty($value) || !isModEnabled('banque')) {
+				return '';
+			}
+			require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+			$account = new Account($this->db);
+			if ($account->fetch((int) $value) > 0) {
+				return $account->getNomUrl(3, '', 'reflabel');
+			}
+			return '';
+		}
 
 		if ($key === 'fk_paiement') {
 			if (empty($value)) {
