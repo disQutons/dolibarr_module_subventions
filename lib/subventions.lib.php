@@ -856,3 +856,56 @@ if (!function_exists('getSubventionsLedgerUrl')) {
 	}
 }
 
+if (!function_exists('subventionsTranslateFinanceurLabel')) {
+	/**
+	 * Translate default funding source dictionary labels while preserving customized DB labels
+	 *
+	 * @param  string         $ref   Dictionary ref (e.g. SF_ETAT)
+	 * @param  string         $label Label stored in database
+	 * @param  Translate|null $langs Translation object (optional, defaults to global $langs)
+	 * @return string                Translated label when default/key, or customized DB label
+	 */
+	function subventionsTranslateFinanceurLabel($ref, $label, $langs = null)
+	{
+		if (!is_object($langs)) {
+			global $langs;
+		}
+		if (!is_object($langs)) {
+			return (string) $label;
+		}
+
+		$langs->load('subventions@subventions');
+
+		$defaultMap = array(
+			'SF_AUTRE' => array('key' => 'FinanceurAutre', 'default' => 'Autre'),
+			'SF_ETAT' => array('key' => 'FinanceurEtat', 'default' => 'État'),
+			'SF_REG' => array('key' => 'FinanceurRegion', 'default' => 'Région'),
+			'SF_DEP' => array('key' => 'FinanceurDepartement', 'default' => 'Département'),
+			'SF_COM' => array('key' => 'FinanceurCommune', 'default' => 'Commune'),
+			'SF_SOC' => array('key' => 'FinanceurOrganismesSociaux', 'default' => 'Organismes sociaux (CAF, etc.)'),
+			'SF_EUR' => array('key' => 'FinanceurFondsEuropeens', 'default' => 'Fonds européens (FSE, FEDER, etc.)'),
+			'SF_ASP' => array('key' => 'FinanceurASP', 'default' => "L'agence de services et de paiement (emplois aidés)"),
+			'SF_PUB' => array('key' => 'FinanceurAutresEtablissementsPublics', 'default' => 'Autres établissements publics'),
+			'SF_PRI' => array('key' => 'FinanceurAidesPrivees', 'default' => 'Aides privées (fondation)'),
+		);
+
+		$refKey = strtoupper(trim((string) $ref));
+		if (isset($defaultMap[$refKey])) {
+			$entry = $defaultMap[$refKey];
+			if ($label === '' || $label === $entry['default'] || $label === $entry['key']) {
+				return $langs->transnoentitiesnoconv($entry['key']);
+			}
+		}
+
+		if ($label !== '') {
+			$translated = $langs->transnoentitiesnoconv($label);
+			if ($translated !== $label) {
+				return $translated;
+			}
+		}
+
+		return (string) $label;
+	}
+}
+
+

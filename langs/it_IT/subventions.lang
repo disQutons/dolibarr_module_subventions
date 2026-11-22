@@ -1,10 +1,14 @@
+# Translation file
 ModuleSubventionsName=Sovvenzioni
+ModuleSubventionsDesc=Monitoraggio di sovvenzioni, finanziamenti e pagamenti
+SubventionsDescription=Monitoraggio di sovvenzioni, finanziamenti e pagamenti
 ListSubventionsAssociatedProject=Elenco dei sussidi relativi al progetto
 AddSubvention=Aggiungi una sovvenzione
 #
 # financement_list.php
 #
 Fundings=Finanziamenti
+
 #
 # subvention_card.php
 #
@@ -25,10 +29,26 @@ Requested=Richiesto
 SetFromEvaluate=Azione non completata
 SetToEvaluate=Relazione da presentare
 ConfirmActionRefuse=Sei sicuro di voler rifiutare questa sovvenzione? (tutti i finanziamenti associati verranno impostati a 0)
+ConfirmCancelSubvention=Sei sicuro di voler annullare questa sovvenzione?
+ConfirmArchiveSubvention=Sei sicuro di voler archiviare questa sovvenzione?
+ConfirmReopenSubvention=Sei sicuro di voler riaprire questa sovvenzione e riportarla allo stato di bozza?
+CancelSubvention=Annulla sovvenzione
+SubventionRefusedSuccess=Sovvenzione contrassegnata come rifiutata
+SubventionCanceledSuccess=Sovvenzione annullata con successo
+SubventionArchivedSuccess=Sovvenzione archiviata con successo
+SubventionReopenedSuccess=Sovvenzione riaperta e riportata allo stato di bozza
+ErrorCannotCancelSubsidyWithPayments=Impossibile annullare una sovvenzione con pagamenti già ricevuti
+ErrorCannotArchiveNonClosedSubsidy=Solo una sovvenzione chiusa, rifiutata o annullata può essere archiviata
+Archived=Archiviata
+Canceled=Annullata
+Archive=Archivia
+Reopen=Riapri
+
 #
 # subvention_list.php
 #
 Subsidys=Sovvenzioni
+
 #
 # admin\setup.php
 #
@@ -39,9 +59,55 @@ AmountPending=Importo in attesa
 AmountRefused=Importo rifiutato
 Path=Percorso
 SubsidysSetupPage=Configurazione sovvenzioni
-SubsidysDict=L'elenco dei finanziatori si trova nella gestione dei dizionari.
-# TODO SubsidysDict=L'elenco dei finanziatori e i conti associati si trovano nella gestione dei dizionari.
-# TODO AccountancyModule=Modulo Contabilità
+SubsidysDict=L'elenco dei finanziatori e i conti associati si trovano nella gestione dei dizionari.
+AccountancyModule=Modulo Contabilità
+AccountancyCodeProductHelp=Conto di ricavo (es.: 740x - Contributi in conto esercizio)
+AccountancyCodeReceivableHelp=Conto crediti (es.: 441x - Sovvenzioni da ricevere)
+AccoutancyCodeProduct=Codice contabile di ricavo (740x)
+Accountancy_code_receivable=Codice contabile crediti (441x)
+AccountancyCodeReceivable=Codice contabile crediti (441x)
+accountancy_code_receivable=Codice contabile crediti (441x)
+Use_subledger=Conto ausiliario del terzo
+UseSubledgerHelp=Inserire 1 per utilizzare il conto ausiliario del terzo durante il trasferimento in contabilità, 0 per non utilizzarlo (registrazione diretta sul conto crediti, ad esempio 441x)
+SUBVENTIONS_ACCOUNTANCY_ENABLED=Attiva l'integrazione contabile delle sovvenzioni
+SUBVENTIONS_ACCOUNTANCY_JOURNAL=Registro predefinito per gli impegni di sovvenzione (OD)
+SUBVENTIONS_ACCOUNTANCY_JOURNAL_HELP=Registro contabile predefinito utilizzato durante il trasferimento degli impegni nel registro di trasferimento contabile
+SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT=Registro predefinito per i pagamenti di sovvenzione (Banca / Cassa)
+SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT_HELP=Registro contabile predefinito utilizzato durante il trasferimento dei pagamenti nel registro di trasferimento contabile
+SUBVENTIONS_ACCOUNTANCY_CODE_RECEIVABLE_DEFAULT=Conto crediti predefinito (Dare 441x)
+SUBVENTIONS_ACCOUNTANCY_CODE_PRODUCT_DEFAULT=Conto di ricavo predefinito (Avere 74xx)
+AccountancyTransferJournal=Registro di trasferimento contabile
+TransferJournal=Registro di trasferimento
+ViewInLedger=Visualizza nel Libro Mastro
+ErrorCannotDeleteAccountedObject=Impossibile eliminare un elemento già contabilizzato nel Libro Mastro
+ErrorCannotReopenAccountedFinancement=Impossibile riaprire un finanziamento già contabilizzato nel Libro Mastro
+FinancementAccepted=Finanziamento concesso con successo
+FinancementRefused=Finanziamento contrassegnato come rifiutato
+FinancementReopened=Finanziamento riportato allo stato presentato
+DeposeFinancement=Presenta
+GrantFinancement=Concedi
+RefuseFinancement=Rifiuta
+ReopenFinancement=Riapri / Riporta a presentato
+ConfirmAcceptFinancement=Confermi la concessione di questo finanziamento?
+ConfirmRefuseFinancement=Confermi il rifiuto di questo finanziamento?
+ConfirmReopenFinancement=Sei sicuro di voler riportare questo finanziamento allo stato Presentato?
+DateNotificationRefus=Data di notifica del rifiuto
+Accounted=Contabilizzato
+NotAccounted=Non contabilizzato
+DateEngagement=Data di impegno
+EngagementDate=Data di impegno
+SubventionEngagement=Impegno sovvenzione
+SubventionPayment=Pagamento sovvenzione
+SubventionReceivableAccount=Sovvenzioni da ricevere
+SubventionProductAccount=Contributi in conto esercizio
+SubledgerAccount=Conto ausiliario
+BankTransactionLine=Movimento bancario
+ShowBankTransaction=Visualizza movimento bancario
+SubventionBankAccount=Banca / Cassa
+ErrorBankAccountNotFound=Conto bancario non trovato
+PaymentMode=Modalità di pagamento
+NumPayment=N. transazione / assegno
+PaymentNumberHelp=Numero assegno, riferimento bonifico o ID transazione
 ProjectModule=Modulo Progetti
 StatisticsModule=Modulo Statistiche
 SUBVENTIONS_PROJECT=Aggiungere le sovvenzioni alla panoramica dei progetti
@@ -57,29 +123,32 @@ EvaluationDate=Valutazione della sovvenzione
 Recalcul=Ricalcolare gli importi IVA esclusa e IVA inclusa
 SUBVENTIONS_STATISTIC_COLOR_GREEN=Percentuale minima per visualizzare in verde (altrimenti arancione)
 SUBVENTIONS_STATISTIC_COLOR_ORANGE=Percentuale minima per visualizzare in arancione (altrimenti rosso)
+
 #
 # core\modules\modSubventions.class.php
 #
-CodeTooltipHelp=
+CodeTooltipHelp=Questo campo contiene un riferimento per identificare il record. Inserisci un valore a tua scelta, senza caratteri speciali.
 RightsCreateUpdateFunding=Creare o aggiornare i finanziamenti
 RightsCreateUpdatePayment=Creare o aggiornare i pagamenti
 RightsCreateUpdateSubsidy=Creare o aggiornare le sovvenzioni
 RightsDeleteFunding=Eliminare i finanziamenti
 RightsDeletePayment=Eliminare i pagamenti
 RightsDeleteSubsidy=Eliminare le sovvenzioni
-RightsExportSubsidyFundingAndPayment=
-RightsImportSubsidyFundingAndPayment=
+RightsExportSubsidyFundingAndPayment=Esportare sovvenzioni, finanziamenti e pagamenti
+RightsImportSubsidyFundingAndPayment=Importare sovvenzioni, finanziamenti e pagamenti
 RightsReadFunding=Leggere i finanziamenti
 RightsReadPayment=Leggere i pagamenti
 RightsReadSubsidy=Leggere le sovvenzioni
 RightsExportSubsidyFundingAndPayment=Esportare sovvenzioni, finanziamenti e pagamenti
 RightsImportSubsidyFundingAndPayment=Importare sovvenzioni, finanziamenti e pagamenti
+
 #
 # lib\subventions.lib.php
 #
 AttributsSuppAddFunding=Attributi aggiuntivi finanziamenti
 AttributsSuppPayment=Attributi aggiuntivi pagamenti
 AttributsSuppSubsidy=Attributi aggiuntivi sovvenzioni
+
 #
 # index.php
 #
@@ -88,6 +157,7 @@ PendingSubsidy=Finanziamenti in attesa
 NoSubsidy=Nessuna sovvenzione
 LatestModifiedMySubsidy=Ultime sovvenzioni modificate
 LatestCreatedMySubsidy=Ultime sovvenzioni create
+
 #
 # subventions_statitics.php
 #
@@ -112,6 +182,7 @@ STATUS_FINANCED=Finanziato
 STATUS_EVALUATED=Relazione presentata
 STATUS_CLOTURED=Chiuso
 STATUS_REFUSED=Rifiutato
+STATUS_ARCHIVED=Archiviata
 STATUS_CANCELED=Annullato
 FundingSourceType=Finanziatore
 ByFundingSource=Per finanziatori
@@ -123,6 +194,8 @@ AmountFin=Importo finanziato
 LastRequest=Ultima richiesta
 AllYears=Tutti
 FundingSourceGroup=Gruppo di finanziatori
+
+
 #
 # Common Translations
 #
@@ -145,3 +218,232 @@ SubsidysSetup=Configurazione sovvenzioni
 BackToSub=Ritorno al sussidio
 XXX=
 bytes=byte
+
+#
+# Project ventilation (multi-projects)
+#
+ProjectVentilation=Ripartizione progetti
+ListOfFundedProjects=Elenco dei progetti finanziati
+AddProjectVentilation=Aggiungi ripartizione
+AllocatedAmount=Importo ripartito
+AllocatedPercentage=Percentuale
+TotalVentilated=Totale ripartito
+RemainingToAllocate=Rimanente da ripartire
+VentilationExceedsTotal=Il totale ripartito supera l'importo accettato
+VentilationIncomplete=La ripartizione è incompleta
+ConfirmDeleteVentilation=Sei sicuro di voler eliminare questa ripartizione?
+SubventionsAllocated=Sovvenzioni (ripartite)
+ListSubventionsAllocatedProject=Elenco delle sovvenzioni ripartite su questo progetto
+ProjectAlreadyAllocated=Questo progetto è già assegnato a questa sovvenzione
+VentilationOf=Ripartizione di
+NoProjectVentilation=Nessuna ripartizione per progetto
+
+# Multi-year repartition
+AutoYearAllocation=Ripartizione pluriennale automatica
+AutoYearAllocationShort=Pro rata temporis
+ConfirmAutoYearAllocation=Confermi il calcolo automatico della ripartizione annuale pro rata in base ai mesi del progetto selezionato? (le ripartizioni esistenti per questo progetto verranno sostituite)
+AutoYearAllocationSuccess=Ripartizione pluriennale calcolata con successo su %s esercizio/i
+DurationMonths=Durata (mesi)
+NumberOfMonths=Numero di mesi
+NbOfMonths=N. di mesi
+Months=mesi
+NumberOfYears=Numero di esercizi
+Years=Esercizi
+Year=Anno
+Project=Progetto
+ErrorMissingProjectDates=Le date di inizio e fine del progetto devono essere definite nella sovvenzione
+ErrorStartDateGreaterThanEndDate=La data di inizio del progetto deve essere anteriore alla data di fine
+ErrorAmountRequired=È richiesto un importo accettato o richiesto superiore a 0
+ErrorTotalMonthsZero=La durata calcolata del progetto è zero
+
+#
+# Agenda automatic actions and triggers
+#
+Notify_SUBVENTION_CREATE=Creazione di una sovvenzione
+Notify_SUBVENTION_VALIDATE=Convalida/Presentazione di una sovvenzione
+Notify_SUBVENTION_MODIFY=Modifica di una sovvenzione
+Notify_SUBVENTION_ACCEPT=Accettazione di una sovvenzione
+Notify_SUBVENTION_REFUSE=Rifiuto di una sovvenzione
+Notify_SUBVENTION_FINANCED=Finanziamento totale di una sovvenzione
+Notify_SUBVENTION_EVALUATE=Presentazione della relazione di una sovvenzione
+Notify_SUBVENTION_CLOTURE=Chiusura di una sovvenzione
+Notify_SUBVENTION_CANCEL=Annullamento di una sovvenzione
+Notify_SUBVENTION_ARCHIVE=Archiviazione di una sovvenzione
+Notify_SUBVENTION_UNVALIDATE=Sovvenzione riportata a bozza
+Notify_SUBVENTION_REOPEN=Riapertura di una sovvenzione
+Notify_SUBVENTION_DELETE=Eliminazione di una sovvenzione
+Notify_SUBVENTION_VENTILATION_CREATE=Ripartizione su progetto creata
+Notify_SUBVENTION_VENTILATION_MODIFY=Ripartizione su progetto modificata
+Notify_SUBVENTION_VENTILATION_DELETE=Ripartizione su progetto eliminata
+Notify_SUBVENTION_VENTILATION_AUTOREPARTITION=Ripartizione pluriennale automatica generata
+
+SUBVENTION_CREATEInDolibarr=Sovvenzione %s creata
+SUBVENTION_VALIDATEInDolibarr=Sovvenzione %s presentata
+SUBVENTION_MODIFYInDolibarr=Sovvenzione %s modificata
+SUBVENTION_ACCEPTInDolibarr=Sovvenzione %s accettata
+SUBVENTION_REFUSEInDolibarr=Sovvenzione %s rifiutata
+SUBVENTION_FINANCEDInDolibarr=Sovvenzione %s interamente finanziata
+SUBVENTION_EVALUATEInDolibarr=Sovvenzione %s: relazione presentata
+SUBVENTION_CLOTUREInDolibarr=Sovvenzione %s chiusa
+SUBVENTION_CANCELInDolibarr=Sovvenzione %s annullata
+SUBVENTION_ARCHIVEInDolibarr=Sovvenzione %s archiviata
+SUBVENTION_UNVALIDATEInDolibarr=Sovvenzione %s riportata a bozza
+SUBVENTION_REOPENInDolibarr=Sovvenzione %s riaperta
+SUBVENTION_DELETEInDolibarr=Sovvenzione %s eliminata
+SUBVENTION_VENTILATION_CREATEInDolibarr=Ripartizione su progetto creata per %s
+SUBVENTION_VENTILATION_MODIFYInDolibarr=Ripartizione su progetto modificata per %s
+SUBVENTION_VENTILATION_DELETEInDolibarr=Ripartizione su progetto eliminata per %s
+SUBVENTION_VENTILATION_AUTOREPARTITIONInDolibarr=Ripartizione pluriennale automatica per %s
+
+Notify_FINANCEMENT_CREATE=Creazione di una richiesta di finanziamento
+Notify_FINANCEMENT_VALIDATE=Presentazione di una richiesta di finanziamento
+Notify_FINANCEMENT_MODIFY=Modifica di un finanziamento
+Notify_FINANCEMENT_ACCEPT=Concessione di un finanziamento
+Notify_FINANCEMENT_REFUSE=Rifiuto di un finanziamento
+Notify_FINANCEMENT_CANCEL=Annullamento di un finanziamento
+Notify_FINANCEMENT_UNVALIDATE=Finanziamento riportato a bozza
+Notify_FINANCEMENT_REOPEN=Riapertura di un finanziamento
+Notify_FINANCEMENT_DELETE=Eliminazione di un finanziamento
+
+FINANCEMENT_CREATEInDolibarr=Richiesta di finanziamento %s creata
+FINANCEMENT_VALIDATEInDolibarr=Richiesta di finanziamento %s presentata
+FINANCEMENT_MODIFYInDolibarr=Finanziamento %s modificato
+FINANCEMENT_ACCEPTInDolibarr=Finanziamento %s concesso
+FINANCEMENT_REFUSEInDolibarr=Finanziamento %s rifiutato
+FINANCEMENT_CANCELInDolibarr=Finanziamento %s annullato
+FINANCEMENT_UNVALIDATEInDolibarr=Finanziamento %s riportato a bozza
+FINANCEMENT_REOPENInDolibarr=Finanziamento %s riaperto
+FINANCEMENT_DELETEInDolibarr=Finanziamento %s eliminato
+
+Notify_PAIEMENT_CREATE=Creazione di un pagamento di sovvenzione
+Notify_PAIEMENT_VALIDATE=Convalida di un pagamento di sovvenzione
+Notify_PAIEMENT_MODIFY=Modifica di un pagamento di sovvenzione
+Notify_PAIEMENT_DELETE=Eliminazione di un pagamento di sovvenzione
+
+PAIEMENT_CREATEInDolibarr=Pagamento di sovvenzione %s creato
+PAIEMENT_VALIDATEInDolibarr=Pagamento di sovvenzione %s convalidato
+PAIEMENT_MODIFYInDolibarr=Pagamento di sovvenzione %s modificato
+PAIEMENT_DELETEInDolibarr=Pagamento di sovvenzione %s eliminato
+
+#
+# Field tooltips / Infobulles d'aide
+#
+SubventionRefHelp=Riferimento univoco della sovvenzione (generato automaticamente secondo il modello di numerazione)
+SubventionLabelHelp=Nome o titolo della pratica di sovvenzione / del progetto
+SubventionThirdPartyHelp=Terzo richiedente o promotore della domanda di sovvenzione
+SubventionProjectHelp=Progetto Dolibarr a cui è associata questa pratica di sovvenzione
+SubventionMontantDemHelp=Importo totale richiesto a tutti i finanziatori per questo progetto
+SubventionMontantAccHelp=Importo totale concesso o notificato dai finanziatori
+SubventionMontantFinHelp=Importo cumulativo dei pagamenti effettivamente ricevuti fino ad oggi
+SubventionMontantAttHelp=Saldo residuo da ricevere sugli importi concessi (Concesso - Finanziato)
+SubventionMontantRefHelp=Importo totale delle richieste respinte dai finanziatori
+DateStartProjectHelp=Data di inizio del periodo di esecuzione del progetto sovvenzionato
+DateEndProjectHelp=Data di fine del periodo di esecuzione del progetto sovvenzionato
+DateExpectedProjectHelp=Data prevista o termine atteso per la risposta dei finanziatori
+DateReportProjectHelp=Termine contrattuale per la presentazione del rendiconto finanziario e della relazione sulle attività
+SubventionDescriptionHelp=Descrizione dettagliata delle azioni e degli obiettivi del progetto sovvenzionato
+SubventionEvaluationHelp=Criteri di valutazione, risultati attesi e indicatori di impatto previsti per il rendiconto
+SubventionStatusHelp=Stato della pratica: Bozza, Convalidata, Accettata, Finanziata, Valutata, Chiusa, Rifiutata o Annullata
+
+FundingRefHelp=Riferimento univoco della richiesta di finanziamento
+FundingSubventionRefHelp=Pratica di sovvenzione principale a cui è collegata questa richiesta di finanziamento
+FundingThirdPartyHelp=Terzo finanziatore (ente pubblico o privato) sollecitato per questo finanziamento
+FundingTypeHelp=Categoria o tipo di finanziatore (es.: Stato, Regione, Dipartimento...). Configurabile nei dizionari
+FundingMontantDemHelp=Importo richiesto a questo specifico finanziatore
+FundingMontantAccHelp=Importo ufficialmente concesso da questo finanziatore (a seguito di decisione o commissione)
+FundingMontantFinHelp=Importo cumulativo dei pagamenti ricevuti da questo finanziatore
+FundingMontantAttHelp=Importo residuo da ricevere da questo finanziatore (Concesso - Finanziato)
+FundingMontantRefHelp=Importo respinto da questo finanziatore
+FundingStatusHelp=Stato istruttoria: Bozza, Presentato, Concesso o Rifiutato
+DateEngagementHelp=Data di notifica ufficiale, decreto di assegnazione o convenzione firmata
+FundingAccountedHelp=Indica se l'impegno contabile è stato trasferito nel registro di trasferimento (Registro OD)
+
+PaymentRefHelp=Riferimento univoco del pagamento o della rata
+PaymentSubventionRefHelp=Pratica di sovvenzione collegata a questo pagamento
+PaymentFinancementRefHelp=Linea di finanziamento specifica a cui è imputata questa rata
+PaymentAmountHelp=Importo dell'acconto o del saldo ricevuto
+PaymentDateHelp=Data effettiva di accredito bancario dei fondi
+PaymentThirdPartyHelp=Terzo emittente del pagamento (ente finanziatore)
+PaymentAccountHelp=Conto bancario della vostra organizzazione accreditato con il pagamento
+PaymentModeHelp=Modalità di pagamento utilizzata (es.: Bonifico bancario, Assegno, ecc.)
+PaymentAccountedHelp=Indica se il pagamento bancario è stato trasferito nel registro di trasferimento contabile (Registro Banca)
+
+
+
+#
+# Extra Italian translations (menus, dictionary, docs, dashboard from PR #32)
+#
+AmountAverage=Importo medio
+AmountTotal=Importo totale
+NewSubvention=Nuova sovvenzione
+NewPayment=Nuovo pagamento
+NewFunding=Nuovo finanziamento
+Creation=Creato
+MenuSubvention=Sovvenzione
+MenuListSubventions=Elenco delle sovvenzioni
+MenuDraftSubvention=Bozza
+MenuValidatedSubvention=Presentato
+MenuAcceptedSubvention=Accettato
+MenuEvaluatedSubvention=Relazione da presentare
+MenuCloturedSubvention=Chiuso
+MenuRefusedSubvention=Rifiutato
+MenuStatistics=Statistiche
+MenuFunding=Finanziamenti
+MenuNewFunding=Nuovo finanziamento
+MenuListFundings=Elenco dei finanziamenti
+MenuPayment=Pagamenti
+MenuNewPayment=Nuovo pagamento
+MenuListPayments=Elenco dei pagamenti
+ProjectName=Nome del progetto
+EvaluationCriteria=Criteri di valutazione
+Amount=Importo
+DatePayment=Data di pagamento
+ReferenceSubvention=Riferimento sovvenzione
+FundingSourceListCanBeModifiedInDictionary=La lista dei finanziatori può essere modificata nel dizionario
+DictionaryFinanceursLabel=Sovvenzioni: Finanziatori principali e contabilità
+FinanceurAutre=Altro
+FinanceurEtat=Stato
+FinanceurRegion=Regione
+FinanceurDepartement=Dipartimento
+FinanceurCommune=Comune
+FinanceurOrganismesSociaux=Organismi sociali (es. CAF)
+FinanceurFondsEuropeens=Fondi europei (FSE, FESR, ecc.)
+FinanceurASP=Agenzia per i servizi e i pagamenti (lavori sovvenzionati)
+FinanceurAutresEtablissementsPublics=Altri enti pubblici
+FinanceurAidesPrivees=Aiuti privati (fondazioni)
+MenuNewSubvention=Nuova sovvenzione
+NbOfPaiements=Numero di pagamenti
+AmountOfPaiements=Importo dei pagamenti
+OpenAmount=Importo aperto
+PaiementReceipt=Ricevuta di pagamento
+DashboardKPIs=Cifre chiave in sintesi
+DocumentsModule=Documenti
+SUBVENTIONS_ENABLE_DOC_SUBVENTION=Attiva documenti/PDF per le sovvenzioni
+SUBVENTIONS_ENABLE_DOC_FINANCEMENT=Attiva documenti/PDF per i finanziamenti
+SUBVENTIONS_ENABLE_DOC_PAIEMENT=Attiva documenti/PDF per i pagamenti
+DocsDisabled=La funzione documenti è disattivata
+FinancementReceipt=Ricevuta di finanziamento
+PercentAcc=% acc.
+PercentFin=% fin.
+DeletePayment=Elimina pagamento
+Financement=Finanziamento
+Paiement=Pagamento
+Subvention=Sovvenzione
+
+#
+# Complete UI & Export/Import/PDF coverage
+#
+Subventions=Sovvenzioni
+Financements=Finanziamenti
+Paiements=Pagamenti
+Unlink=Scollega
+VariousOperations=Operazioni varie
+ErrorNumberingModuleNotSetup=Il modulo di numerazione per %s non è configurato
+PdfTitle=Pratica di sovvenzione
+PercentBetween0And100=% tra 0 e 100
+ExportSubventionsDataset=Sovvenzioni, finanziamenti e pagamenti
+ProjectLabel=Progetto (etichetta)
+FundingSourceTypeLabel=Tipo di finanziatore (etichetta)
+SubventionId=ID Sovvenzione
+FinancementId=ID Finanziamento
+

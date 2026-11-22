@@ -166,11 +166,11 @@ $item->defaultFieldValue = 'date_creation';
 // Colors for statistics percent
 $item = $formSetup->newItem('SUBVENTIONS_STATISTIC_COLOR_GREEN');
 $item->defaultFieldValue = '75';
-$item->fieldAttr['placeholder'] = '% entre 0 et 100';
+$item->fieldAttr['placeholder'] = $langs->trans('PercentBetween0And100');
 
 $item = $formSetup->newItem('SUBVENTIONS_STATISTIC_COLOR_ORANGE');
 $item->defaultFieldValue = '50';
-$item->fieldAttr['placeholder'] = '% entre 0 et 100';
+$item->fieldAttr['placeholder'] = $langs->trans('PercentBetween0And100');
 
 // ACCOUNTANCY
 $formSetup->newItem('AccountancyModule')->setAsTitle();
@@ -404,7 +404,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 		 */
 		$setupnotempty++;
 
-		print load_fiche_titre($langs->trans("NumberingModules", $myTmpObjectArray['label']), '', '');
+		print load_fiche_titre($langs->trans("NumberingModules", $langs->trans($myTmpObjectArray['label'])), '', '');
 
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre">';
@@ -515,7 +515,7 @@ foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
 		$setupnotempty++;
 		$type = strtolower($myTmpObjectKey);
 
-		print load_fiche_titre($langs->trans("DocumentModules", $myTmpObjectKey), '', '');
+		print load_fiche_titre($langs->trans("DocumentModules", $langs->trans($myTmpObjectArray['label'])), '', '');
 
 		// Load array def with activated templates
 		$def = array();
