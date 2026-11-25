@@ -302,11 +302,11 @@ jQuery(document).ready(function() {
                     }
                     jQuery('#fk_fin').trigger('change.select2');
                 } else {
-                    console.error('Erreur : ', data ? data.error : 'Invalid response');
+                    console.error('Error: ', data ? data.error : 'Invalid response');
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Erreur AJAX : ', error);
+                console.error('AJAX error: ', error);
             }
         });
     }
@@ -341,11 +341,11 @@ jQuery(document).ready(function() {
                             loadFinancementsForSubvention(data.fk_sub, fk_fin);
                         }
                     } else {
-                        console.error('Erreur : ', data ? data.error : 'Invalid response');
+                        console.error('Error: ', data ? data.error : 'Invalid response');
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Erreur AJAX : ', error);
+                    console.error('AJAX error: ', error);
                 }
             });
         }

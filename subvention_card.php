@@ -993,7 +993,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 						require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 						$acc_static = new Account($db);
 						if ($acc_static->fetch($obj->fk_account) > 0) {
-							print $acc_static->getNomUrl(1);
+							print $acc_static->getNomUrl(1, '', 'reflabel');
 						}
 					}
 					print '</td>';

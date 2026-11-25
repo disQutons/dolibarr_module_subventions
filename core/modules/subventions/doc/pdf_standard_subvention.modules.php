@@ -110,7 +110,7 @@ class pdf_standard_subvention extends ModelePDFSubvention
 		global $langs, $mysoc;
 
 		// Translations
-		$langs->loadLangs(array("main", "bills"));
+		$langs->loadLangs(array("main", "bills", "commercial", "subventions@subventions"));
 
 		$this->db = $db;
 		$this->name = "standard";
@@ -183,7 +183,7 @@ class pdf_standard_subvention extends ModelePDFSubvention
 		}
 
 		// Load translation files required by the page
-		$langfiles = array("main", "bills", "products", "dict", "companies", "compta");
+		$langfiles = array("main", "bills", "products", "dict", "companies", "compta", "commercial", "subventions@subventions");
 		$outputlangs->loadLangs($langfiles);
 
 		// Show Draft Watermark

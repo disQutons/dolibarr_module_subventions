@@ -232,9 +232,9 @@ print '<td class="left">'.$langs->trans("FundingSourceGroup").'</td>';
 print '<td class="center">'.$langs->trans("NbRequest").'</td>';
 print '<td class="center">'.$langs->trans("AmountDem").'</td>';
 print '<td class="center">'.$langs->trans("AmountAcc").'</td>';
-print '<td class="center">% acc</td>';
+print '<td class="center">'.$langs->trans("PercentAcc").'</td>';
 print '<td class="center">'.$langs->trans("AmountFin").'</td>';
-print '<td class="center">% fin</td>';
+print '<td class="center">'.$langs->trans("PercentFin").'</td>';
 print '</tr>';
 
 $data = $stats->getStatsFundingSource($summary = true, $year);
@@ -306,9 +306,9 @@ print '<td class="left">'.$langs->trans("FundingSource").'</td>';
 print '<td class="center">'.$langs->trans("NbRequest").'</td>';
 print '<td class="center">'.$langs->trans("AmountDem").'</td>';
 print '<td class="center">'.$langs->trans("AmountAcc").'</td>';
-print '<td class="center">% acc</td>';
+print '<td class="center">'.$langs->trans("PercentAcc").'</td>';
 print '<td class="center">'.$langs->trans("AmountFin").'</td>';
-print '<td class="center">% fin</td>';
+print '<td class="center">'.$langs->trans("PercentFin").'</td>';
 //print '<td class="center">'.$langs->trans("LastRequest").'</td>';
 print '</tr>';
 

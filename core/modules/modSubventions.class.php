@@ -347,7 +347,7 @@ class modSubventions extends DolibarrModules
 		 // List of tables we want to see into dictionary editor
 		 'tabname' => array("c_subventions_financeur"),
 		 // Label of tables
-		 'tablib' => array("Subventions : Financeurs principaux et comptabilité"),
+		 'tablib' => array("DictionaryFinanceursLabel"),
 		 // Request to select fields
 		 'tabsql' => array('SELECT f.rowid as rowid, f.ref, f.label, f.accountancy_code, f.accountancy_code_receivable, f.use_subledger, f.active, f.position FROM '.MAIN_DB_PREFIX.'c_subventions_financeur as f'),
 		 // Sort order
@@ -498,7 +498,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions',
 			'type' => 'left',
-			'titre' => 'Subvention',
+			'titre' => 'MenuSubvention',
 			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention',
@@ -514,7 +514,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention',
 			'type' => 'left',
-			'titre' => 'Nouvelle subvention',
+			'titre' => 'MenuNewSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_new',
 			'url' => '/subventions/subvention_card.php?action=create',
@@ -529,7 +529,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention',
 			'type' => 'left',
-			'titre' => 'Liste des subventions',
+			'titre' => 'MenuListSubventions',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_list',
 			'url' => '/subventions/subvention_list.php?leftmenu=subvention_list',
@@ -544,7 +544,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention_list',
 			'type' => 'left',
-			'titre' => 'Non déposées',
+			'titre' => 'MenuDraftSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_draft',
 			'url' => '/subventions/subvention_list.php?search_status=0&leftmenu=subvention_list',
@@ -559,7 +559,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention_list',
 			'type' => 'left',
-			'titre' => 'Attente de réponse',
+			'titre' => 'MenuValidatedSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_validated',
 			'url' => '/subventions/subvention_list.php?search_status=1&leftmenu=subvention_list',
@@ -574,7 +574,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention_list',
 			'type' => 'left',
-			'titre' => 'Attente de financement',
+			'titre' => 'MenuAcceptedSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_accepted',
 			'url' => '/subventions/subvention_list.php?search_status=2&leftmenu=subvention_list',
@@ -589,7 +589,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention_list',
 			'type' => 'left',
-			'titre' => 'Bilan à déposer',
+			'titre' => 'MenuEvaluatedSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_evaluated',
 			'url' => '/subventions/subvention_list.php?search_status=3&leftmenu=subvention_list',
@@ -604,7 +604,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention_list',
 			'type' => 'left',
-			'titre' => 'Clôturé',
+			'titre' => 'MenuCloturedSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_clotured',
 			'url' => '/subventions/subvention_list.php?search_status=5&leftmenu=subvention_list',
@@ -619,7 +619,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention_list',
 			'type' => 'left',
-			'titre' => 'Refusé',
+			'titre' => 'MenuRefusedSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_refused',
 			'url' => '/subventions/subvention_list.php?search_status=6&leftmenu=subvention_list',
@@ -634,7 +634,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subvention',
 			'type' => 'left',
-			'titre' => 'Statistics',
+			'titre' => 'MenuStatistics',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subvention_statistics',
 			'url' => '/subventions/stats/index.php',
@@ -651,7 +651,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions',
 			'type' => 'left',
-			'titre' => 'Financements',
+			'titre' => 'MenuFunding',
 			'prefix' => img_picto('', 'fa-handshake', 'class="paddingright pictofixedwidth valignmiddle"'),
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'financement',
@@ -667,7 +667,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=financement',
 			'type' => 'left',
-			'titre' => 'Nouveau financement',
+			'titre' => 'MenuNewFunding',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subventions_financement_new',
 			'url' => '/subventions/financement_card.php?action=create',
@@ -682,7 +682,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=financement',
 			'type' => 'left',
-			'titre' => 'Liste des financements',
+			'titre' => 'MenuListFundings',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subventions_financement_list',
 			'url' => '/subventions/financement_list.php',
@@ -699,7 +699,7 @@ class modSubventions extends DolibarrModules
 		/*$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=subventions_financement_list',
 			'type' => 'left',
-			'titre' => 'Attente de réponse',
+			'titre' => 'MenuValidatedSubvention',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subventions_financement_validated',
 			'url' => '/subventions/financement_list.php?leftmenu=subventions_financement_list&search_montant_fin=0&search_montant_ref=0',
@@ -716,7 +716,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions',
 			'type' => 'left',
-			'titre' => 'Paiements',
+			'titre' => 'MenuPayment',
 			'prefix' => img_picto('', 'fa-coins', 'class="paddingright pictofixedwidth valignmiddle"'),
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'paiement',
@@ -732,7 +732,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=paiement',
 			'type' => 'left',
-			'titre' => 'Nouveau paiement',
+			'titre' => 'MenuNewPayment',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subventions_paiement_new',
 			'url' => '/subventions/paiement_card.php?action=create',
@@ -747,7 +747,7 @@ class modSubventions extends DolibarrModules
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=subventions,fk_leftmenu=paiement',
 			'type' => 'left',
-			'titre' => 'Liste des paiements',
+			'titre' => 'MenuListPayments',
 			'mainmenu' => 'subventions',
 			'leftmenu' => 'subventions_paiement_list',
 			'url' => '/subventions/paiement_list.php',
@@ -768,29 +768,29 @@ class modSubventions extends DolibarrModules
 		// Subvention
 		$langs->load("subventions@subventions");
 		$this->export_code[$r] = $this->rights_class.'_complet';	// Ce code donne son nom au fichier exporté
-		$this->export_label[$r] = 'Subventions, financements et paiements';	// Translation key (used only if key ExportDataset_xxx_z not found)
+		$this->export_label[$r] = 'ExportSubventionsDataset';	// Translation key (used only if key ExportDataset_xxx_z not found)
 		$this->export_icon[$r] = $this->picto;
 
 		$this->export_permission[$r] = array(array('subventions', 'subvention', 'export'));
 		$this->export_fields_array[$r] = array(
 			// Subventions
-			's.ref'=>"Ref", 's.label'=>"Nom du projet", 's.fk_soc'=>"ThirdParty", 's.status'=>"Status", 's.note_public'=>"NotePublic",
-			's.note_private'=>"NotePrivate", 's.montant_dem'=>"Montant demandé", 's.montant_acc'=>"Montant accepté",
-			's.montant_fin'=>"Montant financé", 's.montant_att'=>"Montant en attente", 's.montant_ref'=>"Montant refusé",
-			'pr.ref'=>"project", 'pr.title'=>"project"." (libellé)", 's.description'=>"Description", 's.evaluation'=>"Critères d'évaluation",
-			's.date_d_projet'=>"Date début projet", 's.date_f_projet'=>"Date fin projet", 's.date_attendue'=>"Date attendue projet",
-			's.date_bilan'=>"Date rendu bilan",
+			's.ref'=>"Ref", 's.label'=>"ProjectName", 's.fk_soc'=>"ThirdParty", 's.status'=>"Status", 's.note_public'=>"NotePublic",
+			's.note_private'=>"NotePrivate", 's.montant_dem'=>"AmountRequested", 's.montant_acc'=>"AmountAccepted",
+			's.montant_fin'=>"AmountFinanced", 's.montant_att'=>"AmountPending", 's.montant_ref'=>"AmountRefused",
+			'pr.ref'=>"Project", 'pr.title'=>"ProjectLabel", 's.description'=>"Description", 's.evaluation'=>"EvaluationCriteria",
+			's.date_d_projet'=>"BeginProjectDate", 's.date_f_projet'=>"EndProjectDate", 's.date_attendue'=>"EspectingDate",
+			's.date_bilan'=>"EvaluationDate",
 			
 			// Financements
-			'f.fk_sub'=>"Réf Subvention", 'f.ref'=>"Réf Financement", 't.ref'=>"Type de financeur",'t.label'=>"Type de financeur (libellé)", 'f.fk_soc'=>"ThirdParty",
-			'f.status'=>"Status", 'f.note_public'=>"NotePublic", 'f.note_private'=>"NotePrivate", 'f.montant_dem'=>"Montant demandé",
-			'f.montant_acc'=>"Montant accepté", 'f.montant_fin'=>"Montant financé", 'f.montant_att'=>"Montant en attente",
-			'f.montant_ref'=>"Montant refusé",
+			'f.fk_sub'=>"ReferenceSubvention", 'f.ref'=>"ReferenceFunding", 't.ref'=>"FundingSourceType",'t.label'=>"FundingSourceTypeLabel", 'f.fk_soc'=>"ThirdParty",
+			'f.status'=>"Status", 'f.note_public'=>"NotePublic", 'f.note_private'=>"NotePrivate", 'f.montant_dem'=>"AmountRequested",
+			'f.montant_acc'=>"AmountAccepted", 'f.montant_fin'=>"AmountFinanced", 'f.montant_att'=>"AmountPending",
+			'f.montant_ref'=>"AmountRefused",
 			
 			// Paiements
-			'p.fk_sub'=>"Réf Subvention", 'p.fk_fin'=>"Réf Financement", 'p.ref'=>"Réf Paiement", 'p.montant'=>"Montant",
+			'p.fk_sub'=>"ReferenceSubvention", 'p.fk_fin'=>"ReferenceFunding", 'p.ref'=>"ReferencePayment", 'p.montant'=>"Amount",
 			'p.fk_soc'=>"ThirdParty", 'p.status'=>"Status", 'p.note_public'=>"NotePublic", 'p.note_private'=>"NotePrivate",
-			'p.datep'=>"Date paiement", 
+			'p.datep'=>"DatePayment", 
 
 		);
 		$this->export_TypeFields_array[$r] = array(
@@ -814,16 +814,16 @@ class modSubventions extends DolibarrModules
 		$temp_array = [];
 		foreach ($this->export_fields_array[$r] as $key => $value) {
 			if (substr($key, 0, 2) == 's.') {
-				$temp_array[$key] = "<i class='fas fa-hand-holding-heart'></i> Subvention";
+				$temp_array[$key] = "<i class='fas fa-hand-holding-heart'></i> ".$langs->trans('Subvention');
 			}
 			elseif (substr($key, 0, 2) == 'f.') {
-				$temp_array[$key] = "<i class='fas fa-handshake'></i> Financement";
+				$temp_array[$key] = "<i class='fas fa-handshake'></i> ".$langs->trans('Financement');
 			}
 			elseif (substr($key, 0, 2) == 't.') {
-				$temp_array[$key] = "<i class='fas fa-handshake'></i> Financement";
+				$temp_array[$key] = "<i class='fas fa-handshake'></i> ".$langs->trans('Financement');
 			}
 			elseif (substr($key, 0, 2) == 'p.') {
-				$temp_array[$key] = "<i class='fas fa-coins'></i> Paiement";
+				$temp_array[$key] = "<i class='fas fa-coins'></i> ".$langs->trans('Paiement');
 			}
 		}
 
@@ -869,12 +869,12 @@ class modSubventions extends DolibarrModules
 		$import_sample = array();
 		
 		$this->import_fields_array[$r] = array(
-			's.ref'=>"Ref*", 's.label'=>"Nom du projet*", 's.fk_soc'=>"ThirdParty*", 's.status'=>"Status*", 's.note_public'=>"NotePublic",
-			's.note_private'=>"NotePrivate", 's.montant_dem'=>"Montant demandé", 's.montant_acc'=>"Montant accepté",
-			's.montant_fin'=>"Montant financé", 's.montant_att'=>"Montant en attente", 's.montant_ref'=>"Montant refusé",
-			's.fk_project'=>"project", 's.description'=>"Description", 's.evaluation'=>"Critères d'évaluation",
-			's.date_d_projet'=>"Date début projet", 's.date_f_projet'=>"Date fin projet", 's.date_attendue'=>"Date attendue projet",
-			's.date_bilan'=>"Date rendu bilan", 's.date_creation'=>"Date création*"
+			's.ref'=>"Ref*", 's.label'=>"ProjectName*", 's.fk_soc'=>"ThirdParty*", 's.status'=>"Status*", 's.note_public'=>"NotePublic",
+			's.note_private'=>"NotePrivate", 's.montant_dem'=>"AmountRequested", 's.montant_acc'=>"AmountAccepted",
+			's.montant_fin'=>"AmountFinanced", 's.montant_att'=>"AmountPending", 's.montant_ref'=>"AmountRefused",
+			's.fk_project'=>"Project", 's.description'=>"Description", 's.evaluation'=>"EvaluationCriteria",
+			's.date_d_projet'=>"BeginProjectDate", 's.date_f_projet'=>"EndProjectDate", 's.date_attendue'=>"EspectingDate",
+			's.date_bilan'=>"EvaluationDate", 's.date_creation'=>"DateCreation*"
 		);
 		
 		$import_extrafield_sample = array();
@@ -934,9 +934,9 @@ class modSubventions extends DolibarrModules
 		$import_sample = array();
 		
 		$this->import_fields_array[$r] = array(
-			'f.ref'=>"Ref*", 'f.fk_financeur'=>"Type de financeur*", 'f.fk_soc'=>"ThirdParty*", 'f.status'=>"Status*", 'f.note_public'=>"NotePublic",
-			'f.note_private'=>"NotePrivate", 'f.montant_dem'=>"Montant demandé", 'f.montant_acc'=>"Montant accepté", 'f.montant_fin'=>"Montant financé",
-			'f.montant_att'=>"Montant en attente", 'f.montant_ref'=>"Montant refusé",'f.fk_sub'=>"ID Subvention*", 'f.date_creation'=>"Date création*",
+			'f.ref'=>"Ref*", 'f.fk_financeur'=>"FundingSourceType*", 'f.fk_soc'=>"ThirdParty*", 'f.status'=>"Status*", 'f.note_public'=>"NotePublic",
+			'f.note_private'=>"NotePrivate", 'f.montant_dem'=>"AmountRequested", 'f.montant_acc'=>"AmountAccepted", 'f.montant_fin'=>"AmountFinanced",
+			'f.montant_att'=>"AmountPending", 'f.montant_ref'=>"AmountRefused",'f.fk_sub'=>"SubventionId*", 'f.date_creation'=>"DateCreation*",
 		);
 		
 		$import_extrafield_sample = array();
@@ -988,8 +988,8 @@ class modSubventions extends DolibarrModules
 		$import_sample = array();
 		
 		$this->import_fields_array[$r] = array(
-			'p.ref'=>"Ref*", 'p.montant'=>"Montant*", 'p.fk_soc'=>"ThirdParty", 'p.status'=>"Status", 'p.note_public'=>"NotePublic",
-			'p.note_private'=>"NotePrivate", 'p.datep'=>"Date paiement*", 'p.fk_sub'=>"ID Subvention", 'p.fk_fin'=>"ID Financement", 'p.date_creation'=>"Date création*",
+			'p.ref'=>"Ref*", 'p.montant'=>"Amount*", 'p.fk_soc'=>"ThirdParty", 'p.status'=>"Status", 'p.note_public'=>"NotePublic",
+			'p.note_private'=>"NotePrivate", 'p.datep'=>"DatePayment*", 'p.fk_sub'=>"SubventionId", 'p.fk_fin'=>"FinancementId", 'p.date_creation'=>"DateCreation*",
 		);
 		
 		$import_extrafield_sample = array();

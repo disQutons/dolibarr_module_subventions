@@ -121,8 +121,8 @@ class Paiement extends CommonObject
 	public $fields = array(
 		"rowid" => array("type" => "integer", "label" => "TechnicalID", "enabled" => "1", 'position' => 1, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "index" => "1", "css" => "left", "comment" => "Id"),
 		"ref" => array("type" => "varchar(128)", "label" => "Ref", "enabled" => "1", 'position' => 20, 'notnull' => 1, "visible" => "4", "noteditable" => "1", "default" => "(PROV)", "index" => "1", "searchall" => "1", "showoncombobox" => "1", "validate" => "1", "help" => "PaymentRefHelp", "comment" => "Reference of object"),
-		"montant" => array("type" => "price", "label" => "Montant", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "isameasure" => "1", "help" => "PaymentAmountHelp", "validate" => "1",),
-		"datep" => array("type" => "date", "label" => "Date paiement", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "help" => "PaymentDateHelp", "validate" => "1",),
+		"montant" => array("type" => "price", "label" => "Amount", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "isameasure" => "1", "help" => "PaymentAmountHelp", "validate" => "1",),
+		"datep" => array("type" => "date", "label" => "DatePayment", "enabled" => "1", 'position' => 40, 'notnull' => 1, "visible" => "1", "help" => "PaymentDateHelp", "validate" => "1",),
 		"fk_soc" => array("type" => "integer:Societe:societe/class/societe.class.php:1:((status:=:1) AND (entity:IN:__SHARED_ENTITIES__))", "label" => "ThirdParty", "picto" => "company", "enabled" => "isModEnabled('societe')", 'position' => 50, 'notnull' => -1, "visible" => "1", "index" => "1", "css" => "maxwidth500 widthcentpercentminusxx", "csslist" => "tdoverflowmax150", "help" => "PaymentThirdPartyHelp", "validate" => "1",),
 		"note_public" => array("type" => "html", "label" => "NotePublic", "enabled" => "1", 'position' => 61, 'notnull' => 0, "visible" => "0", "cssview" => "wordbreak", "validate" => "1",),
 		"note_private" => array("type" => "html", "label" => "NotePrivate", "enabled" => "1", 'position' => 62, 'notnull' => 0, "visible" => "0", "cssview" => "wordbreak", "validate" => "1",),
@@ -132,15 +132,15 @@ class Paiement extends CommonObject
 		"fk_user_modif" => array("type" => "integer:User:user/class/user.class.php", "label" => "UserModif", "picto" => "user", "enabled" => "1", 'position' => 511, 'notnull' => -1, "visible" => "-2", "csslist" => "tdoverflowmax150",),
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
-		"fk_sub" => array("type" => "integer:Subvention:subventions/class/subvention.class.php", "label" => "Réf subvention", "enabled" => "1", 'position' => 25, 'notnull' => 0, "visible" => "1", "help" => "PaymentSubventionRefHelp",),
-		"fk_fin" => array("type" => "integer:Financement:subventions/class/financement.class.php", "label" => "Réf financement", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1", "help" => "PaymentFinancementRefHelp",),
+		"fk_sub" => array("type" => "integer:Subvention:subventions/class/subvention.class.php", "label" => "ReferenceSubvention", "enabled" => "1", 'position' => 25, 'notnull' => 0, "visible" => "1", "help" => "PaymentSubventionRefHelp",),
+		"fk_fin" => array("type" => "integer:Financement:subventions/class/financement.class.php", "label" => "ReferenceFunding", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1", "help" => "PaymentFinancementRefHelp",),
 		"fk_bank" => array("type" => "integer", "label" => "BankTransaction", "enabled" => "isModEnabled('banque')", 'position' => 52, 'notnull' => 0, "visible" => "0",),
 		"fk_account" => array("type" => "integer:Account:compta/bank/class/account.class.php:1:(t.clos:=:0)", "label" => "BankAccount", "picto" => "bank_account", "enabled" => "isModEnabled('banque')", 'position' => 53, 'notnull' => 0, "visible" => "1", "help" => "PaymentAccountHelp",),
 		"fk_paiement" => array("type" => "sellist:c_paiement:libelle:id::active=1", "label" => "PaymentMode", "enabled" => "1", 'position' => 54, 'notnull' => -1, "visible" => "1", "help" => "PaymentModeHelp",),
 		"num_paiement" => array("type" => "varchar(50)", "label" => "NumPayment", "enabled" => "1", 'position' => 55, 'notnull' => 0, "visible" => "1", "help" => "PaymentNumberHelp",),
 		"accounted" => array("type" => "integer", "label" => "Accounted", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 60, 'notnull' => 0, "visible" => "5", "default" => "0", "csslist" => "center", "arrayofkeyval" => array("0" => "No", "1" => "Yes"), "help" => "PaymentAccountedHelp",),
 		"date_engagement" => array("type" => "date", "label" => "EngagementDate", "enabled" => "(isModEnabled('accounting') || isModEnabled('accountancy'))", 'position' => 61, 'notnull' => 0, "visible" => "0",),
-		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Brouillon", "1" => "Valid&eacute;", "9" => "Annul&eacute;"), "validate" => "1",),
+		"status" => array("type" => "integer", "label" => "Status", "enabled" => "1", 'position' => 2000, 'notnull' => 1, "visible" => "0", "noteditable" => "1", "default" => "1", "index" => "1", "arrayofkeyval" => array("0" => "Draft", "1" => "Enabled", "9" => "Disabled"), "validate" => "1",),
 		"entity" => array('type' => 'integer', 'label' => 'Entity', 'default' => '1', 'enabled' => 1, 'visible' => -2, 'notnull' => 1, 'position' => 15, 'index' => 1),
 	);
 	public $rowid;
@@ -235,7 +235,7 @@ class Paiement extends CommonObject
 
 		// Translate some data of arrayofkeyval
 		if (is_object($langs)) {
-			$langs->load("bills");
+			$langs->loadLangs(array("bills", "subventions@subventions"));
 			foreach ($this->fields as $key => $val) {
 				if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
 					foreach ($val['arrayofkeyval'] as $key2 => $val2) {
@@ -1159,16 +1159,50 @@ class Paiement extends CommonObject
 	{
 		global $langs, $form;
 
-		if ($key === 'fk_paiement') {
-			if (is_object($langs)) {
-				$langs->load("bills");
+		if (in_array($key, array('fk_account', 'fk_paiement'), true)) {
+			if (!empty($this->fields[$key])) {
+				$val = $this->fields[$key];
 			}
 			if (!is_object($form)) {
 				require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 				$form = new Form($this->db);
 			}
+			$isSearch = (strpos((string) $keyprefix, 'search_') === 0);
 			$css = $morecss ? (string) $morecss : (!empty($val['css']) ? (string) $val['css'] : 'minwidth200');
-			$noadmininfo = (strpos($keyprefix, 'search_') === 0) ? 1 : 0;
+
+			if ($key === 'fk_account') {
+				$showNewButton = (!$isSearch && empty($val['disabled']) && empty($nonewbutton) && (!GETPOSTISSET('backtopage') || strpos(GETPOST('backtopage'), $_SERVER['PHP_SELF']) === 0));
+				if (!$isSearch) {
+					if ($showNewButton) {
+						$css .= (!empty($val['picto']) ? ' widthcentpercentminusxx' : ' widthcentpercentminusx');
+					} elseif (!empty($val['picto'])) {
+						$css .= ' widthcentpercentminusx';
+					}
+				}
+				$moreattrib = trim((string) $moreparam.(!empty($val['disabled']) ? ' disabled="disabled"' : ''));
+				$status = $isSearch ? 2 : 0;
+				$showcurrency = isModEnabled('multicurrency') ? 1 : 0;
+
+				$out = (string) $form->select_comptes((string) $value, $keyprefix.$key.$keysuffix, $status, '', 1, $moreattrib, $showcurrency, $css, 1);
+
+				if ($showNewButton) {
+					$paramforthenewlink = '';
+					$paramforthenewlink .= (GETPOSTISSET('action') ? '&action='.GETPOST('action', 'aZ09') : '');
+					$paramforthenewlink .= (GETPOSTISSET('id') ? '&id='.GETPOSTINT('id') : '');
+					$paramforthenewlink .= (GETPOSTISSET('origin') ? '&origin='.GETPOST('origin', 'aZ09') : '');
+					$paramforthenewlink .= (GETPOSTISSET('originid') ? '&originid='.GETPOSTINT('originid') : '');
+					$paramforthenewlink .= '&fk_account=--IDFORBACKTOPAGE--';
+					$backtopageUrl = $_SERVER['PHP_SELF'].'?'.ltrim($paramforthenewlink, '&');
+					$out .= '<a class="butActionNew" title="'.$langs->trans("New").'" href="'.dol_buildpath('/compta/bank/card.php', 1).'?action=create&backtopage='.urlencode($backtopageUrl).'"><span class="fa fa-plus-circle valignmiddle"></span></a>';
+				}
+
+				return $out;
+			}
+
+			if (is_object($langs)) {
+				$langs->load("bills");
+			}
+			$noadmininfo = $isSearch ? 1 : 0;
 			return (string) $form->select_types_paiements($value, $keyprefix.$key.$keysuffix, '', 0, 1, $noadmininfo, 0, 1, $css, 1);
 		}
 
@@ -1190,6 +1224,18 @@ class Paiement extends CommonObject
 	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
 	{
 		global $langs, $form;
+
+		if ($key === 'fk_account') {
+			if (empty($value) || !isModEnabled('banque')) {
+				return '';
+			}
+			require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+			$account = new Account($this->db);
+			if ($account->fetch((int) $value) > 0) {
+				return $account->getNomUrl(3, '', 'reflabel');
+			}
+			return '';
+		}
 
 		if ($key === 'fk_paiement') {
 			if (empty($value)) {
