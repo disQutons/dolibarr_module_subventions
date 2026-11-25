@@ -122,6 +122,38 @@ if (!function_exists('subventionsAdminPrepareHead')) {
 }
 
 
+if (!function_exists('subventionsResolveProjectAmountColumn')) {
+	/**
+	 * Normalize and validate SUBVENTIONS_PROJECT_MONTANT_HT / TTC constant value
+	 * into a whitelisted amount column name on llx_subventions_subvention.
+	 *
+	 * @param  string|null $rawValue Constant value from configuration
+	 * @param  string      $default  Fallback column name
+	 * @return string
+	 */
+	function subventionsResolveProjectAmountColumn($rawValue, $default = 'montant_acc')
+	{
+		$legacyMap = array(
+			'$m_dem' => 'montant_dem',
+			'$m_acc' => 'montant_acc',
+			'$m_fin' => 'montant_fin',
+			'$m_att' => 'montant_att',
+			'$m_ref' => 'montant_ref',
+			'm_dem' => 'montant_dem',
+			'm_acc' => 'montant_acc',
+			'm_fin' => 'montant_fin',
+			'm_att' => 'montant_att',
+			'm_ref' => 'montant_ref',
+		);
+		$val = trim((string) $rawValue);
+		if (isset($legacyMap[$val])) {
+			$val = $legacyMap[$val];
+		}
+		$allowed = array('montant_dem', 'montant_acc', 'montant_fin', 'montant_att', 'montant_ref');
+		return in_array($val, $allowed, true) ? $val : $default;
+	}
+}
+
 if (!function_exists('majMontantsFinancementSubvention')) {
 	// Mise à jour des montants des paiements liés aux financements et subventions
 	function majMontantsFinancementSubvention($object) {
@@ -129,48 +161,42 @@ if (!function_exists('majMontantsFinancementSubvention')) {
 
 	// Vérifie le type de l'objet
     if (is_a($object, 'paiement')) {
-        $fk_sub = $object->fk_sub;
-        $fk_fin = $object->fk_fin;
+        $fk_sub = !empty($object->fk_sub) ? (int) $object->fk_sub : 0;
+        $fk_fin = !empty($object->fk_fin) ? (int) $object->fk_fin : 0;
     } elseif (is_a($object, 'financement')) {
-        $fk_sub = $object->fk_sub;
-        $fk_fin = $object->id;
+        $fk_sub = !empty($object->fk_sub) ? (int) $object->fk_sub : 0;
+        $fk_fin = !empty($object->id) ? (int) $object->id : 0;
     } elseif (is_a($object, 'subvention')) {
-        $fk_sub = $object->id;
-        $fk_fin = null;
+        $fk_sub = !empty($object->id) ? (int) $object->id : 0;
+        $fk_fin = 0;
     } else {
         throw new Exception("Type d'objet non supporté : ".get_class($object));
     }
 
     // On fait un test pour mettre à jour uniquement ce qui doit l'être
-    if (empty($fk_sub)) {
-        $majsub = 0;
-    }
-    else {
-        $majsub = 1;
-    }
-    if (empty($fk_fin)) {
-        $majfin = 0;
-    }
-    else {
-        $majfin = 1;
-    }
+    $majsub = ($fk_sub > 0) ? 1 : 0;
+    $majfin = ($fk_fin > 0) ? 1 : 0;
 
     $db->begin();
     try {
 		// MAJ FINANCEMENT
         if ($majfin) {
-            // Récupère le montant accordé (montant_acc) du financement
-            $resql = $db->query("SELECT montant_acc, montant_dem FROM ".MAIN_DB_PREFIX."subventions_financement WHERE rowid = ".$fk_fin);
+            // Récupère le montant accordé (montant_acc) et la subvention liée du financement
+            $resql = $db->query("SELECT fk_sub, montant_acc, montant_dem FROM ".MAIN_DB_PREFIX."subventions_financement WHERE rowid = ".((int) $fk_fin));
             if (!$resql) {
                 throw new Exception("Erreur SQL : ".$db->lasterror());
             }
             $obj = $db->fetch_object($resql);
             if ($obj) {
+                if (empty($fk_sub) && !empty($obj->fk_sub)) {
+                    $fk_sub = (int) $obj->fk_sub;
+                    $majsub = 1;
+                }
                 $m_acc = $obj->montant_acc;
                 $m_dem = (float) $obj->montant_dem;
 
                 // Calcule la somme des montants reçus (paiements) pour ce financement
-                $resql = $db->query("SELECT SUM(montant) as total FROM ".MAIN_DB_PREFIX."subventions_paiement WHERE fk_fin = ".$fk_fin);
+                $resql = $db->query("SELECT SUM(montant) as total FROM ".MAIN_DB_PREFIX."subventions_paiement WHERE fk_fin = ".((int) $fk_fin));
                 if (!$resql) {
                     throw new Exception("Erreur SQL : ".$db->lasterror());
                 }
@@ -178,23 +204,23 @@ if (!function_exists('majMontantsFinancementSubvention')) {
                 $m_fin = (float) $obj2->total;
 
                 // Calcule le montant attendu (montant_acc - somme des paiements) ne peut pas être négatif
-                $m_att = ($m_acc - $m_fin < 0) ? 0 : $m_acc - $m_fin;
+                $m_att = ((float) $m_acc - $m_fin < 0) ? 0.0 : ((float) $m_acc - $m_fin);
                 
                 // Si aucun montant n'a été saisi ou qu'aucune demande n'avait été faite, on ne calcule rien
-                if (is_null($m_acc) || (is_null($m_dem) && $m_acc > 0)){
-                    $m_ref = 0;    
+                if (is_null($m_acc) || (is_null($obj->montant_dem) && (float) $m_acc > 0)){
+                    $m_ref = 0.0;    
                 }
                 else{
                     // Calcule le montant refusé (montant_dem - montant_acc) ne peut pas être négatif
-                    $m_ref = ($m_dem - $m_acc < 0) ? 0 : $m_dem - $m_acc;
+                    $m_ref = ($m_dem - (float) $m_acc < 0) ? 0.0 : ($m_dem - (float) $m_acc);
                 }
 
                 // Màj financement
                 $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_financement SET ";
-                $sql .= "montant_fin = ".$m_fin.", ";
-                $sql .= "montant_ref = ".$m_ref.", ";
-                $sql .= "montant_att = ".$m_att." ";
-                $sql .= "WHERE rowid = ".$fk_fin;
+                $sql .= "montant_fin = ".((float) $m_fin).", ";
+                $sql .= "montant_ref = ".((float) $m_ref).", ";
+                $sql .= "montant_att = ".((float) $m_att)." ";
+                $sql .= "WHERE rowid = ".((int) $fk_fin);
                 $resql = $db->query($sql);
                 if (!$resql) {
                     throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
@@ -209,7 +235,7 @@ if (!function_exists('majMontantsFinancementSubvention')) {
                         COALESCE(SUM(montant_acc),0) as m_acc,
                         COALESCE(SUM(montant_ref),0) as m_ref,
                         COALESCE(SUM(montant_fin),0) as m_fin 
-                        FROM ".MAIN_DB_PREFIX."subventions_financement WHERE fk_sub = ".$fk_sub;
+                        FROM ".MAIN_DB_PREFIX."subventions_financement WHERE fk_sub = ".((int) $fk_sub);
 
             $resql = $db->query($sql);
             
@@ -222,39 +248,39 @@ if (!function_exists('majMontantsFinancementSubvention')) {
             $m_fin = (float) $obj->m_fin;
             $m_ref = (float) $obj->m_ref;
 
+            // Inclut aussi les paiements liés directement à la subvention sans financement rattaché
+            $resDirect = $db->query("SELECT COALESCE(SUM(montant), 0) as total_direct FROM ".MAIN_DB_PREFIX."subventions_paiement WHERE fk_sub = ".((int) $fk_sub)." AND (fk_fin IS NULL OR fk_fin <= 0)");
+            if (!$resDirect) {
+                throw new Exception("Erreur SQL : ".$db->lasterror());
+            }
+            $objDirect = $db->fetch_object($resDirect);
+            $m_fin += (float) $objDirect->total_direct;
+
             // Calcule le montant attendu (montant_acc - somme des paiements)
             $m_att = $m_acc - $m_fin;
 
-            // TODO Vérifier bon fonctionnement
-            /*$valeur_total_ht = ${getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_HT')};
-            $valeur_total_ttc = ${getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_TTC')};
+            $col_ht = subventionsResolveProjectAmountColumn(getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_HT'));
+            $col_ttc = subventionsResolveProjectAmountColumn(getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_TTC'));
+            $computedAmounts = array(
+                'montant_dem' => $m_dem,
+                'montant_acc' => $m_acc,
+                'montant_fin' => $m_fin,
+                'montant_att' => $m_att,
+                'montant_ref' => $m_ref,
+            );
+            $val_ht = (float) $computedAmounts[$col_ht];
+            $val_ttc = (float) $computedAmounts[$col_ttc];
 
             // Màj subvention
             $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_subvention SET ";
-            if (!is_null($valeur_total_ht)) {
-                $sql .= " total_ht = ".$valeur_total_ht.", ";
-            }
-            if (!is_null($valeur_total_ttc)) {
-                $sql .= " total_ttc = ".$valeur_total_ttc.", ";
-            }*/
-
-            $valeur_total_ht = getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_HT');
-            $valeur_total_ttc = getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_TTC');
-
-            // Màj subvention
-            $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_subvention SET ";
-            if (!is_null($valeur_total_ht)) {
-                $sql .= " total_ht = ".$valeur_total_ht.", ";
-            }
-            if (!is_null($valeur_total_ttc)) {
-                $sql .= " total_ttc = ".$valeur_total_ttc.", ";
-            }
-            $sql .= " montant_fin = ".$m_fin.", ";
-            $sql .= " montant_ref = ".$m_ref.", ";
-            $sql .= " montant_dem = ".$m_dem.", ";
-            $sql .= " montant_acc = ".$m_acc.", ";
-            $sql .= " montant_att = ".$m_att." ";
-            $sql .= " WHERE rowid = ".$fk_sub;
+            $sql .= " total_ht = ".$val_ht.", ";
+            $sql .= " total_ttc = ".$val_ttc.", ";
+            $sql .= " montant_fin = ".((float) $m_fin).", ";
+            $sql .= " montant_ref = ".((float) $m_ref).", ";
+            $sql .= " montant_dem = ".((float) $m_dem).", ";
+            $sql .= " montant_acc = ".((float) $m_acc).", ";
+            $sql .= " montant_att = ".((float) $m_att)." ";
+            $sql .= " WHERE rowid = ".((int) $fk_sub);
             $resql = $db->query($sql);
             if (!$resql) {
                 throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
@@ -264,11 +290,17 @@ if (!function_exists('majMontantsFinancementSubvention')) {
         $db->commit();
 
         // Màj statut de la subvention
-        majstatut($object);
+        $resStatut = majstatut($object);
+        if ($resStatut < 0) {
+            return -1;
+        }
 
         return 1;
     } catch (Exception $e) {
         $db->rollback();
+        if (is_object($object)) {
+            $object->error = $e->getMessage();
+        }
         dol_syslog("Erreur majMontantsFinancementSubvention: ".$e->getMessage(), LOG_ERR);
         return -1;
     }
@@ -279,20 +311,18 @@ if (!function_exists('majMontantsFinancementSubvention')) {
 if (!function_exists('majMontantsTTCHT')) {
 // Mise à jour des champs montantHT et montantTTC pour les projets, en lien avec setup.php
 function majMontantsTTCHT(){
-    global $db, $user, $langs;
-     
-    $valeur_total_ht = getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_HT');
-    $valeur_total_ttc = getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_TTC');
+    global $db;
+
+    $col_ht = subventionsResolveProjectAmountColumn(getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_HT'));
+    $col_ttc = subventionsResolveProjectAmountColumn(getDolGlobalString('SUBVENTIONS_PROJECT_MONTANT_TTC'));
 
     // Màj subvention
     $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_subvention SET ";
-    $sql .= " total_ht = ".$valeur_total_ht.", ";
-    $sql .= " total_ttc = ".$valeur_total_ttc;
+    $sql .= " total_ht = ".$col_ht.", ";
+    $sql .= " total_ttc = ".$col_ttc;
     $resql = $db->query($sql);
 
-    if (!$resql) {
-        //throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
-    }
+    return $resql ? 1 : -1;
 }
 }
 
@@ -303,11 +333,17 @@ function majstatut ($object){
 
     // Vérifie le type de l'objet
     if (is_a($object, 'subvention')) {
-        $sub = $object->id;
+        $sub = !empty($object->id) ? (int) $object->id : 0;
     } elseif (is_a($object, 'financement')) {
-        $sub = $object->fk_sub;
+        $sub = !empty($object->fk_sub) ? (int) $object->fk_sub : 0;
     } elseif (is_a($object, 'paiement')) {
-        $sub = $object->fk_sub;
+        $sub = !empty($object->fk_sub) ? (int) $object->fk_sub : 0;
+        if (empty($sub) && !empty($object->fk_fin)) {
+            $resFin = $db->query("SELECT fk_sub FROM ".MAIN_DB_PREFIX."subventions_financement WHERE rowid = ".((int) $object->fk_fin));
+            if ($resFin && ($objFin = $db->fetch_object($resFin))) {
+                $sub = (int) $objFin->fk_sub;
+            }
+        }
     } else {
         throw new Exception("Type d'objet non supporté : ".get_class($object));
     }
@@ -319,11 +355,15 @@ function majstatut ($object){
     $db->begin();
     try {
 	    // Récupère les informations de la subvention
-        $resql = $db->query("SELECT montant_dem, montant_acc, montant_fin, montant_att, montant_ref, s.status FROM ".MAIN_DB_PREFIX."subventions_subvention as s WHERE rowid = ".$sub);
+        $resql = $db->query("SELECT montant_dem, montant_acc, montant_fin, montant_att, montant_ref, s.status FROM ".MAIN_DB_PREFIX."subventions_subvention as s WHERE rowid = ".((int) $sub));
         if (!$resql) {
             throw new Exception("Erreur SQL : ".$db->lasterror());
         }
         $obj = $db->fetch_object($resql);
+        if (!$obj) {
+            $db->commit();
+            return 0;
+        }
         $m_acc_is_null = is_null($obj->montant_acc);
         $m_dem = (float) $obj->montant_dem;
         $m_acc = (float) $obj->montant_acc;
@@ -360,8 +400,8 @@ function majstatut ($object){
             if ($stat != $old_stat) {
                 // Màj statut de la subvention
                 $sql = "UPDATE ".MAIN_DB_PREFIX."subventions_subvention SET ";
-                $sql .= " status = ".$stat." ";
-                $sql .= " WHERE rowid = ".$sub;
+                $sql .= " status = ".((int) $stat)." ";
+                $sql .= " WHERE rowid = ".((int) $sub);
                 $resql = $db->query($sql);
                 if (!$resql) {
                     throw new Exception("Erreur SQL UPDATE : ".$db->lasterror());
@@ -372,7 +412,7 @@ function majstatut ($object){
                 // Lancement du trigger si le statut a changé automatiquement
                 dol_include_once('/subventions/class/subvention.class.php');
                 $subObj = new Subvention($db);
-                if ($subObj->fetch($sub) > 0) {
+                if ($subObj->fetch((int) $sub) > 0) {
                     if ($stat == Subvention::STATUS_ACCEPTED) {
                         $subObj->call_trigger('SUBVENTION_ACCEPT', $user);
                     } elseif ($stat == Subvention::STATUS_FINANCED) {
@@ -391,6 +431,9 @@ function majstatut ($object){
     }
     catch (Exception $e) {
         $db->rollback();
+        if (is_object($object)) {
+            $object->error = $e->getMessage();
+        }
         dol_syslog("Erreur majMontantsFinancementSubvention: ".$e->getMessage(), LOG_ERR);
         return -1;
     }

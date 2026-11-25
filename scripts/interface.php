@@ -73,8 +73,8 @@ if (!$res) {
 }
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
-dol_include_once('/custom/subventions/class/subvention.class.php');
-dol_include_once('/custom/subventions/class/financement.class.php');
+dol_include_once('/subventions/class/subvention.class.php');
+dol_include_once('/subventions/class/financement.class.php');
 
 header('Content-Type: application/json'); // Force le type de réponse en JSON
 
@@ -88,7 +88,7 @@ if ($action === 'getSubventionsBySoc') {
         exit;
     }
     $fk_soc = GETPOST('fk_soc', 'int');
-    $options = '<option value="0"></option>';
+    $options = '<option value="-1">&nbsp;</option>';
 
     if ($fk_soc > 0) {
         $sql = "SELECT s.rowid, s.ref, p.title AS project_name ";
@@ -106,7 +106,7 @@ if ($action === 'getSubventionsBySoc') {
             }
         } else {
             dol_syslog("scripts/interface.php getSubventionsBySoc SQL error: ".$db->lasterror(), LOG_ERR);
-            $options .= '<option value="0">Erreur SQL</option>';
+            $options .= '<option value="-1">Erreur SQL</option>';
         }
     }
 
@@ -122,37 +122,37 @@ if ($action === 'getFinancementsBySubvention') {
     }
     $fk_sub = GETPOST('fk_sub', 'int');
     $fk_soc = GETPOST('fk_soc', 'int');
-    $options = '<option value="0"></option>';
+    $options = '<option value="-1">&nbsp;</option>';
 
+    $sql = "SELECT sf.rowid, sf.ref, p.title AS project_name ";
+    $sql .= "FROM ".MAIN_DB_PREFIX."subventions_financement AS sf ";
+    $sql .= "LEFT JOIN ".MAIN_DB_PREFIX."subventions_subvention AS sub ON sf.fk_sub = sub.rowid ";
+    $sql .= "LEFT JOIN ".MAIN_DB_PREFIX."projet AS p ON sub.fk_project = p.rowid ";
+    $sql .= "WHERE sf.entity IN (".getEntity('financement').")";
     if ($fk_sub > 0) {
-        $sql = "SELECT sf.rowid, sf.ref, p.title AS project_name ";
-        $sql .= "FROM ".MAIN_DB_PREFIX."subventions_financement AS sf ";
-        $sql .= "LEFT JOIN ".MAIN_DB_PREFIX."subventions_subvention AS sub ON sf.fk_sub = sub.rowid ";
-        $sql .= "LEFT JOIN ".MAIN_DB_PREFIX."projet AS p ON sub.fk_project = p.rowid ";
-        $sql .= "WHERE sf.fk_sub = ".((int) $fk_sub);
-        if ($fk_soc > 0) {
-            $sql .= " AND sf.fk_soc = ".((int) $fk_soc);
-        }
-        $sql .= " AND sf.entity IN (".getEntity('financement').")";
-        $sql .= " ORDER BY sf.ref ASC";
-        $result = $db->query($sql);
+        $sql .= " AND sf.fk_sub = ".((int) $fk_sub);
+    }
+    if ($fk_soc > 0) {
+        $sql .= " AND sf.fk_soc = ".((int) $fk_soc);
+    }
+    $sql .= " ORDER BY sf.ref ASC";
+    $result = $db->query($sql);
 
-        if ($result) {
-            while ($obj = $db->fetch_object($result)) {
-                $proj = !empty($obj->project_name) ? ' – '.dol_escape_htmltag($obj->project_name) : '';
-                $options .= '<option value="'.((int) $obj->rowid).'">'.dol_escape_htmltag($obj->ref).$proj.'</option>';
-            }
-        } else {
-            dol_syslog("scripts/interface.php getFinancementsBySubvention SQL error: ".$db->lasterror(), LOG_ERR);
-            $options .= '<option value="0">Erreur SQL</option>';
+    if ($result) {
+        while ($obj = $db->fetch_object($result)) {
+            $proj = !empty($obj->project_name) ? ' – '.dol_escape_htmltag($obj->project_name) : '';
+            $options .= '<option value="'.((int) $obj->rowid).'">'.dol_escape_htmltag($obj->ref).$proj.'</option>';
         }
+    } else {
+        dol_syslog("scripts/interface.php getFinancementsBySubvention SQL error: ".$db->lasterror(), LOG_ERR);
+        $options .= '<option value="-1">Erreur SQL</option>';
     }
 
     echo json_encode(['success' => true, 'options' => $options]);
     exit;
 }
 
-// Récupérer le fk_soc par financement
+// Récupérer le fk_soc et le fk_sub par financement
 if ($action === 'getSocByFinancement') {
     if (!$user->hasRight('subventions', 'financement', 'read')) {
         echo json_encode(['success' => false, 'error' => 'Access denied']);
@@ -162,12 +162,15 @@ if ($action === 'getSocByFinancement') {
     $financement = new Financement($db);
     $financement->fetch($fk_fin);
 
-    if ($financement->id <= 0 || $financement->entity != $conf->entity) {
+    $allowedEntities = array_map('intval', explode(',', getEntity('financement')));
+    if ($financement->id <= 0 || !in_array((int) $financement->entity, $allowedEntities, true)) {
         echo json_encode(['success' => false, 'error' => 'Access denied']);
-    } elseif ($financement->fk_soc > 0) {
-        echo json_encode(['success' => true, 'fk_soc' => $financement->fk_soc]);
     } else {
-        echo json_encode(['success' => false, 'error' => 'fk_soc non défini']);
+        echo json_encode(array(
+            'success' => true,
+            'fk_soc' => (int) $financement->fk_soc,
+            'fk_sub' => (int) $financement->fk_sub,
+        ));
     }
     exit;
 }

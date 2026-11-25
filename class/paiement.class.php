@@ -132,8 +132,8 @@ class Paiement extends CommonObject
 		"fk_user_modif" => array("type" => "integer:User:user/class/user.class.php", "label" => "UserModif", "picto" => "user", "enabled" => "1", 'position' => 511, 'notnull' => -1, "visible" => "-2", "csslist" => "tdoverflowmax150",),
 		"last_main_doc" => array("type" => "varchar(255)", "label" => "LastMainDoc", "enabled" => "1", 'position' => 600, 'notnull' => 0, "visible" => "0",),
 		"import_key" => array("type" => "varchar(14)", "label" => "ImportId", "enabled" => "1", 'position' => 1000, 'notnull' => -1, "visible" => "-2",),
-		"fk_sub" => array("type" => "integer:subvention:/custom/subventions/class/subvention.class.php", "label" => "Réf subvention", "enabled" => "1", 'position' => 25, 'notnull' => 0, "visible" => "1", "help" => "PaymentSubventionRefHelp",),
-		"fk_fin" => array("type" => "integer:financement:/custom/subventions/class/financement.class.php", "label" => "Réf financement", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1", "help" => "PaymentFinancementRefHelp",),
+		"fk_sub" => array("type" => "integer:Subvention:subventions/class/subvention.class.php", "label" => "Réf subvention", "enabled" => "1", 'position' => 25, 'notnull' => 0, "visible" => "1", "help" => "PaymentSubventionRefHelp",),
+		"fk_fin" => array("type" => "integer:Financement:subventions/class/financement.class.php", "label" => "Réf financement", "enabled" => "1", 'position' => 30, 'notnull' => 0, "visible" => "1", "help" => "PaymentFinancementRefHelp",),
 		"fk_bank" => array("type" => "integer", "label" => "BankTransaction", "enabled" => "isModEnabled('banque')", 'position' => 52, 'notnull' => 0, "visible" => "0",),
 		"fk_account" => array("type" => "integer:Account:compta/bank/class/account.class.php:1:(t.clos:=:0)", "label" => "BankAccount", "picto" => "bank_account", "enabled" => "isModEnabled('banque')", 'position' => 53, 'notnull' => 0, "visible" => "1", "help" => "PaymentAccountHelp",),
 		"fk_paiement" => array("type" => "sellist:c_paiement:libelle:id::active=1", "label" => "PaymentMode", "enabled" => "1", 'position' => 54, 'notnull' => -1, "visible" => "1", "help" => "PaymentModeHelp",),
@@ -440,6 +440,18 @@ class Paiement extends CommonObject
 				$this->db->rollback();
 			}
 			return -1;
+		}
+		if ($hasold && ((int) $oldobj->fk_fin !== (int) $this->fk_fin || (int) $oldobj->fk_sub !== (int) $this->fk_sub)) {
+			$resultmajold = majMontantsFinancementSubvention($oldobj);
+			if ($resultmajold < 0) {
+				if (empty($this->error) && !empty($oldobj->error)) {
+					$this->error = $oldobj->error;
+				}
+				while ($this->db->transaction_opened > $txlevel) {
+					$this->db->rollback();
+				}
+				return -1;
+			}
 		}
 
 		// Sync bank line and PaymentVarious if payment is not already accounted
