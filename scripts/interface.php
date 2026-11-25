@@ -159,18 +159,24 @@ if ($action === 'getSocByFinancement') {
         exit;
     }
     $fk_fin = GETPOST('fk_fin', 'int');
-    $financement = new Financement($db);
-    $financement->fetch($fk_fin);
+    if ($fk_fin <= 0) {
+        echo json_encode(['success' => false, 'error' => 'Invalid id']);
+        exit;
+    }
+    $sql = "SELECT sf.rowid, sf.fk_soc, sf.fk_sub ";
+    $sql .= "FROM ".MAIN_DB_PREFIX."subventions_financement AS sf ";
+    $sql .= "WHERE sf.rowid = ".((int) $fk_fin);
+    $sql .= " AND sf.entity IN (".getEntity('financement').")";
+    $result = $db->query($sql);
 
-    $allowedEntities = array_map('intval', explode(',', getEntity('financement')));
-    if ($financement->id <= 0 || !in_array((int) $financement->entity, $allowedEntities, true)) {
-        echo json_encode(['success' => false, 'error' => 'Access denied']);
-    } else {
+    if ($result && ($obj = $db->fetch_object($result))) {
         echo json_encode(array(
             'success' => true,
-            'fk_soc' => (int) $financement->fk_soc,
-            'fk_sub' => (int) $financement->fk_sub,
+            'fk_soc' => (int) $obj->fk_soc,
+            'fk_sub' => (int) $obj->fk_sub,
         ));
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Access denied']);
     }
     exit;
 }
