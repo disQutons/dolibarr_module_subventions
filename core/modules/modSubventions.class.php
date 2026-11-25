@@ -274,9 +274,9 @@ class modSubventions extends DolibarrModules
 		//                             2 => array('SUBVENTIONS_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
 		// );
 		$this->const = array(
-			1 => array('SUBVENTIONS_PROJECT_MONTANT_HT', 'chaine', '$m_acc', 'Montant HT par défaut pour les projets', 1),
-			2 => array('SUBVENTIONS_PROJECT_MONTANT_TTC', 'chaine', '$m_acc', 'Montant TTC par défaut pour les projets', 1),
-			3 => array('SUBVENTIONS_STATISTIC_DATE', 'chaine', '$date_creation', 'Date par défaut pour les statistiques', 1),
+			1 => array('SUBVENTIONS_PROJECT_MONTANT_HT', 'chaine', 'montant_acc', 'Montant HT par défaut pour les projets', 1),
+			2 => array('SUBVENTIONS_PROJECT_MONTANT_TTC', 'chaine', 'montant_acc', 'Montant TTC par défaut pour les projets', 1),
+			3 => array('SUBVENTIONS_STATISTIC_DATE', 'chaine', 'date_creation', 'Date par défaut pour les statistiques', 1),
 			4 => array('SUBVENTIONS_STATISTIC_COLOR_GREEN', 'chaine', '75', 'Pourcentage minimum pour s\'afficher en vert', 1),
 			5 => array('SUBVENTIONS_STATISTIC_COLOR_ORANGE', 'chaine', '50', 'Pourcentage minimum pour s\'afficher en orange', 1),
 			6 => array('SUBVENTIONS_ACCOUNTANCY_JOURNAL_PAYMENT', 'chaine', 'BQ', 'Journal par défaut pour les paiements de subventions', 1),
@@ -1124,6 +1124,9 @@ class modSubventions extends DolibarrModules
 		// Filet de sécurité : ajoute les colonnes que les scripts SQL n'auraient pas pu créer
 		$this->addMissingColumns();
 
+		// Normalise les anciennes valeurs par défaut contenant un '$' littéral (<= 1.3.1)
+		$this->migrateLegacyConstants();
+
 		// Migration des écritures bancaires de paiement existantes vers PaymentVarious (évite l'erreur compte de tiers inconnu en comptabilité)
 		dol_include_once('/subventions/lib/subventions.lib.php');
 		if (function_exists('migrateSubventionsBankPaymentsToVarious')) {
@@ -1134,6 +1137,38 @@ class modSubventions extends DolibarrModules
 		$this->checkAndInitTriggers();
 
 		return $this->_init($sql, $options);
+	}
+
+	/**
+	 * Normalize legacy constant values containing a leading '$' from versions <= 1.3.1
+	 *
+	 * @return void
+	 */
+	private function migrateLegacyConstants()
+	{
+		$amountMap = array(
+			'$m_dem' => 'montant_dem',
+			'$m_acc' => 'montant_acc',
+			'$m_fin' => 'montant_fin',
+			'$m_att' => 'montant_att',
+			'$m_ref' => 'montant_ref',
+			'm_dem' => 'montant_dem',
+			'm_acc' => 'montant_acc',
+			'm_fin' => 'montant_fin',
+			'm_att' => 'montant_att',
+			'm_ref' => 'montant_ref',
+		);
+		foreach ($amountMap as $oldVal => $newVal) {
+			$this->db->query(
+				"UPDATE ".MAIN_DB_PREFIX."const SET value = '".$this->db->escape($newVal)."'"
+				." WHERE name IN ('SUBVENTIONS_PROJECT_MONTANT_HT', 'SUBVENTIONS_PROJECT_MONTANT_TTC')"
+				." AND value = '".$this->db->escape($oldVal)."'"
+			);
+		}
+		$this->db->query(
+			"UPDATE ".MAIN_DB_PREFIX."const SET value = 'date_creation'"
+			." WHERE name = 'SUBVENTIONS_STATISTIC_DATE' AND value = '".$this->db->escape('$date_creation')."'"
+		);
 	}
 
 	/**

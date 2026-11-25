@@ -274,101 +274,93 @@ llxHeader('', $title, $help_url, '', 0, 0, '', '', '', 'mod-subventions page-car
 // </script>';
 
 // Script pour lier les paiements aux financements en fonction de la subvention choisie
+if ($action == 'create' || $action == 'edit') {
 ?>
 <script>
 jQuery(document).ready(function() {
-    // Récupérer le jeton CSRF
-    var csrfToken = jQuery('input[name="token"]').val();
-    if (!csrfToken) {
-        csrfToken = jQuery('input[name="newtoken"]').val();
+    var interfaceUrl = '<?php echo dol_escape_js(dol_buildpath('/subventions/scripts/interface.php', 1)); ?>';
+    // Récupérer le jeton CSRF du formulaire courant
+    var csrfToken = jQuery('form input[name="token"]').last().val() || '<?php echo dol_escape_js(currentToken()); ?>';
+
+    function loadFinancementsForSubvention(fk_sub, preferredFkFin) {
+        jQuery.ajax({
+            url: interfaceUrl,
+            type: 'POST',
+            data: {
+                action: 'getFinancementsBySubvention',
+                fk_sub: fk_sub > 0 ? fk_sub : 0,
+                token: csrfToken
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.success) {
+                    jQuery('#fk_fin').html(data.options);
+                    if (preferredFkFin > 0 && jQuery('#fk_fin option[value="' + preferredFkFin + '"]').length > 0) {
+                        jQuery('#fk_fin').val(String(preferredFkFin));
+                    } else {
+                        jQuery('#fk_fin').val('-1');
+                    }
+                    jQuery('#fk_fin').trigger('change.select2');
+                } else {
+                    console.error('Error: ', data ? data.error : 'Invalid response');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error: ', error);
+            }
+        });
     }
 
     // Gestion du changement de subvention
     jQuery('#fk_sub').change(function() {
-        var fk_sub = jQuery(this).val();
-        if (fk_sub > 0) {
-            jQuery.ajax({
-                url: '<?php echo dol_buildpath('/custom/subventions/scripts/interface.php', 1); ?>',
-                type: 'POST',
-                data: {
-                    action: 'getFinancementsBySubvention',
-                    fk_sub: fk_sub,
-                    token: csrfToken // Ajouter le jeton CSRF
-                },
-                dataType: 'json',
-                success: function(data) {
-                    if (data.success) {
-                        jQuery('#fk_fin').html(data.options);
-                    } else {
-                        console.error('Error: ', data.error);
-                        jQuery('#fk_fin').html('<option value="0"><?php echo dol_escape_js($langs->transnoentitiesnoconv("Error")); ?></option>');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error: ', error);
-                    jQuery('#fk_fin').html('<option value="0"><?php echo dol_escape_js($langs->transnoentitiesnoconv("Error")); ?> AJAX</option>');
-                }
-            });
-        }
+        var fk_sub = parseInt(jQuery(this).val(), 10) || 0;
+        var currentFkFin = parseInt(jQuery('#fk_fin').val(), 10) || 0;
+        loadFinancementsForSubvention(fk_sub, currentFkFin);
     });
 
     // Gestion du changement de financement
     jQuery('#fk_fin').change(function() {
-        var fk_fin = jQuery(this).val();
+        var fk_fin = parseInt(jQuery(this).val(), 10) || 0;
         if (fk_fin > 0) {
             jQuery.ajax({
-                url: '<?php echo dol_buildpath('/custom/subventions/scripts/interface.php', 1); ?>',
+                url: interfaceUrl,
                 type: 'POST',
                 data: {
                     action: 'getSocByFinancement',
                     fk_fin: fk_fin,
-                    token: csrfToken // Ajouter le jeton CSRF
+                    token: csrfToken
                 },
                 dataType: 'json',
                 success: function(data) {
-                    if (data.success) {
-                        jQuery('#fk_soc').val(data.options);
-						//jQuery('#fk_soc').trigger('change');
-						jQuery('#fk_soc').val(data.fk_soc).trigger('change.select2');
-
+                    if (data && data.success) {
+                        if (data.fk_soc > 0) {
+                            jQuery('#fk_soc').val(String(data.fk_soc)).trigger('change.select2');
+                        }
+                        if (data.fk_sub > 0 && !(parseInt(jQuery('#fk_sub').val(), 10) > 0)) {
+                            jQuery('#fk_sub').val(String(data.fk_sub)).trigger('change.select2');
+                            loadFinancementsForSubvention(data.fk_sub, fk_fin);
+                        }
                     } else {
-                        console.error('Erreur : ', data.error);
+                        console.error('Error: ', data ? data.error : 'Invalid response');
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Erreur AJAX : ', error);
+                    console.error('AJAX error: ', error);
                 }
             });
         }
     });
 
     // Fix issue #21: Chargement initial si fk_sub est déjà rempli au chargement de la page
-    var initialFkSub = jQuery('#fk_sub').val();
-    var initialFkFin = jQuery('#fk_fin').val();
+    var initialFkSub = parseInt(jQuery('#fk_sub').val(), 10) || 0;
+    var initialFkFin = parseInt(jQuery('#fk_fin').val(), 10) || 0;
     if (initialFkSub > 0) {
-        jQuery.ajax({
-            url: '<?php echo dol_buildpath("/custom/subventions/scripts/interface.php", 1); ?>',
-            type: 'POST',
-            data: {
-                action: 'getFinancementsBySubvention',
-                fk_sub: initialFkSub,
-                token: csrfToken
-            },
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    jQuery('#fk_fin').html(data.options);
-                    // Restaurer la sélection initiale si fk_fin était pré-rempli
-                    if (initialFkFin > 0) {
-                        jQuery('#fk_fin').val(initialFkFin);
-                    }
-                }
-            }
-        });
+        loadFinancementsForSubvention(initialFkSub, initialFkFin);
     }
 });
 </script>
 <?php
+}
 
 
 // Part to create
