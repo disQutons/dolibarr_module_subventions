@@ -149,6 +149,7 @@ class Financement extends CommonObject
 	public $rowid;
 	public $ref;
 	public $fk_soc;
+	public $socid;
 	public $note_public;
 	public $note_private;
 	public $date_creation;

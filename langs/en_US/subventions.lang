@@ -435,6 +435,22 @@ FundingSourceTypeLabel=Funding source type (label)
 SubventionId=Grant ID
 FinancementId=Funding ID
 
-
+#
+# Contact types
+#
+ContactDefault_subvention=Subsidy
+ContactDefault_financement=Funding
+ContactDefault_paiement=Subsidy payment
+TypeContact_subvention_internal_SUBVENTIONLEADER=Subsidy manager
+TypeContact_subvention_internal_SUBVENTIONCONTRIBUTOR=Subsidy contributor
+TypeContact_subvention_internal_SUBVENTIONACCOUNTING=Administrative and financial follow-up
+TypeContact_subvention_external_SUBVENTIONCONTACT=Funder contact
+TypeContact_subvention_external_SUBVENTIONINSTRUCTOR=Grant case officer
+TypeContact_subvention_external_SUBVENTIONSIGNATORY=Signatory
+TypeContact_financement_internal_FINANCEMENTLEADER=Funding manager
+TypeContact_financement_external_FINANCEMENTCONTACT=Funder contact
+TypeContact_financement_external_FINANCEMENTINSTRUCTOR=Funding officer
+TypeContact_paiement_internal_PAIEMENTLEADER=Payment follow-up manager
+TypeContact_paiement_external_PAIEMENTCONTACT=Funder accounting contact
 
 
