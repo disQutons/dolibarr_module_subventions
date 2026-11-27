@@ -34,6 +34,15 @@ function financementPrepareHead($object)
 
 	$langs->load("subventions@subventions");
 
+	// Ensure default contact types are registered in llx_c_type_contact on upgrade without module reactivation
+	if (!getDolGlobalString('SUBVENTIONS_CONTACT_TYPES_INITIALIZED')) {
+		dol_include_once('/subventions/core/modules/modSubventions.class.php');
+		$modSub = new modSubventions($db);
+		if (method_exists($modSub, 'checkAndInitContactTypes')) {
+			$modSub->checkAndInitContactTypes();
+		}
+	}
+
 	$showtabofpagecontact = 1;
 	$showtabofpagenote = 1;
 	$showtabofpagedocument = 1;
@@ -48,8 +57,14 @@ function financementPrepareHead($object)
 	$h++;
 
 	if ($showtabofpagecontact) {
+		$internalContacts = $object->liste_contact(-1, 'internal');
+		$externalContacts = $object->liste_contact(-1, 'external');
+		$nbContact = (is_array($internalContacts) ? count($internalContacts) : 0) + (is_array($externalContacts) ? count($externalContacts) : 0);
 		$head[$h][0] = dol_buildpath("/subventions/financement_contact.php", 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans("Contacts");
+		if ($nbContact > 0) {
+			$head[$h][1] .= '<span class="badge marginleftonlyshort">'.$nbContact.'</span>';
+		}
 		$head[$h][2] = 'contact';
 		$h++;
 	}

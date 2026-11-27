@@ -118,6 +118,10 @@ class modSubventions extends DolibarrModules
 
 		$this->db = $db;
 
+		if (is_object($langs)) {
+			$langs->load("subventions@subventions");
+		}
+
 		// Id for module (must be unique).
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
 		$this->numero = 173321; // Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
@@ -234,7 +238,13 @@ class modSubventions extends DolibarrModules
 			// Set this to 1 if the module provides a website template into doctemplates/websites/website_template-mytemplate
 			'websitetemplates' => 0,
 			// Set this to 1 if the module provides a captcha driver
-			'captcha' => 0
+			'captcha' => 0,
+			// Contact elements exposed in Setup > Dictionaries > Contact types (llx_c_type_contact)
+			'contactelement' => array(
+				'subvention' => img_picto('', 'fa-hand-holding-heart', 'class="pictofixedwidth"').(is_object($langs) ? $langs->trans('Subsidy') : 'Subsidy'),
+				'financement' => img_picto('', 'fa-handshake', 'class="pictofixedwidth"').(is_object($langs) ? $langs->trans('Funding') : 'Funding'),
+				'paiement' => img_picto('', 'fa-coins', 'class="pictofixedwidth"').(is_object($langs) ? $langs->trans('Payment') : 'Payment'),
+			),
 		);
 
 		// Data directories to create when module is enabled.
@@ -1136,6 +1146,9 @@ class modSubventions extends DolibarrModules
 		// Insertion des triggers agenda dans llx_c_action_trigger et activation par défaut
 		$this->checkAndInitTriggers();
 
+		// Insertion des types de contacts dans llx_c_type_contact
+		$this->checkAndInitContactTypes();
+
 		return $this->_init($sql, $options);
 	}
 
@@ -1296,6 +1309,45 @@ class modSubventions extends DolibarrModules
 				dolibarr_set_const($this->db, $keyconst, '1', 'chaine', 0, '', $conf->entity);
 			}
 		}
+	}
+
+	/**
+	 * Check and initialize default contact types in llx_c_type_contact
+	 *
+	 * @return void
+	 */
+	public function checkAndInitContactTypes()
+	{
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+
+		$contactTypes = array(
+			array('subvention', 'internal', 'SUBVENTIONLEADER', 'Subsidy manager', 10),
+			array('subvention', 'internal', 'SUBVENTIONCONTRIBUTOR', 'Subsidy contributor', 20),
+			array('subvention', 'internal', 'SUBVENTIONACCOUNTING', 'Administrative and financial follow-up', 30),
+			array('subvention', 'external', 'SUBVENTIONCONTACT', 'Funder contact', 10),
+			array('subvention', 'external', 'SUBVENTIONINSTRUCTOR', 'Grant case officer', 20),
+			array('subvention', 'external', 'SUBVENTIONSIGNATORY', 'Signatory', 30),
+			array('financement', 'internal', 'FINANCEMENTLEADER', 'Funding manager', 10),
+			array('financement', 'external', 'FINANCEMENTCONTACT', 'Funder contact', 10),
+			array('financement', 'external', 'FINANCEMENTINSTRUCTOR', 'Funding officer', 20),
+			array('paiement', 'internal', 'PAIEMENTLEADER', 'Payment follow-up manager', 10),
+			array('paiement', 'external', 'PAIEMENTCONTACT', 'Funder accounting contact', 10),
+		);
+
+		foreach ($contactTypes as $ct) {
+			$sqlcheck = "SELECT rowid FROM ".MAIN_DB_PREFIX."c_type_contact";
+			$sqlcheck .= " WHERE element = '".$this->db->escape($ct[0])."'";
+			$sqlcheck .= " AND source = '".$this->db->escape($ct[1])."'";
+			$sqlcheck .= " AND code = '".$this->db->escape($ct[2])."'";
+			$resql = $this->db->query($sqlcheck);
+			if ($resql && $this->db->num_rows($resql) == 0) {
+				$sqlinsert = "INSERT INTO ".MAIN_DB_PREFIX."c_type_contact (element, source, code, libelle, active, module, position)";
+				$sqlinsert .= " VALUES ('".$this->db->escape($ct[0])."', '".$this->db->escape($ct[1])."', '".$this->db->escape($ct[2])."', '".$this->db->escape($ct[3])."', 1, 'subventions', ".((int) $ct[4]).")";
+				$this->db->query($sqlinsert);
+			}
+		}
+
+		dolibarr_set_const($this->db, 'SUBVENTIONS_CONTACT_TYPES_INITIALIZED', '1', 'chaine', 0, '', 0);
 	}
 
 	/**
