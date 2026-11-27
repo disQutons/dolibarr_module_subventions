@@ -133,119 +133,100 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
 
 // Draft subsidy
 if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 'read')) {
-		
-	$sql = "SELECT s.rowid, s.ref, s.label, s.status";
+	$sql = "SELECT s.rowid, s.ref, s.label, s.status, s.montant_dem";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
-	$sql .= " WHERE s.status = 0";
+	$sql .= " WHERE s.entity IN (".getEntity('subvention').")";
+	$sql .= " AND s.status = ".((int) Subvention::STATUS_DRAFT);
 	$resql = $db->query($sql);
-	
-	if ($resql)
-	{
+
+	if ($resql) {
 		$total = 0;
 		$num = $db->num_rows($resql);
 
+		print '<div class="div-table-responsive-no-min" tabindex="0" role="region" aria-label="'.dol_escape_htmltag($langs->transnoentitiesnoconv("DraftSubsidy")).'">';
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre">';
-		print '<th colspan="3">'.$langs->trans("DraftSubsidy").($num?'<span class="badge marginleftonlyshort">'.$num.'</span>':'').'</th></tr>';
+		print '<th colspan="3">'.$langs->trans("DraftSubsidy").($num ? '<span class="badge marginleftonlyshort">'.$num.'</span>' : '').'</th></tr>';
 
-		$var = true;
-		if ($num > 0)
-		{
+		if ($num > 0) {
 			$i = 0;
-			while ($i < $num)
-			{
+			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
-				print '<tr class="oddeven"><td class="nowrap">';
-				
-				$substatic->id=$obj->rowid;
-				$substatic->ref=$obj->ref;
-				$substatic->label=$obj->label;
-				$substatic->status=$obj->status;
+				print '<tr class="oddeven"><td class="nowraponall">';
+
+				$substatic->id = $obj->rowid;
+				$substatic->ref = $obj->ref;
+				$substatic->label = $obj->label;
+				$substatic->status = $obj->status;
 
 				print $substatic->getNomUrl(1);
 				print '</td>';
-				print '<td class="nowrap"><p>'.$obj->label.'</p>';
-				print '</td>';
-				print '<td class="right" class="nowrap">'.$obj->status.'</td></tr>';
+				print '<td class="tdoverflow" style="width: 100%;" title="'.dol_escape_htmltag($obj->label).'">'.dol_escape_htmltag($obj->label).'</td>';
+				print '<td class="right nowraponall">'.price($obj->montant_dem).'</td></tr>';
 				$i++;
-				$total += $obj->status;
+				$total += $obj->montant_dem;
 			}
-			if ($total>0)
-			{
-				print '<tr class="liste_total"><td>'.$langs->trans("Total").'</td><td colspan="2" class="right">'.$total."</td></tr>";
+			if ($total > 0) {
+				print '<tr class="liste_total"><td>'.$langs->trans("Total").'</td><td colspan="2" class="right">'.price($total)."</td></tr>";
 			}
-		}
-		else
-		{
+		} else {
 			print '<tr class="oddeven"><td colspan="3" class="opacitymedium">'.$langs->trans("NoSubsidy").'</td></tr>';
 		}
-		print "</table><br>";
+		print "</table></div><br>";
 
 		$db->free($resql);
-	}
-	else
-	{
+	} else {
 		dol_print_error($db);
 	}
 }
 
 // Pending subsidy
 if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 'read')) {
-		
 	$sql = "SELECT s.rowid, s.ref, s.label, s.status, s.montant_att";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
-	$sql .= " WHERE s.status > 1";
+	$sql .= " WHERE s.entity IN (".getEntity('subvention').")";
+	$sql .= " AND s.status > 1";
 	$sql .= " AND s.montant_att > 0";
 	$resql = $db->query($sql);
-	
-	if ($resql)
-	{
+
+	if ($resql) {
 		$total = 0;
 		$num = $db->num_rows($resql);
 
+		print '<div class="div-table-responsive-no-min" tabindex="0" role="region" aria-label="'.dol_escape_htmltag($langs->transnoentitiesnoconv("PendingSubsidy")).'">';
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre">';
-		print '<th colspan="3">'.$langs->trans("PendingSubsidy").($num?'<span class="badge marginleftonlyshort">'.$num.'</span>':'').'</th></tr>';
+		print '<th colspan="3">'.$langs->trans("PendingSubsidy").($num ? '<span class="badge marginleftonlyshort">'.$num.'</span>' : '').'</th></tr>';
 
-		$var = true;
-		if ($num > 0)
-		{
+		if ($num > 0) {
 			$i = 0;
-			while ($i < $num)
-			{
+			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
-				print '<tr class="oddeven"><td class="nowrap">';
-				
-				$substatic->id=$obj->rowid;
-				$substatic->ref=$obj->ref;
-				$substatic->label=$obj->label;
-				$substatic->status=$obj->status;
-				$substatic->montant_att=$obj->montant_att;
+				print '<tr class="oddeven"><td class="nowraponall">';
+
+				$substatic->id = $obj->rowid;
+				$substatic->ref = $obj->ref;
+				$substatic->label = $obj->label;
+				$substatic->status = $obj->status;
+				$substatic->montant_att = $obj->montant_att;
 
 				print $substatic->getNomUrl(1);
 				print '</td>';
-				print '<td class="nowrap"><p>'.$obj->label.'</p>';
-				print '</td>';
-				print '<td class="right" class="nowrap">'.$obj->montant_att.'</td></tr>';
+				print '<td class="tdoverflow" style="width: 100%;" title="'.dol_escape_htmltag($obj->label).'">'.dol_escape_htmltag($obj->label).'</td>';
+				print '<td class="right nowraponall">'.price($obj->montant_att).'</td></tr>';
 				$i++;
 				$total += $obj->montant_att;
 			}
-			if ($total>0)
-			{
-				print '<tr class="liste_total"><td>'.$langs->trans("Total").'</td><td colspan="2" class="right">'.$total."</td></tr>";
+			if ($total > 0) {
+				print '<tr class="liste_total"><td>'.$langs->trans("Total").'</td><td colspan="2" class="right">'.price($total)."</td></tr>";
 			}
-		}
-		else
-		{
-
+		} else {
 			print '<tr class="oddeven"><td colspan="3" class="opacitymedium">'.$langs->trans("NoSubsidy").'</td></tr>';
 		}
-		print "</table><br>";
+		print "</table></div><br>";
 
 		$db->free($resql);
-	}
-	else
-	{
+	} else {
 		dol_print_error($db);
 	}
 }
@@ -255,106 +236,96 @@ print '</div><div class="fichetwothirdright">';
 
 
 // Last modified subsidy
-if (isModEnabled('subventions') && $user->hasRight('subventions','subvention', 'read')) {
+if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 'read')) {
 	$sql = "SELECT s.rowid, s.ref, s.label, s.status, s.date_creation, s.tms";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
+	$sql .= " WHERE s.entity IN (".getEntity('subvention').")";
 	$sql .= " ORDER BY s.tms DESC";
 	$sql .= $db->plimit($max, 0);
 
 	$resql = $db->query($sql);
-		
-	if ($resql)
-	{
+
+	if ($resql) {
 		$num = $db->num_rows($resql);
 		$i = 0;
 
+		print '<div class="div-table-responsive-no-min" tabindex="0" role="region" aria-label="'.dol_escape_htmltag($langs->transnoentitiesnoconv("LatestModifiedMySubsidy", $max)).'">';
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre">';
-		print '<th colspan="2">';
-		print $langs->trans("LatestModifiedMySubsidy", $max);
-		print '</th>';
-		print '<th></th>';
+		print '<th colspan="2">'.$langs->trans("LatestModifiedMySubsidy", $max).'</th>';
 		print '<th class="right">'.$langs->trans("DateModificationShort").'</th>';
+		print '<th class="right">'.$langs->trans("Status").'</th>';
 		print '</tr>';
-		if ($num)
-		{
-			while ($i < $num)
-			{
+		if ($num) {
+			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 
-				$substatic->id=$obj->rowid;
-				$substatic->ref=$obj->ref;
-				$substatic->label=$obj->label;
-				$substatic->status=$obj->status;
+				$substatic->id = $obj->rowid;
+				$substatic->ref = $obj->ref;
+				$substatic->label = $obj->label;
+				$substatic->status = $obj->status;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap">'.$substatic->getNomUrl(1).'</td>';
-				print '<td class="nowrap"><p>'.$obj->label.'</p>';
-				print '</td>';
-				print '<td class="right nowrap">';
-				print "</td>";
-				print '<td class="right nowrap">'.dol_print_date($db->jdate($obj->tms), 'day')."</td>";
+				print '<td class="nowraponall">'.$substatic->getNomUrl(1).'</td>';
+				print '<td class="tdoverflow" style="width: 100%;" title="'.dol_escape_htmltag($obj->label).'">'.dol_escape_htmltag($obj->label).'</td>';
+				print '<td class="right nowraponall">'.dol_print_date($db->jdate($obj->tms), 'day').'</td>';
+				print '<td class="right nowraponall">'.$substatic->getLibStatut(3).'</td>';
 				print '</tr>';
 				$i++;
 			}
 
 			$db->free($resql);
 		} else {
-			print '<tr class="oddeven"><td colspan="3" class="opacitymedium">'.$langs->trans("NoSubsidy").'</td></tr>';
+			print '<tr class="oddeven"><td colspan="4" class="opacitymedium">'.$langs->trans("NoSubsidy").'</td></tr>';
 		}
-		print "</table><br>";
+		print "</table></div><br>";
 	}
 }
 
 // Last created subsidy
-if (isModEnabled('subventions') && $user->hasRight('subventions','subvention', 'read')) {
+if (isModEnabled('subventions') && $user->hasRight('subventions', 'subvention', 'read')) {
 	$sql = "SELECT s.rowid, s.ref, s.label, s.status, s.date_creation, s.tms";
 	$sql .= " FROM ".MAIN_DB_PREFIX."subventions_subvention as s";
+	$sql .= " WHERE s.entity IN (".getEntity('subvention').")";
 	$sql .= " ORDER BY s.date_creation DESC";
 	$sql .= $db->plimit($max, 0);
 
 	$resql = $db->query($sql);
-		
-	if ($resql)
-	{
+
+	if ($resql) {
 		$num = $db->num_rows($resql);
 		$i = 0;
 
+		print '<div class="div-table-responsive-no-min" tabindex="0" role="region" aria-label="'.dol_escape_htmltag($langs->transnoentitiesnoconv("LatestCreatedMySubsidy", $max)).'">';
 		print '<table class="noborder centpercent">';
 		print '<tr class="liste_titre">';
-		print '<th colspan="2">';
-		print $langs->trans("LatestCreatedMySubsidy", $max);
-		print '</th>';
-		print '<th></th>';
-		print '<th class="right">'.$langs->trans("DateModificationShort").'</th>';
+		print '<th colspan="2">'.$langs->trans("LatestCreatedMySubsidy", $max).'</th>';
+		print '<th class="right">'.$langs->trans("DateCreationShort").'</th>';
+		print '<th class="right">'.$langs->trans("Status").'</th>';
 		print '</tr>';
-		if ($num)
-		{
-			while ($i < $num)
-			{
+		if ($num) {
+			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 
-				$substatic->id=$obj->rowid;
-				$substatic->ref=$obj->ref;
-				$substatic->label=$obj->label;
-				$substatic->status=$obj->status;
+				$substatic->id = $obj->rowid;
+				$substatic->ref = $obj->ref;
+				$substatic->label = $obj->label;
+				$substatic->status = $obj->status;
 
 				print '<tr class="oddeven">';
-				print '<td class="nowrap">'.$substatic->getNomUrl(1).'</td>';
-				print '<td class="nowrap"><p>'.$obj->label.'</p>';
-				print '</td>';
-				print '<td class="right nowrap">';
-				print "</td>";
-				print '<td class="right nowrap">'.dol_print_date($db->jdate($obj->tms), 'day')."</td>";
+				print '<td class="nowraponall">'.$substatic->getNomUrl(1).'</td>';
+				print '<td class="tdoverflow" style="width: 100%;" title="'.dol_escape_htmltag($obj->label).'">'.dol_escape_htmltag($obj->label).'</td>';
+				print '<td class="right nowraponall">'.dol_print_date($db->jdate($obj->date_creation), 'day').'</td>';
+				print '<td class="right nowraponall">'.$substatic->getLibStatut(3).'</td>';
 				print '</tr>';
 				$i++;
 			}
 
 			$db->free($resql);
 		} else {
-			print '<tr class="oddeven"><td colspan="3" class="opacitymedium">'.$langs->trans("NoSubsidy").'</td></tr>';
+			print '<tr class="oddeven"><td colspan="4" class="opacitymedium">'.$langs->trans("NoSubsidy").'</td></tr>';
 		}
-		print "</table><br>";
+		print "</table></div><br>";
 	}
 }
 
